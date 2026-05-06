@@ -1,0 +1,41 @@
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# PlatformIO
+esp32_bt_mic/.pio/
+esp32_bt_mic/.vscode/
+esp32_bt_mic/lib/
+esp32_bt_mic/include/
+esp32_bt_mic/test/
+
+# .NET / C# / Visual Studio
+windows_app/**/bin/
+windows_app/**/obj/
+windows_app/**/.vs/
+windows_app/**/packages/
+windows_app/**/*.user
+windows_app/**/*.suo
+
+# Build artifacts
+*.o
+*.a
+*.elf
+*.bin
+*.hex
+*.map
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes

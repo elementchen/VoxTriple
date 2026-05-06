@@ -1,0 +1,39 @@
+menu "BT Microphone Configuration"
+
+    config BT_MIC_DEVICE_NAME
+        string "Bluetooth device name"
+        default "ESP32_BT_MIC"
+        help
+            Name of the Bluetooth device as it appears during discovery.
+
+    config I2S_MIC_BCK_PIN
+        int "I2S Bit Clock GPIO pin"
+        default 26
+        help
+            GPIO pin number for I2S SCK (bit clock) signal.
+
+    config I2S_MIC_WS_PIN
+        int "I2S Word Select GPIO pin"
+        default 25
+        help
+            GPIO pin number for I2S WS (word select) signal.
+
+    config I2S_MIC_DATA_PIN
+        int "I2S Data In GPIO pin"
+        default 32
+        help
+            GPIO pin number for I2S SD (serial data) signal.
+
+    config BUTTON_1_GPIO
+        int "Button 1 GPIO pin"
+        default 13
+
+    config BUTTON_2_GPIO
+        int "Button 2 GPIO pin"
+        default 12
+
+    config BUTTON_3_GPIO
+        int "Button 3 GPIO pin"
+        default 14
+
+endmenu
