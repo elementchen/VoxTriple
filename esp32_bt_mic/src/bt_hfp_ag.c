@@ -24,7 +24,6 @@
 #include "bt_app_core.h"
 #include "bt_app_hf.h"
 #include "bt_init.h"
-#include "audio_task.h"
 #include "audio_capture.h"
 #include "osi/allocator.h"
 
@@ -247,9 +246,8 @@ void bt_hfp_audio_start(void)
     s_last_enter_time = esp_timer_get_time();
     s_time_old = s_last_enter_time;
 
-    /* Start audio capture from I2S microphone */
+    /* Start audio capture from I2S microphone (bt_app_send_data_task reads from it) */
     audio_capture_start();
-    audio_task_start();
 }
 
 void bt_hfp_audio_stop(void)
@@ -257,7 +255,6 @@ void bt_hfp_audio_stop(void)
     ESP_LOGI(TAG, "Stopping HFP audio streaming");
 
     /* Stop audio capture */
-    audio_task_stop();
     audio_capture_stop();
 
     /* Stop timer */
