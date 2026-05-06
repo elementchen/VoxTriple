@@ -31,7 +31,7 @@ static const char *TAG = "BLE_GATTS";
 #define GATTS_CHAR_BTN_EVENT_UUID 0x2A04
 #define GATTS_CHAR_DEV_STATUS_UUID 0x2A05
 
-#define GATTS_NUM_HANDLES    12
+#define GATTS_NUM_HANDLES    16
 #define GATTS_APP_ID         0x01
 #define PREPARE_BUF_MAX_SIZE 1024
 
@@ -85,32 +85,21 @@ static esp_ble_adv_params_t adv_params = {
 static void ble_init_adv_data(const char *name)
 {
     int name_len = strlen(name);
-    /* AD Structure layout:
-     *   [length][AD type][AD data...]
-     * AD Structure 1: Flags (3 bytes)
-     * AD Structure 2: 128-bit Service UUID (18 bytes)
-     * AD Structure 3: Complete Local Name (2 + name_len bytes)
-     */
-    uint8_t raw_adv_data[3 + 18 + 2 + name_len];
+    /* BLE advertising data max 31 bytes.
+     * AD1: Flags (3 bytes)
+     * AD2: Short name (2 + name_len bytes) — fits within 31-byte limit
+     * Service UUID goes in scan response data. */
+    uint8_t raw_adv_data[3 + 2 + name_len];
     int pos = 0;
 
-    /* Flags: General Discoverable, BR/EDR is supported (bit 2 clear = Simultaneous LE + BR/EDR) */
-    raw_adv_data[pos++] = 2;                          /* Length */
-    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_FLAG;       /* AD Type: Flags */
-    raw_adv_data[pos++] = ESP_BLE_ADV_FLAG_GEN_DISC;  /* No BREDR_NOT_SPT = dual-mode capable */
+    /* Flags: General Discoverable, dual-mode (no BREDR_NOT_SPT) */
+    raw_adv_data[pos++] = 2;
+    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_FLAG;
+    raw_adv_data[pos++] = ESP_BLE_ADV_FLAG_GEN_DISC;
 
-    /* Complete 128-bit UUID for our service (0x1820) */
-    raw_adv_data[pos++] = 17;                              /* Length: 1 + 16 */
-    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_128SRV_CMPL;     /* AD Type: Complete 128-bit UUID list */
-    /* 128-bit UUID: 00001820-0000-1000-8000-00805F9B34FB */
-    uint8_t uuid128[16] = {0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80,
-                           0x00, 0x10, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00};
-    memcpy(&raw_adv_data[pos], uuid128, 16);
-    pos += 16;
-
-    /* Complete Local Name */
-    raw_adv_data[pos++] = name_len + 1;                 /* Length */
-    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_NAME_CMPL;    /* AD Type */
+    /* Shortened Local Name */
+    raw_adv_data[pos++] = name_len + 1;
+    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_NAME_SHORT;
     memcpy(&raw_adv_data[pos], name, name_len);
     pos += name_len;
 
@@ -119,8 +108,15 @@ static void ble_init_adv_data(const char *name)
         ESP_LOGE(TAG, "config raw adv data failed, error code = 0x%x", ret);
     }
 
-    /* Scan response: same data for devices that scan without connecting */
-    ret = esp_ble_gap_config_scan_rsp_data_raw(raw_adv_data, sizeof(raw_adv_data));
+    /* Scan response: 128-bit service UUID for discoverability */
+    uint8_t scan_rsp[18];
+    scan_rsp[0] = 17;
+    scan_rsp[1] = ESP_BLE_AD_TYPE_128SRV_CMPL;
+    uint8_t uuid128[16] = {0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80,
+                           0x00, 0x10, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00};
+    memcpy(&scan_rsp[2], uuid128, 16);
+
+    ret = esp_ble_gap_config_scan_rsp_data_raw(scan_rsp, sizeof(scan_rsp));
     if (ret) {
         ESP_LOGE(TAG, "config raw scan rsp data failed, error code = 0x%x", ret);
     }
@@ -564,4 +560,16 @@ void ble_get_button_mapping(uint8_t button_id, uint8_t *vk_code, uint8_t *modifi
         *modifier = 0;
         break;
     }
+}
+
+void ble_gatts_adv_stop(void)
+{
+    esp_ble_gap_stop_advertising();
+    ESP_LOGI(TAG, "BLE advertising stopped (SCO active)");
+}
+
+void ble_gatts_adv_start(void)
+{
+    esp_ble_gap_start_advertising(&adv_params);
+    ESP_LOGI(TAG, "BLE advertising restarted");
 }

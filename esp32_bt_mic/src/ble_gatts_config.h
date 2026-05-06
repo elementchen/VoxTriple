@@ -68,4 +68,14 @@ void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
  */
 void ble_get_button_mapping(uint8_t button_id, uint8_t *vk_code, uint8_t *modifier);
 
+/**
+ * @brief Stop BLE advertising (call when SCO audio is active to avoid interference)
+ */
+void ble_gatts_adv_stop(void);
+
+/**
+ * @brief Restart BLE advertising (call when SCO audio stops)
+ */
+void ble_gatts_adv_start(void);
+
 #endif /* __BLE_GATTS_CONFIG_H__ */

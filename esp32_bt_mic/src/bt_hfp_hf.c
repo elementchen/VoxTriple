@@ -1,0 +1,444 @@
+/*
+ * SPDX-FileCopyrightText: 2024 ESP32 BT Microphone Project
+ *
+ * SPDX-License-Identifier: Unlicense OR CC0-1.0
+ */
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include "esp_log.h"
+#include "esp_bt_main.h"
+#include "esp_bt_device.h"
+#include "esp_gap_bt_api.h"
+#include "esp_hf_client_api.h"
+#include "esp_timer.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "freertos/ringbuf.h"
+#include "sdkconfig.h"
+#include "bt_app_core.h"
+#include "bt_app_hf.h"
+#include "bt_init.h"
+#include "audio_capture.h"
+#include "ble_gatts_config.h"
+#include "osi/allocator.h"
+
+static const char *TAG = "BT_HFP_HF";
+
+#if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
+
+/* HFP audio timing:
+ * 7500 us = one mSBC frame, aligned to common Tesco slot intervals */
+#define PCM_BLOCK_DURATION_US        (7500)
+#define WBS_PCM_SAMPLING_RATE_KHZ    (16)
+#define PCM_SAMPLING_RATE_KHZ        (8)
+#define BYTES_PER_SAMPLE             (2)
+#define WBS_PCM_INPUT_DATA_SIZE      (WBS_PCM_SAMPLING_RATE_KHZ * PCM_BLOCK_DURATION_US / 1000 * BYTES_PER_SAMPLE)
+#define PCM_INPUT_DATA_SIZE          (PCM_SAMPLING_RATE_KHZ * PCM_BLOCK_DURATION_US / 1000 * BYTES_PER_SAMPLE)
+#define ESP_HFP_RINGBUF_SIZE         4800
+#define PCM_GENERATOR_TICK_US        (4000)
+
+static RingbufHandle_t s_m_rb = NULL;
+static SemaphoreHandle_t s_send_data_sem = NULL;
+static TaskHandle_t s_bt_send_task_handle = NULL;
+static esp_hf_client_audio_state_t s_audio_codec = ESP_HF_CLIENT_AUDIO_STATE_DISCONNECTED;
+static uint64_t s_last_enter_time = 0;
+static esp_timer_handle_t s_periodic_timer = NULL;
+static volatile bool s_audio_running = false;
+
+/**
+ * @brief Outgoing data callback - HFP stack reads PCM from us via ring buffer
+ */
+static uint32_t bt_app_hf_outgoing_cb(uint8_t *p_buf, uint32_t sz)
+{
+    size_t item_size = 0;
+    uint8_t *data = NULL;
+
+    if (!s_m_rb || !s_audio_running) return 0;
+
+    vRingbufferGetInfo(s_m_rb, NULL, NULL, NULL, NULL, &item_size);
+    if (item_size >= sz) {
+        data = xRingbufferReceiveUpTo(s_m_rb, &item_size, 0, sz);
+        if (data) {
+            memcpy(p_buf, data, item_size);
+            vRingbufferReturnItem(s_m_rb, data);
+            return sz;
+        }
+    }
+    return 0;
+}
+
+/**
+ * @brief Incoming data callback - audio from AG (Windows), unused for mic
+ */
+static void bt_app_hf_incoming_cb(const uint8_t *buf, uint32_t sz)
+{
+    /* Not used for microphone-only device */
+}
+
+/**
+ * @brief Timer callback triggers the send-task to refill ring buffer from I2S
+ */
+static void bt_app_send_data_timer_cb(void *arg)
+{
+    xSemaphoreGive(s_send_data_sem);
+}
+
+/**
+ * @brief Audio pump task: reads I2S → ring buffer, signals HFP stack
+ */
+static void bt_app_send_data_task(void *arg)
+{
+    uint64_t frame_data_num;
+    size_t item_size = 0;
+    uint8_t *buf = NULL;
+
+    for (;;) {
+        if (xSemaphoreTake(s_send_data_sem, (TickType_t)portMAX_DELAY)) {
+            uint64_t now = esp_timer_get_time();
+            uint64_t duration = now - s_last_enter_time;
+
+            if (s_audio_codec == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED_MSBC) {
+                frame_data_num = duration / PCM_BLOCK_DURATION_US * WBS_PCM_INPUT_DATA_SIZE;
+                s_last_enter_time += frame_data_num / WBS_PCM_INPUT_DATA_SIZE * PCM_BLOCK_DURATION_US;
+            } else {
+                frame_data_num = duration / PCM_BLOCK_DURATION_US * PCM_INPUT_DATA_SIZE;
+                s_last_enter_time += frame_data_num / PCM_INPUT_DATA_SIZE * PCM_BLOCK_DURATION_US;
+            }
+
+            if (frame_data_num == 0) continue;
+
+            buf = osi_malloc(frame_data_num);
+            if (!buf) {
+                ESP_LOGE(TAG, "%s, no mem", __func__);
+                continue;
+            }
+
+            size_t total_read = 0;
+            while (total_read < frame_data_num) {
+                size_t bytes_read = 0;
+                esp_err_t ret = audio_capture_read(buf + total_read,
+                                                   frame_data_num - total_read,
+                                                   &bytes_read, 100);
+                if (ret != ESP_OK || bytes_read == 0) {
+                    memset(buf + total_read, 0, frame_data_num - total_read);
+                    total_read = frame_data_num;
+                    break;
+                }
+                total_read += bytes_read;
+            }
+
+            BaseType_t done = xRingbufferSend(s_m_rb, buf, frame_data_num, 0);
+            if (!done) {
+                ESP_LOGE(TAG, "rb send fail");
+            }
+            osi_free(buf);
+
+            vRingbufferGetInfo(s_m_rb, NULL, NULL, NULL, NULL, &item_size);
+
+            uint32_t threshold = (s_audio_codec == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED_MSBC)
+                                 ? WBS_PCM_INPUT_DATA_SIZE : PCM_INPUT_DATA_SIZE;
+            if (item_size >= threshold) {
+                esp_hf_client_outgoing_data_ready();
+            }
+        }
+    }
+}
+
+void bt_hfp_hf_audio_start(void)
+{
+    if (s_send_data_sem) {
+        ESP_LOGW(TAG, "Audio already started");
+        return;
+    }
+
+    ESP_LOGI(TAG, "Starting HFP HF audio streaming");
+
+    s_audio_running = true;
+
+    s_m_rb = xRingbufferCreate(ESP_HFP_RINGBUF_SIZE, RINGBUF_TYPE_BYTEBUF);
+    assert(s_m_rb);
+
+    s_send_data_sem = xSemaphoreCreateBinary();
+
+    xTaskCreate(bt_app_send_data_task, "BtSendData", 4096, NULL,
+                configMAX_PRIORITIES - 3, &s_bt_send_task_handle);
+
+    const esp_timer_create_args_t timer_args = {
+        .callback = &bt_app_send_data_timer_cb,
+        .name = "periodic"
+    };
+    ESP_ERROR_CHECK(esp_timer_create(&timer_args, &s_periodic_timer));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(s_periodic_timer, PCM_GENERATOR_TICK_US));
+
+    s_last_enter_time = esp_timer_get_time();
+
+    /* Pause BLE advertising to avoid BTDM scheduling conflicts with SCO */
+    ble_gatts_adv_stop();
+
+    audio_capture_start();
+}
+
+/* Stop data pipeline only (timer + flag). Resources cleaned up in audio_stop(). */
+static void bt_hfp_hf_audio_pipeline_stop(void)
+{
+    s_audio_running = false;
+    if (s_periodic_timer) {
+        esp_timer_stop(s_periodic_timer);
+        esp_timer_delete(s_periodic_timer);
+        s_periodic_timer = NULL;
+    }
+}
+
+void bt_hfp_hf_audio_stop(void)
+{
+    ESP_LOGI(TAG, "Stopping HFP HF audio streaming");
+
+    bt_hfp_hf_audio_pipeline_stop();
+
+    audio_capture_stop();
+
+    /* Resume BLE advertising now that SCO is released */
+    ble_gatts_adv_start();
+
+    if (s_bt_send_task_handle) {
+        vTaskDelete(s_bt_send_task_handle);
+        s_bt_send_task_handle = NULL;
+    }
+
+    if (s_send_data_sem) {
+        vSemaphoreDelete(s_send_data_sem);
+        s_send_data_sem = NULL;
+    }
+
+    if (s_m_rb) {
+        vRingbufferDelete(s_m_rb);
+        s_m_rb = NULL;
+    }
+}
+
+#endif /* CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI */
+
+/* PTT (Push-To-Talk) — Button 1 controls SCO audio on/off */
+void bt_hfp_hf_ptt_press(void)
+{
+    if (!bt_hfp_is_connected()) {
+        ESP_LOGW(TAG, "PTT: HFP not connected, ignoring");
+        return;
+    }
+    if (bt_audio_is_active()) {
+        ESP_LOGI(TAG, "PTT: audio already active");
+        return;
+    }
+    ESP_LOGI(TAG, "PTT press — opening audio to AG");
+    esp_hf_client_connect_audio(hf_peer_addr);
+}
+
+void bt_hfp_hf_ptt_release(void)
+{
+    if (!bt_audio_is_active()) {
+        return;
+    }
+    ESP_LOGI(TAG, "PTT release — stopping pipeline then closing SCO");
+    /* Stop data pipeline BEFORE disconnecting to prevent
+     * outgoing callbacks from hitting a dead SCO link. */
+    bt_hfp_hf_audio_pipeline_stop();
+    esp_hf_client_disconnect_audio(hf_peer_addr);
+}
+
+/* HFP HF Client event strings */
+static const char *c_hf_evt_str[] = {
+    "CONNECTION_STATE_EVT",
+    "AUDIO_STATE_EVT",
+    "BVRA_EVT",
+    "CIND_CALL_EVT",
+    "CIND_CALL_SETUP_EVT",
+    "CIND_CALL_HELD_EVT",
+    "CIND_SERVICE_AVAILABILITY_EVT",
+    "CIND_SIGNAL_STRENGTH_EVT",
+    "CIND_ROAMING_STATUS_EVT",
+    "CIND_BATTERY_LEVEL_EVT",
+    "COPS_CURRENT_OPERATOR_EVT",
+    "BTRH_EVT",
+    "CLIP_EVT",
+    "CCWA_EVT",
+    "CLCC_EVT",
+    "VOLUME_CONTROL_EVT",
+    "AT_RESPONSE_EVT",
+    "CNUM_EVT",
+    "BSIR_EVT",
+    "BINP_EVT",
+    "RING_IND_EVT",
+    "PKT_STAT_NUMS_GET_EVT",
+    "PROF_STATE_EVT",
+};
+
+static const char *c_connection_state_str[] = {
+    "DISCONNECTED",
+    "CONNECTING",
+    "CONNECTED",
+    "SLC_CONNECTED",
+    "DISCONNECTING",
+};
+
+static const char *c_audio_state_str[] = {
+    "DISCONNECTED",
+    "CONNECTING",
+    "CONNECTED",
+    "CONNECTED_MSBC",
+};
+
+void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_t *param)
+{
+    if (event <= ESP_HF_CLIENT_PROF_STATE_EVT) {
+        ESP_LOGI(TAG, "HFP HF event: %s", c_hf_evt_str[event]);
+    } else {
+        ESP_LOGE(TAG, "HFP HF invalid event %d", event);
+    }
+
+    switch (event) {
+    case ESP_HF_CLIENT_CONNECTION_STATE_EVT: {
+        ESP_LOGI(TAG, "connection state %s, peer feats 0x%" PRIx32 ", chld feats 0x%" PRIx32,
+                 c_connection_state_str[param->conn_stat.state],
+                 param->conn_stat.peer_feat,
+                 param->conn_stat.chld_feat);
+
+        memcpy(hf_peer_addr, param->conn_stat.remote_bda, ESP_BD_ADDR_LEN);
+
+        bool connected = (param->conn_stat.state == ESP_HF_CLIENT_CONNECTION_STATE_SLC_CONNECTED);
+        bt_hfp_set_connected(connected);
+
+        extern void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
+        ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());
+
+        if (connected) {
+            ESP_LOGI(TAG, "SLC connected, ready for PTT");
+        }
+        break;
+    }
+
+    case ESP_HF_CLIENT_AUDIO_STATE_EVT: {
+        ESP_LOGI(TAG, "Audio State: %s", c_audio_state_str[param->audio_stat.state]);
+
+#if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
+        if (param->audio_stat.state == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED ||
+            param->audio_stat.state == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED_MSBC) {
+
+            s_audio_codec = param->audio_stat.state;
+
+            /* Register legacy data callbacks for outgoing/incoming audio */
+            esp_hf_client_register_data_callback(bt_app_hf_incoming_cb, bt_app_hf_outgoing_cb);
+
+            bt_audio_set_active(true);
+            bt_hfp_hf_audio_start();
+
+            extern void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
+            ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());
+
+        } else if (param->audio_stat.state == ESP_HF_CLIENT_AUDIO_STATE_DISCONNECTED) {
+            ESP_LOGI(TAG, "Audio disconnected");
+            bt_audio_set_active(false);
+            bt_hfp_hf_audio_stop();
+
+            extern void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
+            ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());
+        }
+#endif
+        break;
+    }
+
+    case ESP_HF_CLIENT_BVRA_EVT:
+        ESP_LOGI(TAG, "Voice Recognition: %d", param->bvra.value);
+        break;
+
+    case ESP_HF_CLIENT_VOLUME_CONTROL_EVT:
+        ESP_LOGI(TAG, "Volume: type=%d, vol=%d",
+                 param->volume_control.type, param->volume_control.volume);
+        break;
+
+    case ESP_HF_CLIENT_CIND_SERVICE_AVAILABILITY_EVT:
+        ESP_LOGI(TAG, "Service availability: %d", param->service_availability.status);
+        break;
+
+    case ESP_HF_CLIENT_CIND_SIGNAL_STRENGTH_EVT:
+        ESP_LOGI(TAG, "Signal strength: %d", param->signal_strength.value);
+        break;
+
+    case ESP_HF_CLIENT_CIND_BATTERY_LEVEL_EVT:
+        ESP_LOGI(TAG, "Battery level: %d", param->battery_level.value);
+        break;
+
+    case ESP_HF_CLIENT_CIND_ROAMING_STATUS_EVT:
+        ESP_LOGI(TAG, "Roaming: %d", param->roaming.status);
+        break;
+
+    case ESP_HF_CLIENT_CIND_CALL_EVT:
+        ESP_LOGI(TAG, "Call status: %d", param->call.status);
+        break;
+
+    case ESP_HF_CLIENT_CIND_CALL_SETUP_EVT:
+        ESP_LOGI(TAG, "Call setup: %d", param->call_setup.status);
+        break;
+
+    case ESP_HF_CLIENT_CIND_CALL_HELD_EVT:
+        ESP_LOGI(TAG, "Call held: %d", param->call_held.status);
+        break;
+
+    case ESP_HF_CLIENT_COPS_CURRENT_OPERATOR_EVT:
+        ESP_LOGI(TAG, "Operator: %s", param->cops.name);
+        break;
+
+    case ESP_HF_CLIENT_CLIP_EVT:
+        ESP_LOGI(TAG, "CLIP number: %s", param->clip.number);
+        break;
+
+    case ESP_HF_CLIENT_CLCC_EVT:
+        ESP_LOGI(TAG, "Current call: idx=%d dir=%d status=%d number=%s",
+                 param->clcc.idx, param->clcc.dir, param->clcc.status, param->clcc.number);
+        break;
+
+    case ESP_HF_CLIENT_RING_IND_EVT:
+        ESP_LOGI(TAG, "Ring indication");
+        break;
+
+    case ESP_HF_CLIENT_AT_RESPONSE_EVT:
+        ESP_LOGI(TAG, "AT response: code=%d, cme=%d",
+                 param->at_response.code, param->at_response.cme);
+        break;
+
+    case ESP_HF_CLIENT_CNUM_EVT:
+        ESP_LOGI(TAG, "Subscriber number: %s, type=%d",
+                 param->cnum.number, param->cnum.type);
+        break;
+
+    case ESP_HF_CLIENT_BSIR_EVT:
+        ESP_LOGI(TAG, "In-band ring: %d", param->bsir.state);
+        break;
+
+    case ESP_HF_CLIENT_BINP_EVT:
+        ESP_LOGI(TAG, "Voice tag: %s", param->binp.number);
+        break;
+
+    case ESP_HF_CLIENT_PKT_STAT_NUMS_GET_EVT:
+        ESP_LOGI(TAG, "Packet stats event");
+        break;
+
+    case ESP_HF_CLIENT_PROF_STATE_EVT:
+        if (param->prof_stat.state == ESP_HF_INIT_SUCCESS) {
+            ESP_LOGI(TAG, "HF PROF STATE: Init Complete");
+        } else if (param->prof_stat.state == ESP_HF_DEINIT_SUCCESS) {
+            ESP_LOGI(TAG, "HF PROF STATE: Deinit Complete");
+        } else {
+            ESP_LOGE(TAG, "HF PROF STATE error: %d", param->prof_stat.state);
+        }
+        break;
+
+    default:
+        ESP_LOGI(TAG, "Unhandled HFP HF event: %d", event);
+        break;
+    }
+}

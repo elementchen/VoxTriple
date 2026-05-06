@@ -5,8 +5,8 @@
  */
 
 #include <stdint.h>
-#include "esp_hf_ag_api.h"
+#include "esp_hf_client_api.h"
 #include "esp_bt_defs.h"
 
-/* Peer device address - shared between HFP AG callback and main */
+/* Peer (Windows AG) device address */
 esp_bd_addr_t hf_peer_addr;

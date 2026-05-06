@@ -17,7 +17,7 @@
 #include "esp_bt_main.h"
 #include "esp_bt_device.h"
 #include "esp_gap_bt_api.h"
-#include "esp_hf_ag_api.h"
+#include "esp_hf_client_api.h"
 #include "bt_init.h"
 #include "bt_app_core.h"
 #include "bt_app_hf.h"
@@ -116,21 +116,21 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         /* Register GAP callback */
         esp_bt_gap_register_callback(bt_gap_cb);
 
-        /* Set Class of Device for Audio Gateway (HFP AG)
-         * CoD: Major Service Class: Audio (bit 21) + Telephony (bit 18)
-         *       Major Class: Phone (0x02)
-         *       Minor Class: Common Mode (0x00)
-         * This identifies the device as a Phone/Audio Gateway
+        /* Set Class of Device for Hands-Free device (headset/microphone)
+         * Service: Audio + Capturing + Telephony
+         * Major:   Audio/Video (0x04)
+         * Minor:   Hands-free Device (0x02)
+         * This identifies the device as a Bluetooth microphone/headset
          */
         esp_bt_cod_t cod;
-        cod.service = 0x0024;  // Audio (0x20) + Telephony (0x04) services
-        cod.major = 0x02;      // Phone major class
-        cod.minor = 0x00;      // Common Mode minor class
+        cod.service = 0x340;  // Audio(0x100) + Capturing(0x040) + Telephony(0x200)
+        cod.major = 0x04;     // Audio/Video
+        cod.minor = 0x02;     // Hands-free Device
         esp_bt_gap_set_cod(cod, ESP_BT_SET_COD_SERVICE_CLASS | ESP_BT_SET_COD_MAJOR_MINOR);
 
-        /* Register HFP AG callback and initialize */
-        esp_hf_ag_register_callback(bt_app_hf_cb);
-        esp_hf_ag_init();
+        /* Register HFP HF Client callback and initialize */
+        esp_hf_client_register_callback(bt_app_hf_client_cb);
+        esp_hf_client_init();
 
         /* Set pairing PIN */
         esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_VARIABLE;
