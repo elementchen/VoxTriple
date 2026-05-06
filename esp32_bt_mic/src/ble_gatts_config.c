@@ -84,26 +84,42 @@ static esp_ble_adv_params_t adv_params = {
 
 static void ble_init_adv_data(const char *name)
 {
-    int len = strlen(name);
-    uint8_t raw_adv_data[len + 5];
+    int name_len = strlen(name);
+    /* AD Structure layout:
+     *   [length][AD type][AD data...]
+     * AD Structure 1: Flags (3 bytes)
+     * AD Structure 2: 128-bit Service UUID (18 bytes)
+     * AD Structure 3: Complete Local Name (2 + name_len bytes)
+     */
+    uint8_t raw_adv_data[3 + 18 + 2 + name_len];
+    int pos = 0;
 
-    /* Flags */
-    raw_adv_data[0] = 2;
-    raw_adv_data[1] = ESP_BLE_AD_TYPE_FLAG;
-    raw_adv_data[2] = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
+    /* Flags: General Discoverable, BR/EDR is supported (bit 2 clear = Simultaneous LE + BR/EDR) */
+    raw_adv_data[pos++] = 2;                          /* Length */
+    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_FLAG;       /* AD Type: Flags */
+    raw_adv_data[pos++] = ESP_BLE_ADV_FLAG_GEN_DISC;  /* No BREDR_NOT_SPT = dual-mode capable */
 
-    /* Complete local name */
-    raw_adv_data[3] = len + 1;
-    raw_adv_data[4] = ESP_BLE_AD_TYPE_NAME_CMPL;
-    for (int i = 0; i < len; i++) {
-        raw_adv_data[i + 5] = name[i];
-    }
+    /* Complete 128-bit UUID for our service (0x1820) */
+    raw_adv_data[pos++] = 17;                              /* Length: 1 + 16 */
+    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_128SRV_CMPL;     /* AD Type: Complete 128-bit UUID list */
+    /* 128-bit UUID: 00001820-0000-1000-8000-00805F9B34FB */
+    uint8_t uuid128[16] = {0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80,
+                           0x00, 0x10, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00};
+    memcpy(&raw_adv_data[pos], uuid128, 16);
+    pos += 16;
+
+    /* Complete Local Name */
+    raw_adv_data[pos++] = name_len + 1;                 /* Length */
+    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_NAME_CMPL;    /* AD Type */
+    memcpy(&raw_adv_data[pos], name, name_len);
+    pos += name_len;
 
     esp_err_t ret = esp_ble_gap_config_adv_data_raw(raw_adv_data, sizeof(raw_adv_data));
     if (ret) {
         ESP_LOGE(TAG, "config raw adv data failed, error code = 0x%x", ret);
     }
 
+    /* Scan response: same data for devices that scan without connecting */
     ret = esp_ble_gap_config_scan_rsp_data_raw(raw_adv_data, sizeof(raw_adv_data));
     if (ret) {
         ESP_LOGE(TAG, "config raw scan rsp data failed, error code = 0x%x", ret);
@@ -302,15 +318,23 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                                    GATTS_CHAR_BTN_EVENT_UUID, s_char_property,
                                    s_btn_event, BTN_EVENT_CHAR_LEN, NULL);
                 break;
-            case 4: /* Button Event */
+            case 4: /* Button Event - add CCCD for it */
                 s_btn_event_handle = param->add_char.attr_handle;
-                add_characteristic(s_service_handle, &s_dev_status_handle,
-                                   GATTS_CHAR_DEV_STATUS_UUID, s_char_property,
-                                   s_dev_status, DEV_STATUS_CHAR_LEN, NULL);
+                {
+                esp_bt_uuid_t descr_uuid;
+                descr_uuid.len = ESP_UUID_LEN_16;
+                descr_uuid.uuid.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
+                esp_err_t ret = esp_ble_gatts_add_char_descr(s_service_handle, &descr_uuid,
+                                                             ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+                                                             NULL, NULL);
+                if (ret) {
+                    ESP_LOGE(TAG, "add btn_event CCCD failed, error code = 0x%x", ret);
+                }
+                }
                 break;
-            case 5: /* Device Status */
+            case 5: /* Device Status - add CCCD for it */
                 s_dev_status_handle = param->add_char.attr_handle;
-                /* Add CCCD for Device Status */
+                {
                 esp_bt_uuid_t descr_uuid;
                 descr_uuid.len = ESP_UUID_LEN_16;
                 descr_uuid.uuid.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
@@ -320,6 +344,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 if (ret) {
                     ESP_LOGE(TAG, "add dev_status CCCD failed, error code = 0x%x", ret);
                 }
+                }
                 break;
         }
         break;
@@ -328,8 +353,14 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     case ESP_GATTS_ADD_CHAR_DESCR_EVT: {
         ESP_LOGI(TAG, "ADD_DESCR_EVT, status %d, attr_handle %d",
                  param->add_char_descr.status, param->add_char_descr.attr_handle);
-        /* This is the CCCD for device status */
-        if (s_dev_status_descr_handle == 0) {
+        if (s_btn_event_descr_handle == 0) {
+            /* Button Event CCCD handle received, now add Device Status characteristic */
+            s_btn_event_descr_handle = param->add_char_descr.attr_handle;
+            add_characteristic(s_service_handle, &s_dev_status_handle,
+                               GATTS_CHAR_DEV_STATUS_UUID, s_char_property,
+                               s_dev_status, DEV_STATUS_CHAR_LEN, NULL);
+        } else if (s_dev_status_descr_handle == 0) {
+            /* Device Status CCCD handle received, all characteristics and descriptors done */
             s_dev_status_descr_handle = param->add_char_descr.attr_handle;
         }
         break;
@@ -400,13 +431,22 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 config_storage_save_button(BUTTON_ID_3, s_btn3_map[0], s_btn3_map[1]);
                 ESP_LOGI(TAG, "Button 3 mapped to VK=0x%02X, MOD=0x%02X", s_btn3_map[0], s_btn3_map[1]);
             }
-            /* Handle CCCD write (notification enable/disable) */
+            /* Handle CCCD write (notification enable/disable) for Device Status */
             else if ((param->write.handle == s_dev_status_descr_handle) && param->write.len == 2) {
                 uint16_t descr_value = param->write.value[1] << 8 | param->write.value[0];
                 if (descr_value == 0x0001) {
                     ESP_LOGI(TAG, "Device Status notify enable");
                 } else if (descr_value == 0x0000) {
                     ESP_LOGI(TAG, "Device Status notify disable");
+                }
+            }
+            /* Handle CCCD write for Button Event */
+            else if ((param->write.handle == s_btn_event_descr_handle) && param->write.len == 2) {
+                uint16_t descr_value = param->write.value[1] << 8 | param->write.value[0];
+                if (descr_value == 0x0001) {
+                    ESP_LOGI(TAG, "Button Event notify enable");
+                } else if (descr_value == 0x0000) {
+                    ESP_LOGI(TAG, "Button Event notify disable");
                 }
             }
         }
