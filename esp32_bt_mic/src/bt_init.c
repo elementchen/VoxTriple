@@ -116,16 +116,17 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         /* Register GAP callback */
         esp_bt_gap_register_callback(bt_gap_cb);
 
-        /* Set Class of Device for Audio Gateway (Microphone)
-         * CoD: Major Service Class: Audio (bit 21)
-         *       Major Class: Audio (0x04)
-         *       Minor Class: Wearable Headset (0x01)
+        /* Set Class of Device for Audio Gateway (HFP AG)
+         * CoD: Major Service Class: Audio (bit 21) + Telephony (bit 18)
+         *       Major Class: Phone (0x02)
+         *       Minor Class: Common Mode (0x00)
+         * This identifies the device as a Phone/Audio Gateway
          */
         esp_bt_cod_t cod;
-        cod.service = 0x0020;  // Audio service
-        cod.major = 0x04;      // Audio major class
-        cod.minor = 0x01;      // Wearable Headset minor class
-        esp_bt_gap_set_cod(cod, ESP_BT_SET_COD_MAJOR_MINOR);
+        cod.service = 0x0024;  // Audio (0x20) + Telephony (0x04) services
+        cod.major = 0x02;      // Phone major class
+        cod.minor = 0x00;      // Common Mode minor class
+        esp_bt_gap_set_cod(cod, ESP_BT_SET_COD_SERVICE_CLASS | ESP_BT_SET_COD_MAJOR_MINOR);
 
         /* Register HFP AG callback and initialize */
         esp_hf_ag_register_callback(bt_app_hf_cb);
