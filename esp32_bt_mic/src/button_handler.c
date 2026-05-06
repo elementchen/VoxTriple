@@ -13,6 +13,7 @@
 #include "button_handler.h"
 #include "ble_gatts_config.h"
 #include "config_storage.h"
+#include "bt_hfp_hf.h"
 
 static const char *TAG = "BTN_HANDLER";
 
@@ -71,24 +72,27 @@ static void button_task_func(void *arg)
 
             case BTN_STATE_DEBOUNCE:
                 if (!pressed) {
-                    /* False trigger, go back to idle */
                     state[i] = BTN_STATE_IDLE;
                 } else if ((now - last_change[i]) >= DEBOUNCE_MS) {
-                    /* Debounce complete, button is truly pressed */
                     state[i] = BTN_STATE_PRESSED;
                     press_time[i] = now;
                     ESP_LOGI(TAG, "Button %d pressed", i + 1);
 
-                    /* Send BLE notification */
+                    /* Button 1: PTT press → open SCO audio */
+                    if (i == 0) bt_hfp_hf_ptt_press();
+
+                    /* Send BLE notification for keyboard simulation */
                     ble_send_button_event(i, 1);
                 }
                 break;
 
             case BTN_STATE_PRESSED:
                 if (!pressed) {
-                    /* Button released */
                     uint32_t duration = now - press_time[i];
                     ESP_LOGI(TAG, "Button %d released (duration: %lu ms)", i + 1, duration);
+
+                    /* Button 1: PTT release → close SCO audio */
+                    if (i == 0) bt_hfp_hf_ptt_release();
 
                     /* Send BLE notification */
                     ble_send_button_event(i, 0);

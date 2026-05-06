@@ -23,8 +23,8 @@ static const char *TAG = "MAIN";
 void app_main(void)
 {
     ESP_LOGI(TAG, "============================================");
-    ESP_LOGI(TAG, "  ESP32 Bluetooth Microphone - Dual Mode");
-    ESP_LOGI(TAG, "  HFP AG + BLE GATT Server");
+    ESP_LOGI(TAG, "  ESP32 Bluetooth Microphone - PTT Mode");
+    ESP_LOGI(TAG, "  HFP HF Client + BLE GATT Server");
     ESP_LOGI(TAG, "============================================");
 
     /* Step 1: Initialize NVS */
