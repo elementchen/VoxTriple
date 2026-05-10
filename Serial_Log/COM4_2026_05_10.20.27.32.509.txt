@@ -1,0 +1,298 @@
+I (5709481) BTN_HANDLER: Button 1 pressed
+W (5709481) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5709481) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5709741) BTN_HANDLER: Button 1 released (duration: 260 ms)
+I (5709741) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5710221) BTN_HANDLER: Button 1 pressed
+W (5710221) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5710221) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5710451) BTN_HANDLER: Button 1 released (duration: 230 ms)
+I (5710451) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5712101) BTN_HANDLER: Button 2 pressed
+I (5712101) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5712421) BTN_HANDLER: Button 2 released (duration: 320 ms)
+I (5712421) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5716301) BTN_HANDLER: Button 1 pressed
+W (5716301) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5716301) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5716441) BTN_HANDLER: Button 1 released (duration: 140 ms)
+I (5716441) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5716991) BTN_HANDLER: Button 1 pressed
+W (5716991) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5716991) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5717301) BTN_HANDLER: Button 1 released (duration: 310 ms)
+I (5717301) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5718351) BTN_HANDLER: Button 1 pressed
+W (5718351) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5718351) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5718831) BTN_HANDLER: Button 1 released (duration: 480 ms)
+I (5718831) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5720231) BTN_HANDLER: Button 3 pressed
+I (5720231) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5720641) BTN_HANDLER: Button 3 released (duration: 410 ms)
+I (5720641) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5741641) BTN_HANDLER: Button 1 pressed
+W (5741641) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5741641) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5742031) BTN_HANDLER: Button 1 released (duration: 390 ms)
+I (5742031) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5743221) BTN_HANDLER: Button 1 pressed
+W (5743221) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5743221) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5743771) BTN_HANDLER: Button 1 released (duration: 550 ms)
+I (5743771) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5744311) BTN_HANDLER: Button 1 pressed
+W (5744311) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5744311) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5744731) BTN_HANDLER: Button 1 released (duration: 420 ms)
+I (5744731) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5746561) BTN_HANDLER: Button 1 pressed
+W (5746561) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5746561) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5747091) BTN_HANDLER: Button 1 released (duration: 530 ms)
+I (5747091) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5748271) BTN_HANDLER: Button 1 pressed
+W (5748271) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5748271) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5748821) BTN_HANDLER: Button 1 released (duration: 550 ms)
+I (5748821) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5750101) BTN_HANDLER: Button 1 pressed
+W (5750101) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5750101) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5750721) BTN_HANDLER: Button 1 released (duration: 620 ms)
+I (5750721) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5751531) BTN_HANDLER: Button 1 pressed
+W (5751531) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5751531) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5752161) BTN_HANDLER: Button 1 released (duration: 630 ms)
+I (5752161) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5756241) BTN_HANDLER: Button 1 pressed
+W (5756241) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5756241) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5756761) BTN_HANDLER: Button 1 released (duration: 520 ms)
+I (5756761) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5758951) BTN_HANDLER: Button 1 pressed
+W (5758951) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5758951) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5759401) BTN_HANDLER: Button 1 released (duration: 450 ms)
+I (5759401) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5760971) BTN_HANDLER: Button 1 pressed
+W (5760971) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (5760971) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (5761401) BTN_HANDLER: Button 1 released (duration: 430 ms)
+I (5761401) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+W (5888051) BT_HCI: hcif disc complete: hdl 0x0, rsn 0x13 dev_find 1
+I (5888051) BLE_GATTS: BLE disconnected, restarting advertising
+I (5888061) BLE_GATTS: BLE advertising started
+I (7486311) BLE_GATTS: BLE connected, conn_id 0
+I (7486561) BLE_GATTS: MTU exchange, MTU = 500
+I (7487811) BLE_GATTS: update connection params status = 0, conn_int = 16, latency = 0, timeout = 960
+I (7488321) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 5, handle 49
+I (7488321) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (7488321) BLE_GATTS: 01 00
+I (7488321) BLE_GATTS: Button Event notify enable
+I (7488441) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 6, handle 52
+I (7488441) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (7488441) BLE_GATTS: 01 00
+I (7488441) BLE_GATTS: Device Status notify enable
+I (7488481) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 7, handle 42
+I (7488511) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 8, handle 44
+I (7488561) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 9, handle 46
+I (7489711) BLE_GATTS: update connection params status = 0, conn_int = 48, latency = 0, timeout = 960
+I (7525371) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 10, handle 42
+I (7525381) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (7525381) BLE_GATTS: 71 00
+I (7525381) CONFIG_STORAGE: Saved button 1 mapping: VK=0x71, MOD=0x00
+I (7525381) BLE_GATTS: Button 1 mapped to VK=0x71, MOD=0x00
+I (7525501) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 11, handle 44
+I (7525501) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (7525501) BLE_GATTS: 0d 00
+I (7525501) CONFIG_STORAGE: Saved button 2 mapping: VK=0x0D, MOD=0x00
+I (7525501) BLE_GATTS: Button 2 mapped to VK=0x0D, MOD=0x00
+I (7525621) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 12, handle 46
+I (7525621) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (7525621) BLE_GATTS: a3 00
+I (7525631) CONFIG_STORAGE: Saved button 3 mapping: VK=0xA3, MOD=0x00
+I (7525631) BLE_GATTS: Button 3 mapped to VK=0xA3, MOD=0x00
+I (7534951) BTN_HANDLER: Button 1 pressed
+W (7534951) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7534951) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7535431) BTN_HANDLER: Button 1 released (duration: 480 ms)
+I (7535431) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7539531) BTN_HANDLER: Button 1 pressed
+W (7539531) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7539531) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7540161) BTN_HANDLER: Button 1 released (duration: 630 ms)
+I (7540161) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7542921) BTN_HANDLER: Button 1 pressed
+W (7542921) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7542921) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7544851) BTN_HANDLER: Button 1 released (duration: 1930 ms)
+I (7544851) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7564941) BTN_HANDLER: Button 1 pressed
+W (7564941) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7564941) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7570111) BTN_HANDLER: Button 1 released (duration: 5170 ms)
+I (7570111) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7573051) BTN_HANDLER: Button 1 pressed
+W (7573051) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7573051) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7576871) BTN_HANDLER: Button 1 released (duration: 3820 ms)
+I (7576871) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7580621) BTN_HANDLER: Button 1 pressed
+W (7580621) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7580621) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7584231) BTN_HANDLER: Button 1 released (duration: 3610 ms)
+I (7584231) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7586001) BTN_HANDLER: Button 1 pressed
+W (7586001) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7586001) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7588671) BTN_HANDLER: Button 1 released (duration: 2670 ms)
+I (7588671) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7623171) BTN_HANDLER: Button 1 pressed
+W (7623171) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (7623171) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (7626771) BTN_HANDLER: Button 1 released (duration: 3600 ms)
+I (7626771) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+W (7810911) BT_HCI: hcif disc complete: hdl 0x0, rsn 0x13 dev_find 1
+I (7810911) BLE_GATTS: BLE disconnected, restarting advertising
+I (7810931) BLE_GATTS: BLE advertising started
+I (8144511) BLE_GATTS: BLE connected, conn_id 0
+I (8144631) BLE_GATTS: MTU exchange, MTU = 500
+I (8145881) BLE_GATTS: update connection params status = 0, conn_int = 16, latency = 0, timeout = 960
+I (8146351) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 5, handle 49
+I (8146351) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (8146351) BLE_GATTS: 01 00
+I (8146351) BLE_GATTS: Button Event notify enable
+I (8146491) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 6, handle 52
+I (8146491) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (8146491) BLE_GATTS: 01 00
+I (8146491) BLE_GATTS: Device Status notify enable
+I (8146531) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 7, handle 42
+I (8146571) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 8, handle 44
+I (8146611) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 9, handle 46
+I (8147781) BLE_GATTS: update connection params status = 0, conn_int = 48, latency = 0, timeout = 960
+I (8327001) BTN_HANDLER: Button 1 pressed
+W (8327001) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (8327001) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8327441) BTN_HANDLER: Button 1 released (duration: 440 ms)
+I (8327441) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8328151) BTN_HANDLER: Button 2 pressed
+I (8328151) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8328641) BTN_HANDLER: Button 2 released (duration: 490 ms)
+I (8328641) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8329191) BTN_HANDLER: Button 3 pressed
+I (8329191) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8329641) BTN_HANDLER: Button 3 released (duration: 450 ms)
+I (8329641) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+W (8338901) BT_HCI: hcif disc complete: hdl 0x0, rsn 0x13 dev_find 1
+I (8338901) BLE_GATTS: BLE disconnected, restarting advertising
+I (8338921) BLE_GATTS: BLE advertising started
+I (8696811) BLE_GATTS: BLE connected, conn_id 0
+I (8696811) BLE_GATTS: MTU exchange, MTU = 500
+I (8698241) BLE_GATTS: update connection params status = 0, conn_int = 16, latency = 0, timeout = 960
+I (8698821) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 5, handle 49
+I (8698821) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (8698821) BLE_GATTS: 01 00
+I (8698821) BLE_GATTS: Button Event notify enable
+I (8698981) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 6, handle 52
+I (8698981) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (8698981) BLE_GATTS: 01 00
+I (8698981) BLE_GATTS: Device Status notify enable
+I (8699061) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 7, handle 42
+I (8699101) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 8, handle 44
+I (8699181) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 9, handle 46
+I (8700141) BLE_GATTS: update connection params status = 0, conn_int = 48, latency = 0, timeout = 960
+I (8718341) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 10, handle 42
+I (8718341) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (8718341) BLE_GATTS: 71 00
+I (8718351) CONFIG_STORAGE: Saved button 1 mapping: VK=0x71, MOD=0x00
+I (8718351) BLE_GATTS: Button 1 mapped to VK=0x71, MOD=0x00
+I (8718461) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 11, handle 44
+I (8718461) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (8718461) BLE_GATTS: 0d 00
+I (8718471) CONFIG_STORAGE: Saved button 2 mapping: VK=0x0D, MOD=0x00
+I (8718471) BLE_GATTS: Button 2 mapped to VK=0x0D, MOD=0x00
+I (8718581) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 12, handle 46
+I (8718581) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (8718581) BLE_GATTS: 09 04
+I (8718601) CONFIG_STORAGE: Saved button 3 mapping: VK=0x09, MOD=0x04
+I (8718601) BLE_GATTS: Button 3 mapped to VK=0x09, MOD=0x04
+I (8722321) BTN_HANDLER: Button 3 pressed
+I (8722321) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8722661) BTN_HANDLER: Button 3 released (duration: 340 ms)
+I (8722661) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8723251) BTN_HANDLER: Button 3 pressed
+I (8723251) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8724511) BTN_HANDLER: Button 3 released (duration: 1260 ms)
+I (8724511) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8724851) BTN_HANDLER: Button 3 pressed
+I (8724851) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8725001) BTN_HANDLER: Button 3 released (duration: 150 ms)
+I (8725001) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8725181) BTN_HANDLER: Button 3 pressed
+I (8725181) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8728801) BTN_HANDLER: Button 3 released (duration: 3620 ms)
+I (8728801) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8729701) BTN_HANDLER: Button 3 pressed
+I (8729701) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8730961) BTN_HANDLER: Button 3 released (duration: 1260 ms)
+I (8730961) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8731721) BTN_HANDLER: Button 3 pressed
+I (8731721) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (8732321) BTN_HANDLER: Button 3 released (duration: 600 ms)
+I (8732321) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+W (8887481) BT_HCI: hcif disc complete: hdl 0x0, rsn 0x13 dev_find 1
+I (8887481) BLE_GATTS: BLE disconnected, restarting advertising
+I (8887491) BLE_GATTS: BLE advertising started
+I (9670691) BTN_HANDLER: Button 1 pressed
+W (9670691) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (9676351) BTN_HANDLER: Button 1 released (duration: 5660 ms)
+I (10029261) BLE_GATTS: BLE connected, conn_id 0
+I (10029381) BLE_GATTS: MTU exchange, MTU = 500
+I (10030641) BLE_GATTS: update connection params status = 0, conn_int = 16, latency = 0, timeout = 960
+I (10031181) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 5, handle 49
+I (10031191) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (10031191) BLE_GATTS: 01 00
+I (10031191) BLE_GATTS: Button Event notify enable
+I (10031301) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 6, handle 52
+I (10031311) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (10031311) BLE_GATTS: 01 00
+I (10031311) BLE_GATTS: Device Status notify enable
+I (10031341) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 7, handle 42
+I (10031381) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 8, handle 44
+I (10031431) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 9, handle 46
+I (10032541) BLE_GATTS: update connection params status = 0, conn_int = 48, latency = 0, timeout = 960
+I (10044621) BTN_HANDLER: Button 1 pressed
+W (10044621) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (10044621) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (10046071) BTN_HANDLER: Button 1 released (duration: 1450 ms)
+I (10046071) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+W (10052361) BT_HCI: hcif disc complete: hdl 0x0, rsn 0x13 dev_find 1
+I (10052361) BLE_GATTS: BLE disconnected, restarting advertising
+I (10052381) BLE_GATTS: BLE advertising started
+I (10070071) BLE_GATTS: BLE connected, conn_id 0
+I (10070071) BLE_GATTS: MTU exchange, MTU = 500
+I (10071381) BLE_GATTS: update connection params status = 0, conn_int = 16, latency = 0, timeout = 960
+I (10071861) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 5, handle 49
+I (10071861) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (10071871) BLE_GATTS: 01 00
+I (10071871) BLE_GATTS: Button Event notify enable
+I (10071981) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 6, handle 52
+I (10071981) BLE_GATTS: GATT_WRITE_EVT, value len 2
+I (10071991) BLE_GATTS: 01 00
+I (10071991) BLE_GATTS: Device Status notify enable
+I (10072021) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 7, handle 42
+I (10072061) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 8, handle 44
+I (10072101) BLE_GATTS: GATT_READ_EVT, conn_id 0, trans_id 9, handle 46
+I (10073281) BLE_GATTS: update connection params status = 0, conn_int = 48, latency = 0, timeout = 960
+I (10188931) BTN_HANDLER: Button 1 pressed
+W (10188931) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (10188931) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (10189651) BTN_HANDLER: Button 1 released (duration: 720 ms)
+I (10189651) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (10194911) BTN_HANDLER: Button 1 pressed
+W (10194911) BT_HFP_HF: PTT: HFP not connected, ignoring
+I (10194911) BLE_GATTS: ESP_GATTS_CONF_EVT status 0
+I (10198961) BTN_HANDLER: Button 1 released (duration: 4050 ms)
+I (10198961) BLE_GATTS: ESP_GATTS_CONF_EVT status 0

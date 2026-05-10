@@ -1,0 +1,83 @@
+I (103028) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100136
+I (104423) UDP_AUDIO: Packets sent: 10000, errors: 145
+I (104660) BTN_HANDLER: Button 1 pressed
+W (104660) BLE_GATTS: Cannot send btn 0 event: BLE not connected
+I (105100) BTN_HANDLER: Button 1 released (duration: 440 ms)
+W (105100) BLE_GATTS: Cannot send btn 0 event: BLE not connected
+I (111010) BLE_GATTS: BLE connected, conn_id 0
+I (111132) BLE_GATTS: MTU exchange, MTU = 500
+I (112569) BLE_GATTS: update connection params status = 0
+I (113028) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100804
+I (113291) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 5, handle 49
+I (113292) BLE_GATTS: Button Event notify enable
+I (113452) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 6, handle 52
+I (113452) BLE_GATTS: Device Status notify enable
+I (114588) BLE_GATTS: update connection params status = 0
+I (114944) UDP_AUDIO: Packets sent: 11000, errors: 197
+I (115581) BTN_HANDLER: Button 1 pressed
+I (115582) BLE_GATTS: Btn 1 PRESS sent
+I (115764) BTN_HANDLER: Button 1 released (duration: 183 ms)
+I (115765) BLE_GATTS: Btn 1 RELEASE sent
+W (117713) UDP_AUDIO: sendto failed: errno=12 (errors=200)
+I (118226) BTN_HANDLER: Button 1 pressed
+I (118227) BLE_GATTS: Btn 1 PRESS sent
+I (118488) BTN_HANDLER: Button 1 released (duration: 262 ms)
+I (118489) BLE_GATTS: Btn 1 RELEASE sent
+I (120130) BTN_HANDLER: Button 1 pressed
+I (120131) BLE_GATTS: Btn 1 PRESS sent
+I (120432) BTN_HANDLER: Button 1 released (duration: 302 ms)
+I (120433) BLE_GATTS: Btn 1 RELEASE sent
+I (123029) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=79804
+I (125223) UDP_AUDIO: Packets sent: 12000, errors: 225
+I (131815) BTN_HANDLER: Button 2 pressed
+I (131816) BLE_GATTS: Btn 2 PRESS sent
+I (131967) BTN_HANDLER: Button 2 released (duration: 152 ms)
+I (131968) BLE_GATTS: Btn 2 RELEASE sent
+I (132919) BTN_HANDLER: Button 2 pressed
+I (132920) BLE_GATTS: Btn 2 PRESS sent
+I (133030) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=98512
+I (133031) BTN_HANDLER: Button 2 released (duration: 112 ms)
+I (133032) BLE_GATTS: Btn 2 RELEASE sent
+I (133964) BTN_HANDLER: Button 2 pressed
+I (133965) BLE_GATTS: Btn 2 PRESS sent
+I (134326) BTN_HANDLER: Button 2 released (duration: 362 ms)
+I (134327) BLE_GATTS: Btn 2 RELEASE sent
+I (135758) BTN_HANDLER: Button 2 pressed
+I (135759) BLE_GATTS: Btn 2 PRESS sent
+I (135963) UDP_AUDIO: Packets sent: 13000, errors: 299
+I (135990) BTN_HANDLER: Button 2 released (duration: 232 ms)
+I (135991) BLE_GATTS: Btn 2 RELEASE sent
+W (136863) UDP_AUDIO: sendto failed: errno=12 (errors=300)
+I (138332) BTN_HANDLER: Button 2 pressed
+I (138333) BLE_GATTS: Btn 2 PRESS sent
+I (138663) BTN_HANDLER: Button 2 released (duration: 331 ms)
+I (138664) BLE_GATTS: Btn 2 RELEASE sent
+I (140235) BTN_HANDLER: Button 2 pressed
+I (140236) BLE_GATTS: Btn 2 PRESS sent
+I (140477) BTN_HANDLER: Button 2 released (duration: 242 ms)
+I (140478) BLE_GATTS: Btn 2 RELEASE sent
+I (143030) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=101980
+I (146374) UDP_AUDIO: Packets sent: 14000, errors: 340
+I (153030) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=69612
+W (153283) UDP_AUDIO: sendto failed: errno=12 (errors=400)
+I (157473) UDP_AUDIO: Packets sent: 15000, errors: 450
+W (160433) UDP_AUDIO: sendto failed: errno=12 (errors=500)
+W (160450) BT_HCI: hcif disc complete: hdl 0x0, rsn 0x13 dev_find 1
+I (160452) BLE_GATTS: BLE disconnected, restarting advertising
+I (160470) BLE_GATTS: BLE advertising started
+I (163030) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=98292
+I (168023) UDP_AUDIO: Packets sent: 16000, errors: 505
+I (173030) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=104072
+W (174613) UDP_AUDIO: sendto failed: errno=12 (errors=600)
+W (177483) UDP_AUDIO: sendto failed: errno=12 (errors=700)
+I (180733) UDP_AUDIO: Packets sent: 17000, errors: 776
+W (181343) UDP_AUDIO: sendto failed: errno=12 (errors=800)
+I (183030) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=67088
+W (183145) UDP_AUDIO: sendto failed: errno=12 (errors=900)
+W (191863) UDP_AUDIO: sendto failed: errno=12 (errors=1000)
+I (193031) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=67088
+W (193463) UDP_AUDIO: sendto failed: errno=12 (errors=1100)
+I (194353) UDP_AUDIO: Packets sent: 18000, errors: 1138
+W (197934) UDP_AUDIO: sendto failed: errno=12 (errors=1200)
+I (203031) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=104080
+I (205173) UDP_AUDIO: Packets sent: 19000, errors: 1220

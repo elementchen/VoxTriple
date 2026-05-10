@@ -29,124 +29,177 @@
 
 static const char *TAG = "BT_HFP_HF";
 
+/* ----------------------------------------------------------------
+ * Audio DSP: high-pass filter + noise gate for cleaner voice input
+ * All filters use int64_t intermediates to avoid overflow on ESP32.
+ * ---------------------------------------------------------------- */
+
+/* HPF: 1-pole IIR, 80Hz cutoff @ 16kHz (removes rumble/wind) */
+static int16_t s_hpf_prev_in = 0;
+static int64_t s_hpf_prev_out = 0;
+#define HPF_ALPHA_Q15  31775
+
+/* Moving-average ring (5-tap, ~312µs window). Smooths high-frequency hiss. */
+#define MA_TAPS         5
+static int16_t s_ma_ring[MA_TAPS] = {0};
+static int32_t s_ma_sum = 0;
+static uint8_t s_ma_idx = 0;
+static uint8_t s_ma_fill = 0;
+
+/* Noise gate (disabled by default; uncomment call in audio_dsp_process) */
+#define GATE_THRESHOLD   1638
+#define GATE_HOLD_COUNT    18
+static int s_gate_hold = 0;
+static bool s_gate_open = true;
+static int64_t s_env = 0;
+#define ENV_ATTACK_Q15   16384
+#define ENV_RELEASE_Q15    655
+
+static void apply_hpf(uint8_t *buf, size_t len)
+{
+    int16_t *samples = (int16_t *)buf;
+    size_t count = len >> 1;
+    for (size_t i = 0; i < count; i++) {
+        int64_t x = samples[i];
+        int64_t accum = s_hpf_prev_out + x - s_hpf_prev_in;
+        int64_t y = (HPF_ALPHA_Q15 * accum) >> 15;
+        s_hpf_prev_in = (int16_t)x;
+        s_hpf_prev_out = y;
+        if (y > 32767) y = 32767;
+        else if (y < -32768) y = -32768;
+        samples[i] = (int16_t)y;
+    }
+}
+
+/* 5-tap moving-average: low-pass that smooths digital hiss/spikes */
+static void apply_moving_average(uint8_t *buf, size_t len)
+{
+    int16_t *samples = (int16_t *)buf;
+    size_t count = len >> 1;
+    for (size_t i = 0; i < count; i++) {
+        s_ma_sum -= s_ma_ring[s_ma_idx];
+        s_ma_ring[s_ma_idx] = samples[i];
+        s_ma_sum += samples[i];
+        s_ma_idx = (s_ma_idx + 1) % MA_TAPS;
+        if (s_ma_fill < MA_TAPS) s_ma_fill++;
+        samples[i] = (int16_t)(s_ma_sum / s_ma_fill);
+    }
+}
+
+static void apply_noise_gate(uint8_t *buf, size_t len)
+{
+    int16_t *samples = (int16_t *)buf;
+    size_t count = len >> 1;
+    for (size_t i = 0; i < count; i++) {
+        int64_t abs_sample = (samples[i] >= 0) ? samples[i] : -samples[i];
+        if (abs_sample > s_env)
+            s_env += ((abs_sample - s_env) * (int64_t)ENV_ATTACK_Q15) >> 15;
+        else
+            s_env -= ((s_env - abs_sample) * (int64_t)ENV_RELEASE_Q15) >> 15;
+        if (s_env < 0) s_env = 0;
+        if (s_env >= GATE_THRESHOLD) {
+            s_gate_open = true;
+            s_gate_hold = GATE_HOLD_COUNT;
+        } else if (s_gate_hold > 0) {
+            s_gate_hold--;
+        } else {
+            s_gate_open = false;
+        }
+        if (!s_gate_open) samples[i] = 0;
+    }
+}
+
+static void audio_dsp_process(uint8_t *buf, size_t len)
+{
+    apply_hpf(buf, len);               /* remove low-frequency rumble */
+    apply_moving_average(buf, len);    /* smooth digital hiss/spikes */
+    // apply_noise_gate(buf, len);     /* uncomment to enable gate */
+}
+
 #if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
 
-/* HFP audio timing:
- * 7500 us = one mSBC frame, aligned to common Tesco slot intervals */
-#define PCM_BLOCK_DURATION_US        (7500)
-#define WBS_PCM_SAMPLING_RATE_KHZ    (16)
-#define PCM_SAMPLING_RATE_KHZ        (8)
-#define BYTES_PER_SAMPLE             (2)
-#define WBS_PCM_INPUT_DATA_SIZE      (WBS_PCM_SAMPLING_RATE_KHZ * PCM_BLOCK_DURATION_US / 1000 * BYTES_PER_SAMPLE)
-#define PCM_INPUT_DATA_SIZE          (PCM_SAMPLING_RATE_KHZ * PCM_BLOCK_DURATION_US / 1000 * BYTES_PER_SAMPLE)
-#define ESP_HFP_RINGBUF_SIZE         4800
-#define PCM_GENERATOR_TICK_US        (4000)
+/* HFP audio parameters */
+#define ESP_HFP_RINGBUF_SIZE         9600
+#define PCM_GENERATOR_TICK_US        (5000)
+#define AUDIO_READ_CHUNK             (320)   /* 10ms @ 16kHz mono = 320 bytes */
 
 static RingbufHandle_t s_m_rb = NULL;
 static SemaphoreHandle_t s_send_data_sem = NULL;
 static TaskHandle_t s_bt_send_task_handle = NULL;
 static esp_hf_client_audio_state_t s_audio_codec = ESP_HF_CLIENT_AUDIO_STATE_DISCONNECTED;
-static uint64_t s_last_enter_time = 0;
 static esp_timer_handle_t s_periodic_timer = NULL;
 static volatile bool s_audio_running = false;
 
 /**
- * @brief Outgoing data callback - HFP stack reads PCM from us via ring buffer
+ * @brief Outgoing data callback.  Returns PCM data from ring buffer.
+ *        On underflow returns silence (zeros) instead of 0 so the SCO
+ *        link stays clean — no clicking/corruption artefacts.
  */
 static uint32_t bt_app_hf_outgoing_cb(uint8_t *p_buf, uint32_t sz)
 {
     size_t item_size = 0;
-    uint8_t *data = NULL;
 
-    if (!s_m_rb || !s_audio_running) return 0;
+    if (!s_m_rb || !s_audio_running) {
+        memset(p_buf, 0, sz);
+        return sz;
+    }
 
     vRingbufferGetInfo(s_m_rb, NULL, NULL, NULL, NULL, &item_size);
     if (item_size >= sz) {
-        data = xRingbufferReceiveUpTo(s_m_rb, &item_size, 0, sz);
+        uint8_t *data = xRingbufferReceiveUpTo(s_m_rb, &item_size, 0, sz);
         if (data) {
             memcpy(p_buf, data, item_size);
             vRingbufferReturnItem(s_m_rb, data);
             return sz;
         }
     }
-    return 0;
+    /* Underflow: return silence. Keeps eSCO link clean. */
+    memset(p_buf, 0, sz);
+    return sz;
 }
 
-/**
- * @brief Incoming data callback - audio from AG (Windows), unused for mic
- */
 static void bt_app_hf_incoming_cb(const uint8_t *buf, uint32_t sz)
 {
     /* Not used for microphone-only device */
 }
 
-/**
- * @brief Timer callback triggers the send-task to refill ring buffer from I2S
- */
 static void bt_app_send_data_timer_cb(void *arg)
 {
     xSemaphoreGive(s_send_data_sem);
 }
 
 /**
- * @brief Audio pump task: reads I2S → ring buffer, signals HFP stack
+ * @brief Audio pump: reads I2S continuously, DSPs it, feeds ring buffer.
+ *        No more frame-size batching — ring buffer decouples I2S rate
+ *        from HFP mSBC frame rate naturally.
  */
 static void bt_app_send_data_task(void *arg)
 {
-    uint64_t frame_data_num;
-    size_t item_size = 0;
-    uint8_t *buf = NULL;
+    uint8_t *buf = osi_malloc(AUDIO_READ_CHUNK);
+    assert(buf);
 
     for (;;) {
         if (xSemaphoreTake(s_send_data_sem, (TickType_t)portMAX_DELAY)) {
-            uint64_t now = esp_timer_get_time();
-            uint64_t duration = now - s_last_enter_time;
-
-            if (s_audio_codec == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED_MSBC) {
-                frame_data_num = duration / PCM_BLOCK_DURATION_US * WBS_PCM_INPUT_DATA_SIZE;
-                s_last_enter_time += frame_data_num / WBS_PCM_INPUT_DATA_SIZE * PCM_BLOCK_DURATION_US;
-            } else {
-                frame_data_num = duration / PCM_BLOCK_DURATION_US * PCM_INPUT_DATA_SIZE;
-                s_last_enter_time += frame_data_num / PCM_INPUT_DATA_SIZE * PCM_BLOCK_DURATION_US;
+            size_t bytes_read = 0;
+            esp_err_t ret = audio_capture_read(buf, AUDIO_READ_CHUNK,
+                                               &bytes_read, 50);
+            /* Only process aligned reads so DSP gets whole int16 samples */
+            if (ret == ESP_OK && bytes_read >= 2 && (bytes_read & 1) == 0) {
+                audio_dsp_process(buf, bytes_read);
+                xRingbufferSend(s_m_rb, buf, bytes_read, 0);
             }
 
-            if (frame_data_num == 0) continue;
-
-            buf = osi_malloc(frame_data_num);
-            if (!buf) {
-                ESP_LOGE(TAG, "%s, no mem", __func__);
-                continue;
-            }
-
-            size_t total_read = 0;
-            while (total_read < frame_data_num) {
-                size_t bytes_read = 0;
-                esp_err_t ret = audio_capture_read(buf + total_read,
-                                                   frame_data_num - total_read,
-                                                   &bytes_read, 100);
-                if (ret != ESP_OK || bytes_read == 0) {
-                    memset(buf + total_read, 0, frame_data_num - total_read);
-                    total_read = frame_data_num;
-                    break;
-                }
-                total_read += bytes_read;
-            }
-
-            BaseType_t done = xRingbufferSend(s_m_rb, buf, frame_data_num, 0);
-            if (!done) {
-                ESP_LOGE(TAG, "rb send fail");
-            }
-            osi_free(buf);
-
+            size_t item_size = 0;
             vRingbufferGetInfo(s_m_rb, NULL, NULL, NULL, NULL, &item_size);
-
-            uint32_t threshold = (s_audio_codec == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED_MSBC)
-                                 ? WBS_PCM_INPUT_DATA_SIZE : PCM_INPUT_DATA_SIZE;
-            if (item_size >= threshold) {
+            /* Signal ready when we have at least one mSBC frame (240B) */
+            if (item_size >= 240) {
                 esp_hf_client_outgoing_data_ready();
             }
         }
     }
+
+    osi_free(buf);
+    vTaskDelete(NULL);
 }
 
 void bt_hfp_hf_audio_start(void)
@@ -174,8 +227,6 @@ void bt_hfp_hf_audio_start(void)
     };
     ESP_ERROR_CHECK(esp_timer_create(&timer_args, &s_periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(s_periodic_timer, PCM_GENERATOR_TICK_US));
-
-    s_last_enter_time = esp_timer_get_time();
 
     /* Pause BLE advertising to avoid BTDM scheduling conflicts with SCO */
     ble_gatts_adv_stop();

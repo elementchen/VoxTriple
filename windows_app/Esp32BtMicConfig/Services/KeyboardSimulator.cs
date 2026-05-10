@@ -3,93 +3,61 @@ using System.Runtime.InteropServices;
 namespace Esp32BtMicConfig.Services;
 
 /// <summary>
-/// Simulates keyboard input using Win32 SendInput API.
+/// Simulates keyboard input using Win32 keybd_event API.
+/// Uses keybd_event (not SendInput) — proven reliable in WiFi sister project.
+/// keybd_event manipulates the system-wide keyboard state, avoiding
+/// the per-thread input queue issues that SendInput has with UIPI/focus.
 /// </summary>
 public static class KeyboardSimulator
 {
-    private const int INPUT_KEYBOARD = 1;
-    private const uint KEYEVENTF_KEYUP = 0x0002;
-    private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+    [DllImport("user32.dll")]
+    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct INPUT
-    {
-        public uint type;
-        public INPUTUNION union;
-    }
+    private const uint KEYEVENTF_KEYDOWN = 0x0000;
+    private const uint KEYEVENTF_KEYUP   = 0x0002;
 
-    [StructLayout(LayoutKind.Explicit)]
-    private struct INPUTUNION
-    {
-        [FieldOffset(0)] public KEYBDINPUT ki;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct KEYBDINPUT
-    {
-        public ushort wVk;
-        public ushort wScan;
-        public uint dwFlags;
-        public uint time;
-        public IntPtr ExtraInfo;
-    }
-
-    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SendInput")]
-    private static extern uint SendInput(uint nInputs, [MarshalAs(UnmanagedType.LPArray)] INPUT[] pInputs, int cbSize);
-
-    /// <summary>
-    /// Press and release a key with optional modifiers.
-    /// </summary>
-    /// <param name="vkCode">Virtual key code.</param>
-    /// <param name="modifier">Modifier bitmask matching BLE protocol.</param>
+    /// <summary>Press and release a key with modifiers (single shot).</summary>
     public static void SimulateKeyPress(byte vkCode, byte modifier)
     {
-        var inputs = new List<INPUT>();
-
-        // Press modifiers down
-        if ((modifier & 0x01) != 0) inputs.Add(MakeKeyDown(0xA2)); // LCtrl
-        if ((modifier & 0x02) != 0) inputs.Add(MakeKeyDown(0xA0)); // LShift
-        if ((modifier & 0x04) != 0) inputs.Add(MakeKeyDown(0xA4)); // LAlt
-        if ((modifier & 0x08) != 0) inputs.Add(MakeKeyDown(0x5B)); // LWin
-        if ((modifier & 0x10) != 0) inputs.Add(MakeKeyDown(0xA3)); // RCtrl
-        if ((modifier & 0x20) != 0) inputs.Add(MakeKeyDown(0xA1)); // RShift
-        if ((modifier & 0x40) != 0) inputs.Add(MakeKeyDown(0xA5)); // RAlt
-        if ((modifier & 0x80) != 0) inputs.Add(MakeKeyDown(0x5C)); // RWin
-
-        // Press and release the actual key
-        inputs.Add(MakeKeyDown(vkCode));
-        inputs.Add(MakeKeyUp(vkCode));
-
-        // Release modifiers in reverse
-        if ((modifier & 0x80) != 0) inputs.Add(MakeKeyUp(0x5C));
-        if ((modifier & 0x40) != 0) inputs.Add(MakeKeyUp(0xA5));
-        if ((modifier & 0x20) != 0) inputs.Add(MakeKeyUp(0xA1));
-        if ((modifier & 0x10) != 0) inputs.Add(MakeKeyUp(0xA3));
-        if ((modifier & 0x08) != 0) inputs.Add(MakeKeyUp(0x5B));
-        if ((modifier & 0x04) != 0) inputs.Add(MakeKeyUp(0xA4));
-        if ((modifier & 0x02) != 0) inputs.Add(MakeKeyUp(0xA0));
-        if ((modifier & 0x01) != 0) inputs.Add(MakeKeyUp(0xA2));
-
-        var arr = inputs.ToArray();
-        SendInput((uint)arr.Length, arr, Marshal.SizeOf<INPUT>());
+        KeyDown(vkCode, modifier);
+        KeyUp(vkCode, modifier);
     }
 
-    private static INPUT MakeKeyDown(ushort vk) => new()
+    /// <summary>Press key + modifiers down. Call KeyUp to release.</summary>
+    public static void KeyDown(byte vkCode, byte modifier)
     {
-        type = INPUT_KEYBOARD,
-        union = new INPUTUNION { ki = new KEYBDINPUT { wVk = vk, dwFlags = IsExtendedKey(vk) ? KEYEVENTF_EXTENDEDKEY : 0 } }
-    };
+        try
+        {
+            if ((modifier & 0x01) != 0) keybd_event(0xA2, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            if ((modifier & 0x02) != 0) keybd_event(0xA0, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            if ((modifier & 0x04) != 0) keybd_event(0xA4, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            if ((modifier & 0x08) != 0) keybd_event(0x5B, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            if ((modifier & 0x10) != 0) keybd_event(0xA3, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            if ((modifier & 0x20) != 0) keybd_event(0xA1, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            if ((modifier & 0x40) != 0) keybd_event(0xA5, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            if ((modifier & 0x80) != 0) keybd_event(0x5C, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
 
-    private static INPUT MakeKeyUp(ushort vk) => new()
+            keybd_event(vkCode, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+        }
+        catch { /* ignore */ }
+    }
+
+    /// <summary>Release key + modifiers previously pressed by KeyDown.</summary>
+    public static void KeyUp(byte vkCode, byte modifier)
     {
-        type = INPUT_KEYBOARD,
-        union = new INPUTUNION { ki = new KEYBDINPUT { wVk = vk, dwFlags = KEYEVENTF_KEYUP | (IsExtendedKey(vk) ? KEYEVENTF_EXTENDEDKEY : 0) } }
-    };
+        try
+        {
+            keybd_event(vkCode, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
 
-    private static bool IsExtendedKey(ushort vk) => vk is
-        0x21 or 0x22 or 0x23 or 0x24 or  // PgUp, PgDn, End, Home
-        0x25 or 0x26 or 0x27 or 0x28 or  // Arrow keys
-        0x2D or 0x2E or                   // Insert, Delete
-        0x5B or 0x5C or 0x5D or          // LWin, RWin, Apps
-        0xA2 or 0xA3 or 0xA4 or 0xA5;    // Ctrl/Alt right variants
+            if ((modifier & 0x80) != 0) keybd_event(0x5C, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if ((modifier & 0x40) != 0) keybd_event(0xA5, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if ((modifier & 0x20) != 0) keybd_event(0xA1, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if ((modifier & 0x10) != 0) keybd_event(0xA3, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if ((modifier & 0x08) != 0) keybd_event(0x5B, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if ((modifier & 0x04) != 0) keybd_event(0xA4, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if ((modifier & 0x02) != 0) keybd_event(0xA0, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            if ((modifier & 0x01) != 0) keybd_event(0xA2, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+        catch { /* ignore */ }
+    }
 }

@@ -1,0 +1,15 @@
+I (932291) BTN_HANDLER: Button 2 pressed
+W (932291) BLE_GATTS: Cannot send btn 1 event: gatts_if=3 conn=0
+I (932491) BTN_HANDLER: Button 2 released (duration: 200 ms)
+W (932491) BLE_GATTS: Cannot send btn 1 event: gatts_if=3 conn=0
+I (933130) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=95080
+I (936461) BTN_HANDLER: Button 2 pressed
+W (936461) BLE_GATTS: Cannot send btn 1 event: gatts_if=3 conn=0
+I (936661) BTN_HANDLER: Button 2 released (duration: 200 ms)
+W (936661) BLE_GATTS: Cannot send btn 1 event: gatts_if=3 conn=0
+I (937796) UDP_AUDIO: Packets sent: 93000, errors: 479
+I (939692) BTN_HANDLER: Button 1 pressed
+W (939692) BLE_GATTS: Cannot send btn 0 event: gatts_if=3 conn=0
+I (939842) BTN_HANDLER: Button 1 released (duration: 150 ms)
+W (939843) BLE_GATTS: Cannot send btn 0 event: gatts_if=3 conn=0
+I (943131) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=99712

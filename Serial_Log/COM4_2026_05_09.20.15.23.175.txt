@@ -1,0 +1,14 @@
+I (11054) BLE_GATTS: BLE connected, conn_id 0
+I (11236) BLE_GATTS: MTU exchange, MTU = 500
+I (12612) BLE_GATTS: update connection params status = 0
+I (13050) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100828
+I (13395) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 5, handle 49
+I (13396) BLE_GATTS: Button Event notify enable
+I (13514) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 6, handle 52
+I (13515) BLE_GATTS: Device Status notify enable
+I (14037) BLE_GATTS: GATT_WRITE_EVT, conn_id 0, trans_id 12, handle 54
+I (14043) BLE_GATTS: Target IP set to 192.168.200.1:8888 via BLE
+I (14044) UDP_AUDIO: Updating UDP target to 192.168.200.1:8888
+I (14631) BLE_GATTS: update connection params status = 0
+I (23051) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100828
+I (33051) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=98516
