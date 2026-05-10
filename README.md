@@ -1,174 +1,135 @@
-# ESP32 蓝牙麦克风项目
+# VoxTriple — ESP32 三键蓝牙 PTT 麦克风
 
-一个基于ESP32的蓝牙麦克风系统，支持蓝牙音频传输和快捷键功能。
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PlatformIO](https://img.shields.io/badge/build-PlatformIO-orange.svg)](https://platformio.org/)
+[![.NET](https://img.shields.io/badge/app-.NET%208-purple.svg)](https://dotnet.microsoft.com/)
+
+一个基于 ESP32 的蓝牙麦克风系统。三键物理按钮，一键 PTT 通话 + 可编程键盘快捷键。专为语音输入（Windows 语音识别 / 讯飞）设计。
 
 ## 功能特性
 
-- **蓝牙麦克风**: ESP32通过HFP AG Profile连接Windows，作为蓝牙麦克风使用
-- **快捷键功能**: 三个物理按钮可配置为任意键盘快捷键
-- **配置应用**: Windows WPF应用程序用于配置按钮映射
-- **双模蓝牙**: 同时支持经典蓝牙(HFP)和BLE(GATT)
+- **蓝牙麦克风** — ESP32 作为 HFP Hands-Free Client，Windows 原生识别为蓝牙音频输入设备
+- **PTT 按住说话** — Button 1 模拟对讲机，按住采集音频、松开关闭，搭配 Windows 语音输入法使用
+- **可编程快捷键** — 3 个按钮映射任意键盘组合键（含修饰键 Ctrl/Shift/Alt/Win）
+- **BLE 无线配置** — Windows WPF 应用通过 BLE GATT 实时读写按钮映射
+- **开机自动连接** — 首次配对后，Windows 应用启动自动连接 BLE，经典蓝牙自动重连
+- **mSBC 宽带语音** — 16kHz 采样、硬件降噪 DSP（高通 + 滑动平均）
 
-## 硬件要求
+## 硬件清单
 
-- **开发板**: NodeMCU-32S (ESP32-WROOM-32)
-- **麦克风**: INMP441全向麦克风模块
-- **按钮**: 3个轻触按钮
+| 组件 | 型号 | 数量 |
+|------|------|------|
+| 开发板 | NodeMCU-32S (ESP32-WROOM-32) | 1 |
+| 麦克风 | INMP441 全向 MEMS I2S 模块 | 1 |
+| 按钮 | 6×6mm 轻触开关 | 3 |
+| 电容 | 100nF 瓷片 (可选，硬件降噪) | 1 |
 
-### 接线图
-
-```
-ESP32 Pin    INMP441 Pin    功能
----------   ------------   ----
-3.3V        VDD            电源
-GND         GND            地
-GPIO 32     SD             I2S数据输入
-GPIO 25     WS             I2S字选择
-GPIO 26     SCK            I2S时钟
-GND         L/R            左声道
-
-ESP32 Pin    按钮           功能
----------   --------       ----
-GPIO 13     Button 1       快捷键1
-GPIO 12     Button 2       快捷键2
-GPIO 14     Button 3       快捷键3
-```
-
-详细接线图请参考 [docs/wiring_diagram.txt](docs/wiring_diagram.txt)
-
-## 项目结构
+## 接线
 
 ```
-ESP32_MIC_Claudecode/
-├── esp32_bt_mic/           # ESP32固件 (PlatformIO + ESP-IDF)
-│   ├── platformio.ini
-│   ├── sdkconfig.defaults
-│   └── main/               # 源代码
-│
-├── windows_app/            # Windows配置应用 (C# WPF)
-│   └── Esp32BtMicConfig/
-│
-└── docs/                   # 项目文档
-    ├── architecture.md     # 系统架构
-    ├── ble_protocol.md     # BLE协议规范
-    └── wiring_diagram.txt  # 接线图
+INMP441 → ESP32:
+  VDD  → 3.3V          （不可接 5V！）
+  GND  → GND
+  L/R  → GND           （选左声道）
+  SD   → GPIO 32       （I2S 数据）
+  WS   → GPIO 25       （I2S 字选择）
+  SCK  → GPIO 26       （I2S 时钟）
+
+Button 1 → GPIO 13     （PTT + 快捷键）
+Button 2 → GPIO 12     （快捷键）
+Button 3 → GPIO 14     （快捷键）
+
+按钮接法：GPIO ↔ 按键 ↔ GND（低电平有效，内部上拉）
 ```
 
 ## 快速开始
 
-### 1. 编译ESP32固件
+### 1. 编译烧录固件
 
 ```bash
-# 安装PlatformIO
 pip install platformio
-
-# 进入固件目录
 cd esp32_bt_mic
-
-# 编译固件
-pio run
-
-# 烧录固件
-pio run -t upload
-
-# 查看串口日志
-pio device monitor
+pio run -t upload --upload-port COM4
 ```
 
-### 2. 构建Windows应用
+### 2. 蓝牙配对
+
+Windows 蓝牙设置 → 添加设备 → 搜索 `ESP32_BT_MIC` → 配对（PIN: `1234`）
+
+### 3. 启动配置应用
 
 ```bash
-# 进入应用目录
 cd windows_app
-
-# 还原依赖
-dotnet restore
-
-# 构建应用
-dotnet build
-
-# 运行应用
 dotnet run --project Esp32BtMicConfig
 ```
 
-### 3. 使用步骤
+### 4. 使用
 
-1. **烧录固件**: 将编译好的固件烧录到ESP32开发板
-2. **连接设备**: 在Windows蓝牙设置中配对ESP32_BT_MIC设备
-3. **启动应用**: 运行Windows配置应用
-4. **配置按钮**: 在应用中设置三个按钮的快捷键映射
-5. **使用麦克风**: ESP32会自动作为蓝牙麦克风出现在Windows音频设备中
+1. 应用启动后自动连接 BLE，读取当前按钮映射
+2. `Capture Key` 捕获键盘按键 → 勾选修饰键（Ctrl/Shift 等）→ `Write to Device`
+3. 按住 Button 1 说话（PTT），松开停止
+4. Button 2/3 触发已配置的键盘快捷键
+
+## 项目结构
+
+```
+VoxTriple/
+├── esp32_bt_mic/              # ESP32 固件 (PlatformIO + ESP-IDF 5.5)
+│   ├── platformio.ini
+│   ├── sdkconfig.defaults     # BTDM 双模 + HFP HF + BLE
+│   ├── partitions.csv
+│   └── src/
+│       ├── main.c             # 入口
+│       ├── bt_init.c/h        # BT 初始化 + GAP
+│       ├── bt_hfp_hf.c/h      # HFP HF Client + SCO 音频管线
+│       ├── bt_app_core.c/h    # BT 任务分发
+│       ├── bt_app_hf.c/h      # HFP 回调
+│       ├── ble_gatts_config.c/h # BLE GATT 服务 (0x1820)
+│       ├── audio_capture.c/h  # I2S INMP441 驱动 (legacy driver)
+│       ├── button_handler.c/h # 按钮检测 + 消抖
+│       └── config_storage.c/h # NVS 配置存储
+│
+├── windows_app/               # Windows 配置应用 (.NET 8 WPF)
+│   └── Esp32BtMicConfig/
+│       ├── Services/
+│       │   ├── BleGattClient.cs       # BLE 扫描/连接/读写
+│       │   ├── KeyboardSimulator.cs   # keybd_event 键盘模拟
+│       │   └── ConfigurationService.cs # JSON 配置持久化
+│       ├── ViewModels/MainViewModel.cs # MVVM
+│       └── Views/MainWindow.xaml/cs    # 主界面 + Win32 按键捕获
+│
+└── docs/
+    ├── architecture.md         # 系统架构
+    ├── ble_protocol.md         # BLE GATT 协议规范
+    └── wiring_diagram.txt     # 详细接线图
+```
+
+## BLE 协议
+
+- **服务 UUID**: `0x1820` (00001820-0000-1000-8000-00805F9B34FB)
+- **Button 1-3 Map** (0x2A01-0x2A03): R/W, `[vk_code:u8, modifier:u8]`
+- **Button Event** (0x2A04): Notify, `[button_id:u8, state:u8]`
+- **Device Status** (0x2A05): Notify, `[hfp_connected:u8, audio_active:u8]`
+
+修饰键位掩码：bit0=LCtrl, bit1=LShift, bit2=LAlt, bit3=LWin, bit4=RCtrl, bit5=RShift, bit6=RAlt, bit7=RWin
 
 ## 技术栈
 
-### ESP32固件
-- **框架**: ESP-IDF v5.5.1
-- **开发工具**: PlatformIO
-- **蓝牙**: Bluedroid (HFP AG + BLE GATT)
-- **音频**: I2S标准模式 (INMP441)
-
-### Windows应用
-- **框架**: .NET 8 WPF
-- **MVVM**: CommunityToolkit.Mvvm
-- **蓝牙**: Windows.Devices.Bluetooth (BLE GATT)
-- **键盘模拟**: Win32 SendInput API
-
-## BLE协议
-
-详细的BLE GATT协议规范请参考 [docs/ble_protocol.md](docs/ble_protocol.md)
-
-### 服务UUID
-- 服务: `0x1820` (ESP32 Button Config Service)
-
-### 特征值
-- Button 1 Map: `0x2A01` (读/写)
-- Button 2 Map: `0x2A02` (读/写)
-- Button 3 Map: `0x2A03` (读/写)
-- Button Event: `0x2A04` (读/通知)
-- Device Status: `0x2A05` (读/通知)
-
-## 常见问题
-
-### Q: ESP32无法被Windows发现？
-A: 确保ESP32已烧录固件并处于广播状态。在Windows蓝牙设置中点击"添加设备"。
-
-### Q: 麦克风没有声音？
-A: 检查INMP441接线是否正确，确保L/R引脚接地（左声道）。在Windows声音设置中选择ESP32_BT_MIC作为输入设备。
-
-### Q: 按钮没有反应？
-A: 检查按钮接线是否正确，确保按钮按下时GPIO接地。在配置应用中检查按钮映射设置。
-
-### Q: BLE连接失败？
-A: 确保ESP32和Windows设备在蓝牙范围内（10米以内）。尝试删除配对记录后重新配对。
-
-## 开发说明
-
-### ESP32固件开发
-
-固件代码位于 `esp32_bt_mic/main/` 目录，主要模块：
-
-- `main.c` - 入口点，初始化序列
-- `bt_init.c` - 蓝牙初始化
-- `bt_hfp_ag.c` - HFP AG Profile
-- `ble_gatts_config.c` - BLE GATT服务
-- `audio_capture.c` - I2S音频采集
-- `button_handler.c` - 按钮检测
-- `config_storage.c` - NVS配置存储
-
-### Windows应用开发
-
-应用代码位于 `windows_app/Esp32BtMicConfig/` 目录，主要模块：
-
-- `Services/BleGattClient.cs` - BLE通信
-- `Services/KeyboardSimulator.cs` - 键盘模拟
-- `Services/ConfigurationService.cs` - 配置持久化
-- `ViewModels/MainViewModel.cs` - 视图模型
-- `Views/MainWindow.xaml` - 用户界面
+| 组件 | 技术 |
+|------|------|
+| 微控制器 | ESP32 (Xtensa LX6, 240MHz) |
+| 固件框架 | ESP-IDF 5.5 / PlatformIO |
+| 蓝牙协议栈 | Bluedroid BTDM (Classic + BLE) |
+| 音频编解码 | HFP mSBC 16kHz WBS |
+| 麦克风驱动 | I2S Legacy Driver |
+| 桌面应用 | .NET 8 WPF + CommunityToolkit.Mvvm |
+| 键盘模拟 | Win32 `keybd_event` API |
+| BLE 扫描 | `BluetoothLEAdvertisementWatcher` |
 
 ## 许可证
 
-MIT License
+MIT License © 2024-2026
 
-## 联系方式
+## 致谢
 
-如有问题或建议，请提交Issue。
+本项目在开发过程中解决了大量 ESP32 蓝牙双模的边界条件问题，包括 BTDM SCO 同步连接配置、BLE/经典蓝牙共存调度、I2S 驱动选择等。感谢 Espressif ESP-IDF 团队和开源社区的支持。
