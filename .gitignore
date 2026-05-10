@@ -8,3 +8,6 @@ Serial_Log/
 __pycache__/
 *.pyc
 *.egg-info/
+**/dist/
+**/build/
+*.spec
