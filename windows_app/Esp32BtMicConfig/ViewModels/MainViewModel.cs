@@ -37,7 +37,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         string shortcutPath = System.IO.Path.Combine(startupDir, "VoxTriple.lnk");
         if (enable)
         {
-            string exePath = Environment.ProcessPath ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string exePath = Environment.ProcessPath ??
+                System.IO.Path.Combine(System.AppContext.BaseDirectory, "VoxTriple.exe");
             // Use WScript.Shell to create shortcut
             try
             {
