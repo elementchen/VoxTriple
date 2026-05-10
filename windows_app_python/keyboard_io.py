@@ -1,22 +1,20 @@
-"""Keyboard capture & simulation via Win32 APIs (ctypes).
+"""Keyboard capture via pynput (reliable cross-platform listener)
+and simulation via Win32 keybd_event (proven in C# version).
 
-Capture uses a low-level keyboard hook (WH_KEYBOARD_LL) to grab raw
-VK codes before the IME can transform them — same approach as the C# WPF
-version's WndProc hook.
+Capture: pynput.keyboard.Listener wraps WH_KEYBOARD_LL on Windows
+and handles threading correctly. It provides raw VK codes via the
+win32_event_filter callback, bypassing IME.
 
-Simulation uses keybd_event, proven reliable in the C# version.
+Simulation: ctypes → user32.keybd_event, same as C# version.
 """
 import ctypes
-import ctypes.wintypes as w
-import threading
 import logging
+from pynput import keyboard
 
 log = logging.getLogger(__name__)
 
-# ── Win32 constants ────────────────────────────────────────────
-WH_KEYBOARD_LL = 13
-WM_KEYDOWN     = 0x0100
-WM_SYSKEYDOWN  = 0x0104
+# ── Win32 keybd_event (for simulation) ──────────────────────────
+user32 = ctypes.windll.user32
 KEYEVENTF_KEYDOWN = 0x0000
 KEYEVENTF_KEYUP   = 0x0002
 
@@ -25,80 +23,52 @@ VK_LCtrl  = 0xA2; VK_RCtrl  = 0xA3
 VK_LShift = 0xA0; VK_RShift = 0xA1
 VK_LAlt   = 0xA4; VK_RAlt   = 0xA5
 VK_LWin   = 0x5B; VK_RWin   = 0x5C
-
-# Scan code for Right Shift (no extended flag in Win32)
 SCAN_RSHIFT = 0x36
 
-# ── Structs ─────────────────────────────────────────────────────
-class KBDLLHOOKSTRUCT(ctypes.Structure):
-    _fields_ = [
-        ("vkCode",      w.DWORD),
-        ("scanCode",    w.DWORD),
-        ("flags",       w.DWORD),
-        ("time",        w.DWORD),
-        ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
-    ]
-
-HOOKPROC = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_int, w.WPARAM, ctypes.POINTER(KBDLLHOOKSTRUCT))
-LowLevelKeyboardProc = HOOKPROC
-
-# ── Win32 DLL imports ───────────────────────────────────────────
-user32 = ctypes.windll.user32
-kernel32 = ctypes.windll.kernel32
-
-user32.SetWindowsHookExW.restype = ctypes.c_void_p
-user32.CallNextHookEx.restype = ctypes.c_long
-user32.keybd_event.restype = None
-
-# ── Globals ─────────────────────────────────────────────────────
-_hook_handle = None
-_capture_callback = None  # called with (vk_code: int, is_extended: bool, scan_code: int)
-_tk_root = None           # optional tkinter root for main-thread dispatch
-
-
-def _low_level_hook(nCode: int, wParam: int, lParam: ctypes.POINTER(KBDLLHOOKSTRUCT)) -> int:
-    global _capture_callback, _tk_root
-    if nCode >= 0 and _capture_callback:
-        kb = lParam.contents
-        if wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
-            vk = kb.vkCode
-            # Skip IME process key, key-up transitions, and VK=0
-            if vk not in (0, 0xE5) and not (kb.flags & 0x80):
-                is_ext = bool(kb.flags & 0x01)
-                sc = kb.scanCode
-                cb = _capture_callback  # capture before clearing
-                # Dispatch to tkinter main thread if available
-                if _tk_root:
-                    _tk_root.after(0, lambda v=vk, e=is_ext, s=sc: cb(v, e, s))
-                else:
-                    cb(vk, is_ext, sc)
-    return user32.CallNextHookEx(0, nCode, wParam, lParam)
-
-
-_hook_cb = LowLevelKeyboardProc(_low_level_hook)
+# ── Key capture via pynput ──────────────────────────────────────
+_listener: keyboard.Listener | None = None
+_capture_callback = None  # called with (vk_code, is_extended, scan_code)
 
 
 def start_key_capture(callback, tk_root=None):
-    """Install global low-level keyboard hook. `callback(vk, is_extended, scan_code)`.
-    If tk_root is provided, callback is dispatched to tkinter main thread via after()."""
-    global _hook_handle, _capture_callback, _tk_root
+    """Start global keyboard listener. `callback(vk, is_extended, scan_code)`.
+    The listener's win32_event_filter provides raw VK codes before IME."""
+    global _listener, _capture_callback
     _capture_callback = callback
-    _tk_root = tk_root
-    _hook_handle = user32.SetWindowsHookExW(
-        WH_KEYBOARD_LL, _hook_cb,
-        kernel32.GetModuleHandleW(None), 0,
-    )
-    if not _hook_handle:
-        log.error("Failed to install keyboard hook")
+
+    def on_win32_event(msg, data):
+        """pynput win32_event_filter. `data` is the KBDLLHOOKSTRUCT (value, not pointer).
+        We extract raw VK code + extended flag before IME."""
+        if msg not in (0x0100, 0x0104):  # WM_KEYDOWN / WM_SYSKEYDOWN
+            return True
+
+        # data is KBDLLHOOKSTRUCT (passed as ctypes struct by value)
+        vk = int(data.vkCode)
+        if vk == 0 or vk == 0xE5:
+            return True
+
+        is_ext = bool(int(data.flags) & 0x01)
+        sc = int(data.scanCode)
+        cb = _capture_callback
+        if cb:
+            if tk_root:
+                tk_root.after(0, lambda v=vk, e=is_ext, s=sc: cb(v, e, s))
+            else:
+                cb(vk, is_ext, sc)
+        return False  # suppress — don't pass to on_press
+
+    _listener = keyboard.Listener(win32_event_filter=on_win32_event, suppress=False)
+    _listener.start()
+    log.info("Keyboard listener started")
 
 
 def stop_key_capture():
-    global _hook_handle, _capture_callback, _tk_root
+    global _listener, _capture_callback
     _capture_callback = None
-    _tk_root = None
-    if _hook_handle:
-        user32.UnhookWindowsHookEx(_hook_handle)
-        _hook_handle = None
+    if _listener:
+        _listener.stop()
+        _listener = None
+    log.info("Keyboard listener stopped")
 
 
 def map_modifier_vk(vk: int, is_extended: bool) -> int:
