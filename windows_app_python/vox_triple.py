@@ -292,7 +292,7 @@ class VoxTripleApp:
         self._capture_idx = idx
         self._btn[idx]["capturing"] = True
         self._cap_btns[idx].configure(text="Capturing… press any key / 按任意键…")
-        keyboard_io.start_key_capture(self._on_key_captured)
+        keyboard_io.start_key_capture(self._on_key_captured, tk_root=self.root)
 
     def _on_key_captured(self, vk: int, is_extended: bool, scan_code: int):
         idx = self._capture_idx

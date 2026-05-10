@@ -53,28 +53,37 @@ user32.keybd_event.restype = None
 # ── Globals ─────────────────────────────────────────────────────
 _hook_handle = None
 _capture_callback = None  # called with (vk_code: int, is_extended: bool, scan_code: int)
+_tk_root = None           # optional tkinter root for main-thread dispatch
 
 
 def _low_level_hook(nCode: int, wParam: int, lParam: ctypes.POINTER(KBDLLHOOKSTRUCT)) -> int:
-    global _capture_callback
+    global _capture_callback, _tk_root
     if nCode >= 0 and _capture_callback:
         kb = lParam.contents
         if wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
             vk = kb.vkCode
-            if vk not in (0, 0xE5) and not (kb.flags & 0x80):  # skip IME process & key-up flag
-                is_ext = bool(kb.flags & 0x01)    # extended-key flag
+            # Skip IME process key, key-up transitions, and VK=0
+            if vk not in (0, 0xE5) and not (kb.flags & 0x80):
+                is_ext = bool(kb.flags & 0x01)
                 sc = kb.scanCode
-                _capture_callback(vk, is_ext, sc)
+                cb = _capture_callback  # capture before clearing
+                # Dispatch to tkinter main thread if available
+                if _tk_root:
+                    _tk_root.after(0, lambda v=vk, e=is_ext, s=sc: cb(v, e, s))
+                else:
+                    cb(vk, is_ext, sc)
     return user32.CallNextHookEx(0, nCode, wParam, lParam)
 
 
 _hook_cb = LowLevelKeyboardProc(_low_level_hook)
 
 
-def start_key_capture(callback):
-    """Install global low-level keyboard hook. `callback(vk, is_extended, scan_code)`."""
-    global _hook_handle, _capture_callback
+def start_key_capture(callback, tk_root=None):
+    """Install global low-level keyboard hook. `callback(vk, is_extended, scan_code)`.
+    If tk_root is provided, callback is dispatched to tkinter main thread via after()."""
+    global _hook_handle, _capture_callback, _tk_root
     _capture_callback = callback
+    _tk_root = tk_root
     _hook_handle = user32.SetWindowsHookExW(
         WH_KEYBOARD_LL, _hook_cb,
         kernel32.GetModuleHandleW(None), 0,
@@ -84,8 +93,9 @@ def start_key_capture(callback):
 
 
 def stop_key_capture():
-    global _hook_handle, _capture_callback
+    global _hook_handle, _capture_callback, _tk_root
     _capture_callback = None
+    _tk_root = None
     if _hook_handle:
         user32.UnhookWindowsHookEx(_hook_handle)
         _hook_handle = None
