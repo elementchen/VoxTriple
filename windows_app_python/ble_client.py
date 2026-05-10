@@ -1,7 +1,14 @@
-"""BLE GATT client for ESP32_BT_MIC — button mapping service (0x1820)."""
+"""BLE GATT client for ESP32_BT_MIC — button mapping service (0x1820).
+
+Characteristic UUIDs (0x2A01-0x2A05) conflict with Bluetooth SIG-defined
+standard characteristics.  We MUST discover the service first, then resolve
+each characteristic by handle within the service scope — bleak's UUID-only
+API throws "Multiple Characteristics with this UUID" otherwise.
+"""
 import asyncio
 import logging
 from bleak import BleakScanner, BleakClient
+from bleak.backends.characteristic import BleakGATTCharacteristic
 
 log = logging.getLogger(__name__)
 
@@ -23,6 +30,11 @@ class BleClient:
         self._connected = False
         self.on_button_event = None   # callback(button_id: int, state: int)
         self.on_status = None         # callback(hfp: int, audio: int)
+
+        # Characteristic handles (resolved from our service only)
+        self._ch = [None, None, None]       # BTN1_MAP, BTN2_MAP, BTN3_MAP
+        self._ch_event: BleakGATTCharacteristic | None = None
+        self._ch_status: BleakGATTCharacteristic | None = None
 
     @property
     def is_connected(self) -> bool:
@@ -47,17 +59,46 @@ class BleClient:
         return None
 
     async def connect(self, address: str) -> bool:
-        """Connect by BLE address, discover GATT, subscribe to notifications."""
+        """Connect, discover our service, resolve char handles, subscribe."""
         try:
             self._client = BleakClient(address)
             await self._client.connect()
-            log.info("BLE connected, discovering GATT…")
-            await asyncio.sleep(1.5)  # wait for ESP32 to register all chars
+            log.info("BLE connected, waiting for service registration…")
+            await asyncio.sleep(1.5)
 
-            # Subscribe to button events
-            await self._client.start_notify(CHAR_BTN_EVENT, self._on_button_event)
-            # Subscribe to device status
-            await self._client.start_notify(CHAR_DEV_STATUS, self._on_status)
+            # Discover services and find our custom service 0x1820
+            svc = None
+            for s in self._client.services:
+                if s.uuid.lower() == SERVICE_UUID:
+                    svc = s
+                    break
+            if svc is None:
+                log.error(f"Service {SERVICE_UUID[:8]} not found")
+                return False
+
+            # Resolve characteristics by handle WITHIN our service
+            char_uuids = [CHAR_BTN1_MAP, CHAR_BTN2_MAP, CHAR_BTN3_MAP]
+            for i, uid in enumerate(char_uuids):
+                for c in svc.characteristics:
+                    if c.uuid.lower() == uid:
+                        self._ch[i] = c
+                        break
+
+            for c in svc.characteristics:
+                if c.uuid.lower() == CHAR_BTN_EVENT:
+                    self._ch_event = c
+                elif c.uuid.lower() == CHAR_DEV_STATUS:
+                    self._ch_status = c
+
+            log.info(f"Resolved: btn1={self._ch[0] is not None} btn2={self._ch[1] is not None} "
+                     f"btn3={self._ch[2] is not None} evt={self._ch_event is not None} "
+                     f"st={self._ch_status is not None}")
+
+            # Subscribe — use characteristic objects (handle-based, no UUID ambiguity)
+            if self._ch_event:
+                await self._client.start_notify(self._ch_event, self._on_button_event)
+            if self._ch_status:
+                await self._client.start_notify(self._ch_status, self._on_status)
 
             self._connected = True
             self._address = address
@@ -74,12 +115,10 @@ class BleClient:
         self._connected = False
 
     async def read_button_mapping(self, idx: int) -> tuple[int, int] | None:
-        """Read [vk_code, modifier] for button 0/1/2."""
-        uuids = [CHAR_BTN1_MAP, CHAR_BTN2_MAP, CHAR_BTN3_MAP]
-        if idx < 0 or idx > 2 or not self._client:
+        if idx < 0 or idx > 2 or not self._client or not self._ch[idx]:
             return None
         try:
-            data = await self._client.read_gatt_char(uuids[idx])
+            data = await self._client.read_gatt_char(self._ch[idx])
             if len(data) >= 2:
                 return data[0], data[1]
         except Exception as e:
@@ -87,12 +126,10 @@ class BleClient:
         return None
 
     async def write_button_mapping(self, idx: int, vk: int, mod: int) -> bool:
-        """Write [vk_code, modifier] for button 0/1/2."""
-        uuids = [CHAR_BTN1_MAP, CHAR_BTN2_MAP, CHAR_BTN3_MAP]
-        if idx < 0 or idx > 2 or not self._client:
+        if idx < 0 or idx > 2 or not self._client or not self._ch[idx]:
             return False
         try:
-            await self._client.write_gatt_char(uuids[idx], bytes([vk, mod]), response=True)
+            await self._client.write_gatt_char(self._ch[idx], bytes([vk, mod]), response=True)
             return True
         except Exception as e:
             log.error(f"Write btn{idx+1} failed: {e}")
