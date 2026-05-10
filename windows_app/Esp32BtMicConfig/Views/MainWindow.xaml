@@ -8,7 +8,8 @@
         MinWidth="580" MinHeight="680"
         WindowStartupLocation="CenterScreen"
         PreviewKeyDown="Window_PreviewKeyDown"
-        Closing="Window_Closing">
+        KeyboardNavigation.TabNavigation="None"
+>
 
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -159,6 +160,9 @@
             <Button Content="Load from File"
                     Command="{Binding LoadConfigFileCommand}"
                     Width="110" Height="32"/>
+            <CheckBox Content="开机自动启动"
+                      IsChecked="{Binding AutoStart}"
+                      VerticalAlignment="Center" Margin="20,0,0,0"/>
         </StackPanel>
 
         <!-- Log / Info -->

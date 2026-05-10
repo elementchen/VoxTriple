@@ -64,6 +64,7 @@ static uint16_t s_dev_status_descr_handle = 0;
 /* Track the GATT interface */
 static esp_gatt_if_t s_gatts_if = ESP_GATT_IF_NONE;
 static uint16_t s_conn_id = 0;
+static bool s_ble_connected = false;
 
 /* Current button mapping values */
 static uint8_t s_btn1_map[BTN_MAP_LEN] = {0x0D, 0x00};  /* VK_RETURN */
@@ -356,8 +357,15 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                                GATTS_CHAR_DEV_STATUS_UUID, s_char_property,
                                s_dev_status, DEV_STATUS_CHAR_LEN, NULL);
         } else if (s_dev_status_descr_handle == 0) {
-            /* Device Status CCCD handle received, all characteristics and descriptors done */
+            /* Device Status CCCD handle received — all chars + descs done.
+             * Now START the service so it becomes visible to BLE clients. */
             s_dev_status_descr_handle = param->add_char_descr.attr_handle;
+            esp_err_t ret = esp_ble_gatts_start_service(s_service_handle);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "start service failed: 0x%x", ret);
+            } else {
+                ESP_LOGI(TAG, "Service 0x1820 started");
+            }
         }
         break;
     }
@@ -464,11 +472,14 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     case ESP_GATTS_CONNECT_EVT: {
         ESP_LOGI(TAG, "BLE connected, conn_id %d", param->connect.conn_id);
         s_conn_id = param->connect.conn_id;
+        s_ble_connected = true;
         break;
     }
 
     case ESP_GATTS_DISCONNECT_EVT: {
         ESP_LOGI(TAG, "BLE disconnected, restarting advertising");
+        s_ble_connected = false;
+        s_conn_id = 0;
         esp_ble_gap_start_advertising(&adv_params);
         break;
     }
@@ -514,9 +525,7 @@ void ble_gatts_init(void)
 
 void ble_send_button_event(uint8_t button_id, uint8_t state)
 {
-    if (s_gatts_if == ESP_GATT_IF_NONE || s_conn_id == 0) {
-        return;
-    }
+    if (s_gatts_if == ESP_GATT_IF_NONE || !s_ble_connected) return;
 
     uint8_t data[BTN_EVENT_CHAR_LEN];
     data[0] = button_id;
@@ -528,9 +537,7 @@ void ble_send_button_event(uint8_t button_id, uint8_t state)
 
 void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active)
 {
-    if (s_gatts_if == ESP_GATT_IF_NONE || s_conn_id == 0) {
-        return;
-    }
+    if (s_gatts_if == ESP_GATT_IF_NONE || !s_ble_connected) return;
 
     uint8_t data[DEV_STATUS_CHAR_LEN];
     data[0] = hfp_connected;

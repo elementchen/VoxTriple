@@ -1,0 +1,71 @@
+I (23045) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=101864
+I (33045) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=93896
+W (38652) UDP_AUDIO: sendto failed: errno=12 (errors=1)
+W (38662) UDP_AUDIO: sendto failed: errno=12 (errors=2)
+W (38672) UDP_AUDIO: sendto failed: errno=12 (errors=3)
+I (43045) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100832
+I (43152) UDP_AUDIO: Packets sent: 4000, errors: 16
+W (46392) UDP_AUDIO: sendto failed: errno=12 (errors=100)
+I (53046) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=94928
+I (54183) UDP_AUDIO: Packets sent: 5000, errors: 119
+I (63047) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=99676
+I (64292) UDP_AUDIO: Packets sent: 6000, errors: 130
+I (73047) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=101988
+W (74442) UDP_AUDIO: sendto failed: errno=12 (errors=200)
+I (75012) UDP_AUDIO: Packets sent: 7000, errors: 202
+I (83049) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=83368
+I (85842) UDP_AUDIO: Packets sent: 8000, errors: 285
+W (90902) UDP_AUDIO: sendto failed: errno=12 (errors=300)
+I (93050) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=99676
+I (96242) UDP_AUDIO: Packets sent: 9000, errors: 325
+I (103050) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=91584
+W (106282) UDP_AUDIO: sendto failed: errno=12 (errors=400)
+I (107152) UDP_AUDIO: Packets sent: 10000, errors: 416
+I (113053) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=93772
+W (114802) UDP_AUDIO: sendto failed: errno=12 (errors=500)
+I (118622) UDP_AUDIO: Packets sent: 11000, errors: 563
+I (123054) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=65016
+W (123092) UDP_AUDIO: sendto failed: errno=12 (errors=600)
+I (129332) UDP_AUDIO: Packets sent: 12000, errors: 634
+I (133054) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=73108
+W (136782) UDP_AUDIO: sendto failed: errno=12 (errors=700)
+I (140192) UDP_AUDIO: Packets sent: 13000, errors: 720
+I (143055) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=78764
+I (150483) UDP_AUDIO: Packets sent: 14000, errors: 749
+I (153056) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=98540
+W (157583) UDP_AUDIO: sendto failed: errno=12 (errors=800)
+I (161382) UDP_AUDIO: Packets sent: 15000, errors: 839
+I (163056) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=102008
+W (170162) UDP_AUDIO: sendto failed: errno=12 (errors=900)
+I (172102) UDP_AUDIO: Packets sent: 16000, errors: 911
+I (173059) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=69516
+W (177092) UDP_AUDIO: sendto failed: errno=12 (errors=1000)
+I (183060) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=98548
+I (183182) UDP_AUDIO: Packets sent: 17000, errors: 1019
+I (193060) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=102016
+I (193182) UDP_AUDIO: Packets sent: 18000, errors: 1019
+I (203061) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=95020
+I (203182) UDP_AUDIO: Packets sent: 19000, errors: 1019
+I (213064) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=97392
+I (213362) UDP_AUDIO: Packets sent: 20000, errors: 1037
+I (223064) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=102016
+I (223432) UDP_AUDIO: Packets sent: 21000, errors: 1044
+I (233064) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=94956
+I (233432) UDP_AUDIO: Packets sent: 22000, errors: 1044
+I (243065) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=98548
+I (243432) UDP_AUDIO: Packets sent: 23000, errors: 1044
+I (253065) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100860
+I (253432) UDP_AUDIO: Packets sent: 24000, errors: 1044
+I (263067) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=95080
+I (263583) UDP_AUDIO: Packets sent: 25000, errors: 1059
+I (273068) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=98548
+I (273602) UDP_AUDIO: Packets sent: 26000, errors: 1061
+W (280632) UDP_AUDIO: sendto failed: errno=12 (errors=1100)
+I (283068) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=102016
+I (284252) UDP_AUDIO: Packets sent: 27000, errors: 1126
+I (293070) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=82240
+I (294762) UDP_AUDIO: Packets sent: 28000, errors: 1177
+I (303071) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=99704
+I (304922) UDP_AUDIO: Packets sent: 29000, errors: 1193
+I (313072) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100860
+I (314922) UDP_AUDIO: Packets sent: 30000, errors: 1193

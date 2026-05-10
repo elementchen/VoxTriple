@@ -1,0 +1,185 @@
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6380
+ho 0 tail 12 room 4
+load:0x40078000,len:15916
+load:0x40080400,len:3860
+entry 0x40080630
+I (29) boot: ESP-IDF 5.5.0 2nd stage bootloader
+I (29) boot: compile time May  6 2026 23:20:29
+I (29) boot: Multicore bootloader
+I (30) boot: chip revision: v1.0
+I (33) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (40) boot.esp32: SPI Flash Size : 4M: ## Label            Usage          Type ST Offset   Length
+I ly entropy source...
+I (48) booB
+I (44) boot: Enabling RNG eart: Partition Table:
+I (51) boot(57) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (70) boot:  2 factory          factory app      00 00 00010000 001f0000
+I (77) boot:  3 storage          Unknown data     01 82 00200000 00100000
+I (83) boot: End of partition table
+I (86) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=28ac8h (166600) map
+I (151) esp_image: segment 1: paddr=00038af0 vaddr=3ff80000 size=00020h (    32) load
+I (151) esp_image: segment 2: paddr=00038b18 vaddr=3ffbdb60 size=04a08h ( 18952) load
+I (162) esp_image: segment 3: paddr=0003d528 vaddr=40080000 size=02af0h ( 10992) load
+I (167) esp_image: segment 4: paddr=00040020 vaddr=400d0020 size=a5cfch (679164) map
+I (402) esp_image: segment 5: paddr=000e5d24 vaddr=40082af0 size=187ech (100332) load
+I (454) boot: Loaded app from partition at offset 0x10000
+I (454) boot: Disabling RNG early entropy source...
+I (465) cpu_start: Multicore app
+I (473) cpu_start: Pro cpu start user code
+I (473) cpu_start: cpu freq: 160000000 Hz
+I (473) app_init: Application information:
+I (473) app_init: Project name:     esp32_bt_mic
+I (478) app_init: App version:      80788e8-dirty
+I (482) app_init: Compile time:     May  6 2026 23:19:34
+I (487) app_init: ELF file SHA256:  7bc5980be...
+I (492) app_init: ESP-IDF:          5.5.0
+I (495) efuse_init: Min chip rev:     v0.0
+I (499) efuse_init: Max chip rev:     v3.99 
+I (503) efuse_init: Chip rev:         v1.0
+I (507) heap_init: Initializing. RAM available for dynamic allocation:
+I (513) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM
+I (518) heap_init: At 3FFB6BF8 len 00001408 (5 KiB): DRAM
+I (523) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM
+I (529) heap_init: At 3FFCC2B0 len 00013D50 (79 KiB): DRAM
+I (534) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (539) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (545) heap_init: At 4009B2DC len 00004D24 (19 KiB): IRAM
+I (552) spi_flash: detected chip: generic
+I (554) spi_flash: flash io: dio
+W (557) ADC: legacy driver is deprecated, please migrate to `esp_adc/adc_oneshot.h`
+W (564) i2s(legacy): legacy i2s driver is deprecated, please migrate to use driver/i2s_std.h, driver/i2s_pdm.h or driver/i2s_tdm.h
+I (576) coexist: coex firmware version: 831ec70
+I (581) main_task: Started on CPU0
+I (591) main_task: Calling app_main()
+I (591) MAIN: ============================================
+I (591) MAIN:   ESP32 Bluetooth Microphone - PTT Mode
+I (591) MAIN:   HFP HF Client + BLE GATT Server
+I (591) MAIN: ============================================
+I (601) MAIN: Step 1: Initializing NVS...
+I (631) MAIN: Step 2: Loading configuration...
+I (641) CONFIG_STORAGE: Initializing configuration storage
+I (641) CONFIG_STORAGE: Button 1: loaded config (VK=0x0D, MOD=0x00)
+I (641) CONFIG_STORAGE: Button 2: loaded config (VK=0x1B, MOD=0x00)
+I (651) CONFIG_STORAGE: Button 3: loaded config (VK=0x20, MOD=0x00)
+I (651) MAIN: Step 3: Initializing I2S microphone...
+I (661) AUDIO_CAPTURE: Initializing I2S (legacy driver) for INMP441
+I (661) AUDIO_CAPTURE: I2S ready: 16000Hz, bck=26, ws=25, din=32
+I (671) MAIN: Step 4: Initializing Bluetooth stack...
+I (671) BTDM_INIT: BT controller compile version [b992c7d]
+I (681) BTDM_INIT: Bluetooth MAC: a8:03:2a:68:6b:d6
+I (691) phy_init: phy_version 4860,6b7a6e5,Feb  6 2025,14:47:07
+I (761) phy_init: Saving new calibration data due to checksum failure or outdated calibration data, mode(0)
+I (1371) BT_INIT: Bluetooth controller mode: BTDM (dual mode)
+I (1381) BT_INIT: BT stack initialized, name: ESP32_BT_MIC
+I (1391) BT_INIT: GAP event: 10
+I (1401) BT_INIT: GAP event: 10
+I (1401) BT_HFP_HF: HFP HF event: PROF_STATE_EVT
+I (1401) BT_HFP_HF: HF PROF STATE: Init Complete
+I (1401) MAIN: Step 5: Initializing BLE GATT server...
+I (1411) BLE_GATTS: Initializing BLE GATT server
+I (1411) BLE_GATTS: REGISTER_APP_EVT, status 0, app_id 1
+I (1431) BLE_GATTS: CREATE_SERVICE_EVT, status 0, service_handle 40
+I (1431) BLE_GATTS: BLE GATT server initialized
+I (1431) MAIN: Step 6: Initializing button handler...
+I (1441) BTN_HANDLER: Initializing button handler
+I (1441) BTN_HANDLER: Button task started (GPIOs: 13, 12, 14)
+I (1451) BTN_HANDLER: Button handler initialized
+I (1451) BLE_GATTS: BLE advertising started
+I (1451) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 42
+I (1461) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 44
+I (1461) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 46
+I (1471) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 48
+I (1471) BLE_GATTS: ADD_DESCR_EVT, status 0, attr_handle 49
+I (1481) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 51
+I (1481) BLE_GATTS: ADD_DESCR_EVT, status 0, attr_handle 52
+I (1491) MAIN: ============================================
+I (1491) MAIN:   System initialized successfully!
+I (1501) MAIN:   Waiting for Bluetooth connections...
+I (1501) MAIN: ============================================
+W (55151) BT_HCI: hcif conn complete: hdl 0x80, st 0x0
+I (55151) BT_INIT: GAP event: 16
+I (55741) BT_INIT: authentication success: DESKTOP-3070
+I (55741) BT_INIT: 00 1a 7d da 71 11
+I (55771) BT_INIT: GAP event: 21
+W (56021) BT_APPL: new conn_srvc id:27, app_id:1
+I (56021) BT_HFP_HF: HFP HF event: CONNECTION_STATE_EVT
+I (56021) BT_HFP_HF: connection state CONNECTED, peer feats 0x0, chld feats 0x0
+I (56111) BT_HFP_HF: HFP HF event: CIND_SERVICE_AVAILABILITY_EVT
+I (56111) BT_HFP_HF: Service availability: 0
+I (56111) BT_HFP_HF: HFP HF event: CIND_CALL_EVT
+I (56121) BT_HFP_HF: Call status: 0
+I (56121) BT_HFP_HF: HFP HF event: CIND_CALL_SETUP_EVT
+I (56121) BT_HFP_HF: Call setup: 0
+I (56121) BT_HFP_HF: HFP HF event: CIND_CALL_HELD_EVT
+I (56131) BT_HFP_HF: Call held: 0
+I (56141) BT_HFP_HF: HFP HF event: CIND_SIGNAL_STRENGTH_EVT
+I (56141) BT_HFP_HF: Signal strength: 0
+I (56141) BT_HFP_HF: HFP HF event: CIND_ROAMING_STATUS_EVT
+I (56151) BT_HFP_HF: Roaming: 0
+I (56151) BT_HFP_HF: HFP HF event: CIND_BATTERY_LEVEL_EVT
+I (56151) BT_HFP_HF: Battery level: 1
+I (56161) BT_HFP_HF: HFP HF event: CONNECTION_STATE_EVT
+I (56161) BT_HFP_HF: connection state SLC_CONNECTED, peer feats 0xf67, chld feats 0xb
+W (56171) BT_APPL: bta_hf_client_send_at: No service, skipping 11 command
+I (56181) BT_HFP_HF: SLC connected, ready for PTT
+I (56181) BT_HFP_HF: HFP HF event: CIND_CALL_SETUP_EVT
+I (56191) BT_HFP_HF: Call setup: 0
+I (61491) BT_HFP_HF: HFP HF event: BVRA_EVT
+I (61491) BT_HFP_HF: Voice Recognition: 1
+I (61541) BT_HFP_HF: HFP HF event: AUDIO_STATE_EVT
+I (61541) BT_HFP_HF: Audio State: CONNECTED_MSBC
+I (61541) BT_HFP_HF: Starting HFP HF audio streaming
+I (61551) BLE_GATTS: BLE advertising stopped (SCO active)
+I (61551) AUDIO_CAPTURE: I2S capture started
+I (61581) BLE_GATTS: BLE advertising stopped
+W (67111) BT_HCI: hcif disc complete: hdl 0x180, rsn 0x13 dev_find 1
+E (67111) BT_APPL: bta_hf_client_sco_co_out_data invalid air mode: 255
+I (67121) BT_HFP_HF: HFP HF event: BVRA_EVT
+E (67121) BT_APPL: bta_hf_client_sco_co_out_data invalid air mode: 255
+I (67121) BT_HFP_HF: Voice Recognition: 0
+I (67131) BT_HFP_HF: HFP HF event: AUDIO_STATE_EVT
+E (67131) BT_APPL: bta_hf_client_sco_co_out_data invalid air mode: 255
+E (67141) BT_APPL: bta_hf_client_sco_co_out_data invalid air mode: 255
+I (67141) BT_HFP_HF: Audio State: DISCONNECTED
+E (67151) BT_APPL: bta_hf_client_sco_co_out_data invalid air mode: 255
+I (67151) BT_HFP_HF: Audio disconnected
+E (67161) BT_APPL: bta_hf_client_sco_co_out_data invalid air mode: 255
+I (67161) BT_HFP_HF: Stopping HFP HF audio streaming
+E (67171) BT_APPL: bta_hf_client_sco_co_out_data invalid air mode: 255
+I (67171) AUDIO_CAPTURE: I2S stopped
+I (67181) BLE_GATTS: BLE advertising restarted
+I (67191) BLE_GATTS: BLE advertising started
+W (74311) BT_HCI: hci cmd send: sniff: hdl 0x80, intv(400 800)
+W (74331) BT_HCI: hcif mode change: hdl 0x80, mode 2, intv 800, status 0x0
+I (74341) BT_INIT: ESP_BT_GAP_MODE_CHG_EVT mode: 2
+I (75791) BT_HFP_HF: HFP HF event: AUDIO_STATE_EVT
+I (75791) BT_HFP_HF: Audio State: CONNECTED_MSBC
+I (75791) BT_HFP_HF: Starting HFP HF audio streaming
+I (75791) BLE_GATTS: BLE advertising stopped (SCO active)
+I (75791) AUDIO_CAPTURE: I2S capture started
+I (75801) BLE_GATTS: BLE advertising stopped
+W (77301) BT_HCI: hcif mode change: hdl 0x80, mode 0, intv 0, status 0x0
+I (77301) BT_INIT: ESP_BT_GAP_MODE_CHG_EVT mode: 0
+I (77311) BT_HFP_HF: HFP HF event: BVRA_EVT
+I (77311) BT_HFP_HF: Voice Recognition: 1
+W (81401) BT_HCI: hcif disc complete: hdl 0x180, rsn 0x13 dev_find 1
+I (81401) BT_HFP_HF: HFP HF event: AUDIO_STATE_EVT
+I (81401) BT_HFP_HF: Audio State: DISCONNECTED
+I (81401) BT_HFP_HF: Audio disconnected
+I (81401) BT_HFP_HF: Stopping HFP HF audio streaming
+I (81411) AUDIO_CAPTURE: I2S stopped
+I (81421) BLE_GATTS: BLE advertising restarted
+I (81421) BT_HFP_HF: HFP HF event: BVRA_EVT
+I (81421) BT_HFP_HF: Voice Recognition: 0
+I (81431) BLE_GATTS: BLE advertising started
+W (88621) BT_HCI: hci cmd send: sniff: hdl 0x80, intv(400 800)
+W (88631) BT_HCI: hcif mode change: hdl 0x80, mode 2, intv 800, status 0x0
+I (88641) BT_INIT: ESP_BT_GAP_MODE_CHG_EVT mode: 2

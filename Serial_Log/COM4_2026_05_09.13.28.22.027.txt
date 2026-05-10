@@ -1,0 +1,14 @@
+I (7817959) BTN_HANDLER: Button 1 pressed
+I (7817960) BLE_GATTS: Btn 1 PRESS sent
+I (7818631) BTN_HANDLER: Button 1 released (duration: 672 ms)
+I (7818633) BLE_GATTS: Btn 1 RELEASE sent
+I (7820134) BTN_HANDLER: Button 1 pressed
+I (7820135) BLE_GATTS: Btn 1 PRESS sent
+I (7823245) BTN_HANDLER: Button 1 released (duration: 3111 ms)
+I (7823246) BLE_GATTS: Btn 1 RELEASE sent
+I (7823701) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=100816
+I (7823713) UDP_AUDIO: Packets sent: 758000, errors: 24074
+I (7827548) BTN_HANDLER: Button 1 pressed
+I (7827549) BLE_GATTS: Btn 1 PRESS sent
+I (7828810) BTN_HANDLER: Button 1 released (duration: 1262 ms)
+I (7828811) BLE_GATTS: Btn 1 RELEASE sent

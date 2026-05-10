@@ -1,0 +1,165 @@
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6380
+ho 0 tail 12 room 4
+load:0x40078000,len:15916
+load:0x40080400,len:3860
+entry 0x40080630
+I (28) boot: ESP-IDF 5.5.0 2nd stage bootloader
+I (29) boot: compile time May  8 2026 18:23:17
+I (29) boot: Multicore bootloader
+I (30) boot: chip revision: v1.0
+I (33) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (40) boot.esp32: SPI Flash Size : 4MB
+I (43) boot: Enabling RNG early entropy source...
+I (48) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (57) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (70) boot:  2 factory          factory app      00 00 00010000 001f0000
+I (76) boot:  3 storage          Unknown data     01 82 00200000 00100000
+I (83) boot: End of partition table
+I (86) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=2ce60h (183904) map
+I (157) esp_image: segment 1: paddr=0003ce88 vaddr=3ff80000 size=00020h (    32) load
+I (157) esp_image: segment 2: paddr=0003ceb0 vaddr=3ffbdb60 size=03168h ( 12648) load
+I (165) esp_image: segment 3: paddr=00040020 vaddr=400d0020 size=d5264h (873060) map
+I (466) esp_image: segment 4: paddr=0011528c vaddr=3ffc0cc8 size=02790h ( 10128) load
+I (470) esp_image: segment 5: paddr=00117a24 vaddr=40080000 size=1f7b8h (128952) load
+I (536) boot: Loaded app from partition at offset 0x10000
+I (536) boot: Disabling RNG early entropy source...
+I (546) cpu_start: Multicore app
+I (555) cpu_start: Pro cpu start user code
+I (555) cpu_start: cpu freq: 160000000 Hz
+I (555) app_init: Application information:
+I (555) app_init: Project name:     esp32_wifi_mic
+I (560) app_init: App version:      d5570cd
+I (563) app_init: Compile time:     May  8 2026 18:22:24
+I (568) app_init: ELF file SHA256:  f7f7e2ca9...
+I (573) app_init: ESP-IDF:          5.5.0
+I (577) efuse_init: Min chip rev:     v0.0
+I (580) efuse_init: Max chip rev:     v3.99 
+I (584) efuse_init: Chip rev:         v1.0
+I (588) heap_init: Initializing. RAM available for dynamic allocation:
+I (595) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM
+I (600) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM
+I (605) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM
+I (610) heap_init: At 3FFCAD08 len 000152F8 (84 KiB): DRAM
+I (615) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (620) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (626) heap_init: At 4009F7B8 len 00000848 (2 KiB): IRAM
+I (633) spi_flash: detected chip: generic
+I (635) spi_flash: flash io: dio
+I (639) coexist: coex firmware version: 831ec70
+I (643) main_task: Started on CPU0
+I (646) main_task: Calling app_main()
+I (648) MAIN: ============================================
+I (653) MAIN:   ESP32 WiFi Microphone
+I (657) MAIN:   48kHz / 16-bit / Mono / Lossless PCM
+I (661) MAIN: ============================================
+I (667) MAIN: Step 1: Initializing NVS...
+I (702) MAIN: Step 2: Loading configuration...
+I (702) CONFIG_STORAGE: Initializing configuration storage
+I (704) CONFIG_STORAGE: Button 1: loaded config (VK=0xA2, MOD=0x00)
+I (707) CONFIG_STORAGE: Button 2: loaded config (VK=0x0D, MOD=0x00)
+I (713) CONFIG_STORAGE: Button 3: loaded config (VK=0xA3, MOD=0x00)
+I (719) MAIN: Step 3: Initializing I2S microphone (48kHz)...
+I (724) AUDIO_CAPTURE: Initializing I2S for INMP441 microphone
+I (732) AUDIO_CAPTURE: I2S initialized: rate=48000, bits=16, bck=26, ws=25, din=32
+I (737) MAIN: Step 4: Starting WiFi station...
+I (746) wifi:wifi driver task: 3ffd0ed0, prio:23, stack:6656, core=0
+I (763) wifi:wifi firmware version: f3dbad7
+I (763) wifi:wifi certification version: v7.0
+I (764) wifi:config NVS flash: enabled
+I (764) wifi:config nano formatting: disabled
+I (768) wifi:Init data frame dynamic rx buffer num: 32
+I (773) wifi:Init static rx mgmt buffer num: 5
+I (777) wifi:Init management short buffer num: 32
+I (781) wifi:Init dynamic tx buffer num: 32
+I (785) wifi:Init static rx buffer size: 1600
+I (789) wifi:Init static rx buffer num: 10
+I (793) wifi:Init dynamic rx buffer num: 32
+I (798) wifi_init: rx ba win: 6
+I (800) wifi_init: accept mbox: 6
+I (803) wifi_init: tcpip mbox: 32
+I (806) wifi_init: udp mbox: 6
+I (809) wifi_init: tcp mbox: 6
+I (811) wifi_init: tcp tx win: 5760
+I (815) wifi_init: tcp rx win: 5760
+I (818) wifi_init: tcp mss: 1440
+I (821) wifi_init: WiFi IRAM OP enabled
+I (824) wifi_init: WiFi RX IRAM OP enabled
+I (830) WIFI_STA: Using saved WiFi credentials from NVS
+I (835) phy_init: phy_version 4860,6b7a6e5,Feb  6 2025,14:47:07
+I (912) wifi:mode : sta (a8:03:2a:68:6b:d4)
+I (913) wifi:enable tsf
+I (916) WIFI_STA: WiFi STA initialized, SSID: babajiadewang
+I (916) MAIN: Step 5: Waiting for WiFi connection...
+I (917) WIFI_STA: WiFi STA started, attempting connection
+I (1013) wifi:new:<1,0>, old:<1,0>, ap:<255,255>, sta:<1,0>, prof:1, snd_ch_cfg:0x0
+I (1015) wifi:state: init -> auth (0xb0)
+I (1027) wifi:state: auth -> assoc (0x0)
+I (1036) wifi:state: assoc -> run (0x10)
+I (1053) wifi:connected with babajiadewang, aid = 1, channel 1, BW20, bssid = b8:8d:12:60:9d:85
+I (1054) wifi:security: WPA2-PSK, phy: bgn, rssi: -29
+I (1059) wifi:pm start, type: 1
+
+I (1060) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (1071) WIFI_STA: WiFi STA connected to AP
+I (1113) wifi:AP's beacon interval = 102400 us, DTIM period = 3
+I (2086) esp_netif_handlers: sta ip: 192.168.10.146, mask: 255.255.255.0, gw: 192.168.10.200
+I (2087) WIFI_STA: Got IP: 192.168.10.146
+I (2088) BLE_GATTS: WiFi IP updated: 192.168.10.146 -> 192.168.10.146:8888
+I (2095) WIFI_STA: WiFi connected successfully
+I (2099) MAIN: WiFi connected. IP: 192.168.10.146
+I (2103) MAIN: Step 6: Initializing BLE stack...
+I (2107) BLE_INIT: Initializing BLE controller (BLE only mode)
+I (2113) BTDM_INIT: BT controller compile version [b992c7d]
+I (2120) BTDM_INIT: Bluetooth MAC: a8:03:2a:68:6b:d6
+I (2438) BLE_INIT: BLE stack initialized
+I (2438) MAIN: Step 7: Initializing BLE GATT server...
+I (2439) BLE_GATTS: Initializing BLE GATT server
+I (2441) BLE_GATTS: REGISTER_APP_EVT, status 0, app_id 1
+I (2458) BLE_GATTS: CREATE_SERVICE_EVT, status 0, service_handle 40
+I (2461) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 42
+I (2462) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 44
+I (2465) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 46
+I (2469) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 48
+I (2475) BLE_GATTS: ADD_DESCR_EVT, status 0, attr_handle 49
+I (2480) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 51
+I (2485) BLE_GATTS: ADD_DESCR_EVT, status 0, attr_handle 52
+I (2490) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 54
+I (2497) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 56
+I (2501) BLE_GATTS: ADD_CHAR_EVT, status 0, attr_handle 58
+I (2506) BLE_GATTS: All characteristics registered (handle 58)
+I (2511) BLE_GATTS: BLE GATT server initialized
+I (2515) MAIN: Step 8: Initializing button handler...
+I (2520) BTN_HANDLER: Initializing button handler
+I (2525) BTN_HANDLER: Button task started (GPIOs: 13, 12, 14)
+I (2530) BTN_HANDLER: Button handler initialized
+I (2534) MAIN: Waiting for GATT characteristics to register...
+I (3040) BLE_GATTS: Starting GATT service (handle 40)
+I (3041) BLE_GATTS: SERVICE_START_EVT, status 0, service_handle 40
+I (3048) AUDIO_CAPTURE: I2S capture started
+I (3052) MAIN: Step 9: Starting UDP audio to 192.168.1.100:8888...
+I (3055) UDP_AUDIO: Starting UDP audio to 192.168.1.100:8888
+I (3066) BLE_GATTS: BLE advertising stopped
+I (3071) BLE_GATTS: BLE advertising started
+I (3072) BLE_GATTS: BLE advertising stopped
+I (3072) UDP_AUDIO: UDP audio task started, sending to 192.168.1.100:8888
+I (3075) UDP_AUDIO: UDP audio started
+I (3079) MAIN: UDP audio streaming started
+I (3083) MAIN: ============================================
+I (3090) MAIN:   System initialized!
+I (3091) MAIN:   WiFi: 192.168.10.146
+I (3095) MAIN:   UDP:  RUNNING
+I (3097) MAIN:   BLE:  advertising as 'ESP32_WIFI_MIC'
+I (3102) MAIN: ============================================
+I (13107) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=104800
+I (23107) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=104800
+I (33107) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=104800
+I (43107) MAIN: Status: WiFi=UP UDP=RUNNING IP=192.168.10.146 Heap=104800

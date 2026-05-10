@@ -10,6 +10,12 @@ public class DeviceConfig
     [JsonPropertyName("device_address")]
     public string DeviceAddress { get; set; } = string.Empty;
 
+    [JsonPropertyName("ble_address")]
+    public ulong BleAddress { get; set; }
+
+    [JsonPropertyName("auto_start")]
+    public bool AutoStart { get; set; }
+
     [JsonPropertyName("button1")]
     public ButtonMapping Button1 { get; set; } = new();
 

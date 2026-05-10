@@ -24,6 +24,39 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private bool _isScanning;
 
     [ObservableProperty]
+    private bool _autoStart;
+
+    partial void OnAutoStartChanged(bool value)
+    {
+        SetStartupShortcut(value);
+    }
+
+    private static void SetStartupShortcut(bool enable)
+    {
+        string startupDir = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        string shortcutPath = System.IO.Path.Combine(startupDir, "VoxTriple.lnk");
+        if (enable)
+        {
+            string exePath = Environment.ProcessPath ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
+            // Use WScript.Shell to create shortcut
+            try
+            {
+                dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell")!)!;
+                dynamic shortcut = shell.CreateShortcut(shortcutPath);
+                shortcut.TargetPath = exePath;
+                shortcut.WorkingDirectory = System.IO.Path.GetDirectoryName(exePath) ?? "";
+                shortcut.Description = "VoxTriple Bluetooth Mic Config";
+                shortcut.Save();
+            }
+            catch { /* ignore — will retry on next launch */ }
+        }
+        else
+        {
+            try { System.IO.File.Delete(shortcutPath); } catch { }
+        }
+    }
+
+    [ObservableProperty]
     private string _lastEventText = "None";
 
     [ObservableProperty]
@@ -137,12 +170,79 @@ public partial class MainViewModel : ObservableObject, IDisposable
     // Currently capturing button index (0-2, -1 = none)
     private int _capturingIndex = -1;
 
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        // Auto-refresh key display when modifier checkboxes change
+        if (e.PropertyName != null && e.PropertyName.Contains("Mod"))
+            RefreshAllKeyDisplays();
+    }
+
+    private void RefreshAllKeyDisplays()
+    {
+        Button1KeyName = BuildKeyDisplay(Button1VkCode, GetModifierForButton(0));
+        Button2KeyName = BuildKeyDisplay(Button2VkCode, GetModifierForButton(1));
+        Button3KeyName = BuildKeyDisplay(Button3VkCode, GetModifierForButton(2));
+    }
+
+    private byte GetModifierForButton(int idx)
+    {
+        byte mod = 0;
+        switch (idx)
+        {
+            case 0:
+                if (Button1ModLCtrl) mod|=1<<0; if (Button1ModLShift) mod|=1<<1; if (Button1ModLAlt) mod|=1<<2; if (Button1ModLWin) mod|=1<<3;
+                if (Button1ModRCtrl) mod|=1<<4; if (Button1ModRShift) mod|=1<<5; if (Button1ModRAlt) mod|=1<<6; if (Button1ModRWin) mod|=1<<7; break;
+            case 1:
+                if (Button2ModLCtrl) mod|=1<<0; if (Button2ModLShift) mod|=1<<1; if (Button2ModLAlt) mod|=1<<2; if (Button2ModLWin) mod|=1<<3;
+                if (Button2ModRCtrl) mod|=1<<4; if (Button2ModRShift) mod|=1<<5; if (Button2ModRAlt) mod|=1<<6; if (Button2ModRWin) mod|=1<<7; break;
+            case 2:
+                if (Button3ModLCtrl) mod|=1<<0; if (Button3ModLShift) mod|=1<<1; if (Button3ModLAlt) mod|=1<<2; if (Button3ModLWin) mod|=1<<3;
+                if (Button3ModRCtrl) mod|=1<<4; if (Button3ModRShift) mod|=1<<5; if (Button3ModRAlt) mod|=1<<6; if (Button3ModRWin) mod|=1<<7; break;
+        }
+        return mod;
+    }
+
     public MainViewModel()
     {
         _config = ConfigurationService.Load();
         _bleClient.ButtonEventReceived += OnButtonEventReceived;
         _bleClient.DeviceStatusChanged += OnDeviceStatusChanged;
         ApplyConfigToUi();
+        AutoStart = _config.AutoStart;
+        // Auto-reconnect BLE on startup if previously paired
+        _ = AutoConnectIfConfiguredAsync();
+    }
+
+    private async Task AutoConnectIfConfiguredAsync()
+    {
+        if (_config.BleAddress == 0) return;
+        ConnectionStatusText = "Auto-connecting BLE...";
+        IsScanning = true;
+        try
+        {
+            // Scan first to confirm device is advertising
+            var addr = await BleGattClient.ScanForDeviceAsync();
+            if (addr == null)
+            {
+                ConnectionStatusText = "ESP32_BT_MIC not found. Click Scan & Connect when ready.";
+                return;
+            }
+            bool ok = await _bleClient.ConnectByAddressAsync(addr.Value);
+            if (ok)
+            {
+                IsConnected = true;
+                ConnectionStatusText = $"Auto-connected: {_bleClient.DeviceName}";
+                _config.DeviceAddress = _bleClient.DeviceAddress;
+                await ReadMappingsFromDeviceAsync();
+            }
+            else
+            {
+                ConnectionStatusText = $"Auto-connect failed. Click Scan & Connect.";
+            }
+        }
+        catch { ConnectionStatusText = "Auto-connect error. Try Scan & Connect."; }
+        finally { IsScanning = false; }
     }
 
     // --- Commands ---
@@ -151,30 +251,34 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private async Task ScanAndConnectAsync()
     {
         IsScanning = true;
-        ConnectionStatusText = "Scanning...";
+        ConnectionStatusText = "Scanning for ESP32_BT_MIC...";
 
         try
         {
-            var deviceInfo = await BleGattClient.FindDeviceAsync();
-            if (deviceInfo == null)
+            var addr = await BleGattClient.ScanForDeviceAsync();
+            if (addr == null)
             {
-                ConnectionStatusText = "Device not found. Make sure ESP32_BT_MIC is powered on and nearby.";
+                ConnectionStatusText = BleGattClient.LastError;
                 return;
             }
 
-            ConnectionStatusText = "Connecting...";
-            var success = await _bleClient.ConnectAsync(deviceInfo.Id);
+            ConnectionStatusText = "Device found! Connecting...";
+            var success = await _bleClient.ConnectByAddressAsync(addr.Value);
             if (!success)
             {
-                ConnectionStatusText = "Connection failed. Please try again.";
+                ConnectionStatusText = $"Connect failed: {BleGattClient.LastError}";
                 return;
             }
 
             IsConnected = true;
             ConnectionStatusText = $"Connected: {_bleClient.DeviceName}";
             _config.DeviceAddress = _bleClient.DeviceAddress;
-
-            // Read current mappings from device
+            // Save BLE address for auto-reconnect next time
+            if (BleGattClient.FoundBluetoothAddress.HasValue)
+            {
+                _config.BleAddress = BleGattClient.FoundBluetoothAddress.Value;
+                SaveConfigFile();
+            }
             await ReadMappingsFromDeviceAsync();
         }
         catch (Exception ex)
@@ -227,6 +331,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _config.Button1 = BuildMapping(0);
         _config.Button2 = BuildMapping(1);
         _config.Button3 = BuildMapping(2);
+        _config.AutoStart = AutoStart;
         ConfigurationService.Save(_config);
         ConnectionStatusText = "Configuration saved to file.";
     }
@@ -239,7 +344,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
         ConnectionStatusText = "Configuration loaded from file.";
     }
 
-    // --- Key capture ---
+    // --- Key Capture (Win32 raw VK codes, bypasses IME) ---
+
+    public bool IsCapturing => _capturingIndex >= 0;
 
     public void BeginCapture(int buttonIndex)
     {
@@ -247,37 +354,69 @@ public partial class MainViewModel : ObservableObject, IDisposable
         SetCapturing(buttonIndex, true);
     }
 
-    public void HandleKeyDown(Key key, Key originalKey)
+    /// <summary>Called from Win32 WndProc — raw VK code vs WPF IME-processed key.</summary>
+    public void HandleCapturedKey(byte vkCode, bool isExtended = false)
     {
         if (_capturingIndex < 0) return;
 
-        // Treat Ctrl/Shift/Alt/Win as modifiers only (don't capture them alone)
-        if (key is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift
-            or Key.LeftAlt or Key.RightAlt or Key.LWin or Key.RWin)
+        byte mappedVk = MapModifierVk(vkCode, isExtended);
+        byte modifier = 0;
+
+        bool isModifierKey = mappedVk is 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5 or 0x5B or 0x5C;
+
+        if (!isModifierKey)
         {
-            return;
+            if (Keyboard.IsKeyDown(Key.LeftCtrl))  modifier |= 1 << 0;
+            if (Keyboard.IsKeyDown(Key.LeftShift)) modifier |= 1 << 1;
+            if (Keyboard.IsKeyDown(Key.LeftAlt))   modifier |= 1 << 2;
+            if (Keyboard.IsKeyDown(Key.LWin))      modifier |= 1 << 3;
+            if (Keyboard.IsKeyDown(Key.RightCtrl)) modifier |= 1 << 4;
+            if (Keyboard.IsKeyDown(Key.RightShift)) modifier |= 1 << 5;
+            if (Keyboard.IsKeyDown(Key.RightAlt))  modifier |= 1 << 6;
+            if (Keyboard.IsKeyDown(Key.RWin))      modifier |= 1 << 7;
         }
 
-        var vkCode = (byte)KeyInterop.VirtualKeyFromKey(originalKey);
-        var name = new ButtonMapping { VkCode = vkCode }.KeyName;
-
-        ApplyKeyToButton(_capturingIndex, vkCode, name);
+        var name = BuildKeyDisplay(mappedVk, modifier);
+        ApplyKeyToButton(_capturingIndex, mappedVk, name, modifier);
         SetCapturing(_capturingIndex, false);
         _capturingIndex = -1;
     }
 
-    public void HandleKeyUp()
+    private static byte MapModifierVk(byte vk, bool extended)
     {
-        // We handle everything in KeyDown, so this is just for modifier display
+        return vk switch
+        {
+            0x11 => extended ? (byte)0xA3 : (byte)0xA2,
+            0x10 => extended ? (byte)0xA1 : (byte)0xA0,
+            0x12 => extended ? (byte)0xA5 : (byte)0xA4,
+            _ => vk
+        };
     }
 
-    private void ApplyKeyToButton(int index, byte vkCode, string keyName)
+    private static string BuildKeyDisplay(byte vkCode, byte modifier)
     {
+        var parts = new List<string>();
+        if ((modifier & (1 << 0)) != 0) parts.Add("LCtrl");
+        if ((modifier & (1 << 1)) != 0) parts.Add("LShift");
+        if ((modifier & (1 << 2)) != 0) parts.Add("LAlt");
+        if ((modifier & (1 << 3)) != 0) parts.Add("LWin");
+        if ((modifier & (1 << 4)) != 0) parts.Add("RCtrl");
+        if ((modifier & (1 << 5)) != 0) parts.Add("RShift");
+        if ((modifier & (1 << 6)) != 0) parts.Add("RAlt");
+        if ((modifier & (1 << 7)) != 0) parts.Add("RWin");
+        parts.Add(new ButtonMapping { VkCode = vkCode }.KeyName);
+        return string.Join("+", parts);
+    }
+
+    private void ApplyKeyToButton(int index, byte vkCode, string keyName, byte modifier = 0)
+    {
+        bool lc=(modifier&(1<<0))!=0,ls=(modifier&(1<<1))!=0,la=(modifier&(1<<2))!=0,lw=(modifier&(1<<3))!=0;
+        bool rc=(modifier&(1<<4))!=0,rs=(modifier&(1<<5))!=0,ra=(modifier&(1<<6))!=0,rw=(modifier&(1<<7))!=0;
         switch (index)
         {
-            case 0: Button1VkCode = vkCode; Button1KeyName = keyName; break;
-            case 1: Button2VkCode = vkCode; Button2KeyName = keyName; break;
-            case 2: Button3VkCode = vkCode; Button3KeyName = keyName; break;
+            case 0: Button1VkCode=vkCode;Button1KeyName=keyName;Button1ModLCtrl=lc;Button1ModLShift=ls;Button1ModLAlt=la;Button1ModLWin=lw;Button1ModRCtrl=rc;Button1ModRShift=rs;Button1ModRAlt=ra;Button1ModRWin=rw;break;
+            case 1: Button2VkCode=vkCode;Button2KeyName=keyName;Button2ModLCtrl=lc;Button2ModLShift=ls;Button2ModLAlt=la;Button2ModLWin=lw;Button2ModRCtrl=rc;Button2ModRShift=rs;Button2ModRAlt=ra;Button2ModRWin=rw;break;
+            case 2: Button3VkCode=vkCode;Button3KeyName=keyName;Button3ModLCtrl=lc;Button3ModLShift=ls;Button3ModLAlt=la;Button3ModLWin=lw;Button3ModRCtrl=rc;Button3ModRShift=rs;Button3ModRAlt=ra;Button3ModRWin=rw;break;
         }
     }
 
@@ -373,9 +512,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
             var mappings = await _bleClient.ReadAllMappingsAsync();
             if (mappings.HasValue)
             {
-                ApplyMappingToUi(0, ButtonMapping.FromBytes(mappings.Value.Vk1, mappings.Value.Mod1));
-                ApplyMappingToUi(1, ButtonMapping.FromBytes(mappings.Value.Vk2, mappings.Value.Mod2));
-                ApplyMappingToUi(2, ButtonMapping.FromBytes(mappings.Value.Vk3, mappings.Value.Mod3));
+                ApplyMappingToUi(0, ButtonMapping.FromBytes(mappings.Value.V1, mappings.Value.M1));
+                ApplyMappingToUi(1, ButtonMapping.FromBytes(mappings.Value.V2, mappings.Value.M2));
+                ApplyMappingToUi(2, ButtonMapping.FromBytes(mappings.Value.V3, mappings.Value.M3));
                 ConnectionStatusText = "Connected - Mappings read from device.";
             }
         }
@@ -389,25 +528,15 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            var stateStr = e.State == 1 ? "PRESSED" : "RELEASED";
-            LastEventText = $"Button {e.ButtonId + 1} {stateStr}";
+            LastEventText = $"Button {e.ButtonId + 1} {(e.State == 1 ? "PRESSED" : "RELEASED")}";
 
-            // Simulate keyboard if button pressed
+            var mapping = e.ButtonId switch { 0 => BuildMapping(0), 1 => BuildMapping(1), 2 => BuildMapping(2), _ => null };
+            if (mapping == null || mapping.VkCode == 0) return;
+
             if (e.State == 1)
-            {
-                var mapping = e.ButtonId switch
-                {
-                    0 => BuildMapping(0),
-                    1 => BuildMapping(1),
-                    2 => BuildMapping(2),
-                    _ => null
-                };
-
-                if (mapping != null && mapping.VkCode != 0)
-                {
-                    KeyboardSimulator.SimulateKeyPress(mapping.VkCode, mapping.Modifier);
-                }
-            }
+                KeyboardSimulator.KeyDown(mapping.VkCode, mapping.Modifier);
+            else
+                KeyboardSimulator.KeyUp(mapping.VkCode, mapping.Modifier);
         });
     }
 
