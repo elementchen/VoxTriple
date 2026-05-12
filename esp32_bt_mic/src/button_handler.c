@@ -30,6 +30,11 @@ static const char *TAG = "BTN_HANDLER";
 #define LONG_PRESS_MS        1000
 #define BTN4_LONG_PRESS_MS   2000    /* Button 4 long-press: pairing mode */
 #define PAIRING_TIMEOUT_MS   30000   /* 30s pairing window */
+
+/* Pairing-mode state (kept across polling ticks) */
+static bool  s_pairing_active  = false;
+static bool  s_pairing_got_dev = false;
+static uint32_t s_pairing_start  = 0;
 #define BUTTON_TASK_STACK    4096
 #define BUTTON_TASK_PRIORITY 3
 
@@ -54,74 +59,88 @@ static TaskHandle_t s_btn_task_handle = NULL;
 static bool s_btn_task_running = false;
 
 static void do_pairing_mode(void);
+static void do_device_switch(void);
+
+/* ── Device Switch ───────────────────────────────────────────── */
 static void do_device_switch(void)
 {
+    if (s_pairing_active) {
+        /* Cancel pairing mode */
+        ESP_LOGI(TAG, "Pairing cancelled by user");
+        s_pairing_active = false;
+        s_pairing_got_dev = false;
+        ws2812_blink_stop();
+        return;
+    }
+
     int cur = config_storage_get_active_device();
     int next = (cur + 1) % MAX_DEVICES;
     ESP_LOGI(TAG, "Switching device %d → %d", cur, next);
 
-    /* 1. Disconnect current */
-    if (bt_audio_is_active()) {
-        bt_hfp_hf_ptt_release();
-    }
-    if (ble_gatts_is_connected()) {
-        ble_gatts_disconnect();
-    }
-    if (bt_hfp_is_connected()) {
-        bt_hfp_disconnect();
-    }
+    /* Disconnect current so new device can find us */
+    if (bt_audio_is_active()) bt_hfp_hf_ptt_release();
+    if (ble_gatts_is_connected()) ble_gatts_disconnect();
+    if (bt_hfp_is_connected()) bt_hfp_disconnect();
 
-    /* 2. Check if next device is paired */
-    esp_bd_addr_t next_addr;
-    if (config_storage_load_device(next, next_addr) != ESP_OK) {
-        ESP_LOGI(TAG, "Device %d not paired — entering pairing mode", next);
-        config_storage_set_active_device(next);
-        ws2812_device_indicator(next);
-        do_pairing_mode();
+    /* Switch active index */
+    config_storage_set_active_device(next);
+
+    /* Show device indicator */
+    ws2812_device_indicator(next);
+
+    /* Restart BLE advertising (will also make Classic BT discoverable
+     * if it was stopped).  The new device will auto-reconnect both
+     * HFP and BLE when it sees us. */
+    ble_gatts_adv_stop();
+    vTaskDelay(pdMS_TO_TICKS(200));
+    ble_gatts_adv_start();
+
+    ESP_LOGI(TAG, "Device %d now active, waiting for auto-reconnect", next);
+}
+
+/* ── Pairing Mode (non-blocking, cancellable) ─────────────────── */
+static void do_pairing_mode(void)
+{
+    if (s_pairing_active) return;
+    ESP_LOGI(TAG, "Entering pairing mode");
+    s_pairing_active = true;
+    s_pairing_got_dev = false;
+    s_pairing_start = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+    /* Disconnect so we're fully available */
+    if (bt_audio_is_active()) bt_hfp_hf_ptt_release();
+    if (ble_gatts_is_connected()) ble_gatts_disconnect();
+    if (bt_hfp_is_connected()) bt_hfp_disconnect();
+
+    /* Blue fast blink */
+    ws2812_blink_color(0, 0, 64, 120);
+}
+
+/* Called from polling loop when pairing is active */
+static void pairing_tick(void)
+{
+    if (!s_pairing_active) return;
+    uint32_t now = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+    /* Check if device connected */
+    if (!s_pairing_got_dev && bt_hfp_is_connected()) {
+        s_pairing_got_dev = true;
+        int idx = config_storage_get_active_device();
+        extern esp_bd_addr_t hf_peer_addr;
+        config_storage_save_device(idx, hf_peer_addr);
+        ESP_LOGI(TAG, "Device saved to slot %d", idx);
+        ws2812_blink_stop();
+        ws2812_solid_color(0, 64, 0, 3000);
+        s_pairing_active = false;
         return;
     }
 
-    /* 3. Switch + connect */
-    config_storage_set_active_device(next);
-    ws2812_device_indicator(next);
-    ESP_LOGI(TAG, "Connecting HFP to device %d…", next);
-    esp_hf_client_connect(next_addr);
-    /* BLE auto-connects when new device sees advertisement */
-}
-
-static void do_pairing_mode(void)
-{
-    ESP_LOGI(TAG, "Entering pairing mode (30s window)");
-    ws2812_blink_color(0, 0, 64, 100);  /* blue fast blink */
-
-    /* Stop current connections */
-    if (bt_hfp_is_connected()) bt_hfp_disconnect();
-    if (ble_gatts_is_connected()) ble_gatts_disconnect();
-    /* Audio off if active */
-    if (bt_audio_is_active()) {
-        bt_hfp_hf_ptt_release();
-    }
-
-    uint32_t start = xTaskGetTickCount() * portTICK_PERIOD_MS;
-    bool paired = false;
-
-    while ((xTaskGetTickCount() * portTICK_PERIOD_MS - start) < PAIRING_TIMEOUT_MS) {
-        /* Wait for new connection on either HFP or BLE */
-        if (bt_hfp_is_connected() || ble_gatts_is_connected()) {
-            paired = true;
-            ESP_LOGI(TAG, "New device paired");
-            /* TODO: save to NVS device list */
-            break;
-        }
-        vTaskDelay(pdMS_TO_TICKS(200));
-    }
-
-    ws2812_blink_stop();
-    if (paired) {
-        ws2812_solid_color(0, 64, 0, 3000);  /* green solid 3s */
-    } else {
-        ESP_LOGW(TAG, "Pairing timeout — no device found");
+    /* Timeout */
+    if ((now - s_pairing_start) > PAIRING_TIMEOUT_MS) {
+        ESP_LOGW(TAG, "Pairing timeout");
+        ws2812_blink_stop();
         ws2812_blink_red(2);
+        s_pairing_active = false;
     }
 }
 
@@ -244,6 +263,9 @@ static void button_task_func(void *arg)
                 break;
             }
         }
+
+        /* Pairing-mode state machine (non-blocking) */
+        if (s_pairing_active) pairing_tick();
 
         vTaskDelay(pdMS_TO_TICKS(10));  /* 10ms polling */
     }

@@ -18,6 +18,7 @@ static const char *TAG = "WS2812";
 static led_strip_handle_t s_led_strip = NULL;
 static TaskHandle_t s_anim_task = NULL;
 static volatile bool s_anim_running = false;
+static volatile bool s_blink_running = false;
 
 /* HSV → RGB helper */
 static void hsv_to_rgb(uint16_t h, uint8_t s, uint8_t v,
@@ -171,21 +172,39 @@ void ws2812_solid_color(uint8_t r, uint8_t g, uint8_t b, int duration_ms)
     }
 }
 
+static void blink_task(void *arg)
+{
+    uint8_t *color = (uint8_t *)arg;
+    uint8_t r = color[0], g = color[1], b = color[2];
+    int interval = color[3] | (color[4] << 8);
+    while (s_blink_running) {
+        led_fill(r, g, b);
+        vTaskDelay(pdMS_TO_TICKS(interval));
+        if (!s_blink_running) break;
+        led_off();
+        vTaskDelay(pdMS_TO_TICKS(interval));
+    }
+    led_off();
+    vTaskDelete(NULL);
+}
+
 void ws2812_blink_color(uint8_t r, uint8_t g, uint8_t b, int interval_ms)
 {
     ws2812_rainbow_stop();
-    s_anim_running = true;
-    /* Blink is just rapid on/off via a task */
-    /* For now, piggyback on rainbow mechanism with simpler approach */
-    led_fill(r, g, b);
-    (void)interval_ms;
+    ws2812_blink_stop();
+    s_blink_running = true;
+    static uint8_t params[6];
+    params[0]=r; params[1]=g; params[2]=b;
+    params[3]=interval_ms & 0xFF; params[4]=(interval_ms>>8) & 0xFF;
+    xTaskCreate(blink_task, "led_blink", 1536, params, 1, &s_anim_task);
 }
 
 void ws2812_blink_stop(void)
 {
     s_anim_running = false;
-    vTaskDelay(pdMS_TO_TICKS(50));
-    if (s_anim_task) s_anim_task = NULL;
+    s_blink_running = false;
+    vTaskDelay(pdMS_TO_TICKS(80));
+    if (s_anim_task) { s_anim_task = NULL; }
     led_off();
 }
 
