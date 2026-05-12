@@ -78,4 +78,9 @@ void ble_gatts_adv_stop(void);
  */
 void ble_gatts_adv_start(void);
 
+/**
+ * @brief Check if a BLE client is currently connected
+ */
+bool ble_gatts_is_connected(void);
+
 #endif /* __BLE_GATTS_CONFIG_H__ */

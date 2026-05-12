@@ -580,3 +580,8 @@ void ble_gatts_adv_start(void)
     esp_ble_gap_start_advertising(&adv_params);
     ESP_LOGI(TAG, "BLE advertising restarted");
 }
+
+bool ble_gatts_is_connected(void)
+{
+    return s_ble_connected;
+}

@@ -17,6 +17,7 @@
 #include "audio_capture.h"
 #include "button_handler.h"
 #include "config_storage.h"
+#include "ws2812_led.h"
 
 static const char *TAG = "MAIN";
 
@@ -50,6 +51,10 @@ void app_main(void)
     /* Step 6: Initialize button handler */
     ESP_LOGI(TAG, "Step 6: Initializing button handler...");
     button_handler_init();
+
+    /* Step 7: Initialize WS2812 LED strip */
+    ESP_LOGI(TAG, "Step 7: Initializing WS2812 LED strip...");
+    ws2812_init();
 
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  System initialized successfully!");

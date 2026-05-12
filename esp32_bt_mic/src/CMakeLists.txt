@@ -7,5 +7,6 @@ idf_component_register(SRCS "main.c"
                             "audio_capture.c"
                             "button_handler.c"
                             "config_storage.c"
-                    PRIV_REQUIRES bt nvs_flash driver esp_ringbuf
+                            "ws2812_led.c"
+                    PRIV_REQUIRES bt nvs_flash driver esp_ringbuf led_strip
                     INCLUDE_DIRS ".")

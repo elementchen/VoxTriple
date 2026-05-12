@@ -14,6 +14,7 @@
 #include "ble_gatts_config.h"
 #include "config_storage.h"
 #include "bt_hfp_hf.h"
+#include "ws2812_led.h"
 
 static const char *TAG = "BTN_HANDLER";
 
@@ -78,8 +79,13 @@ static void button_task_func(void *arg)
                     press_time[i] = now;
                     ESP_LOGI(TAG, "Button %d pressed", i + 1);
 
-                    /* Button 1: PTT press → open SCO audio */
-                    if (i == 0) bt_hfp_hf_ptt_press();
+                    /* Button 1: PTT press → open SCO audio + start LED rainbow */
+                    if (i == 0) {
+                        bt_hfp_hf_ptt_press();
+                        if (ble_gatts_is_connected()) {
+                            ws2812_rainbow_start();
+                        }
+                    }
 
                     /* Send BLE notification for keyboard simulation */
                     ble_send_button_event(i, 1);
@@ -91,8 +97,11 @@ static void button_task_func(void *arg)
                     uint32_t duration = now - press_time[i];
                     ESP_LOGI(TAG, "Button %d released (duration: %lu ms)", i + 1, duration);
 
-                    /* Button 1: PTT release → close SCO audio */
-                    if (i == 0) bt_hfp_hf_ptt_release();
+                    /* Button 1: PTT release → close SCO audio + stop LED */
+                    if (i == 0) {
+                        bt_hfp_hf_ptt_release();
+                        ws2812_rainbow_stop();
+                    }
 
                     /* Send BLE notification */
                     ble_send_button_event(i, 0);
