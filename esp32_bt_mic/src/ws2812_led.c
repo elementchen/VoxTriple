@@ -149,9 +149,10 @@ void ws2812_solid_color(uint8_t r, uint8_t g, uint8_t b, int duration_ms)
     ws2812_rainbow_stop();
     ws2812_blink_stop();
     led_fill(r, g, b);
-    /* Use a simple approach: create a one-shot timer or just let caller handle */
-    /* For simplicity, solid color stays until next LED command */
-    (void)duration_ms;
+    if (duration_ms > 0) {
+        vTaskDelay(pdMS_TO_TICKS(duration_ms));
+        led_off();
+    }
 }
 
 void ws2812_blink_color(uint8_t r, uint8_t g, uint8_t b, int interval_ms)
