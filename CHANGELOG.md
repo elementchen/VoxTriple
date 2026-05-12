@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.0-stable (2026-05-10)
+
+> Stable single-device release. All core features working reliably.
+
+### Firmware
+- HFP HF Client + mSBC 16kHz — Windows native Bluetooth microphone
+- Button 1 PTT: hold to speak, release to mute
+- Button 2/3: configurable keyboard shortcuts via BLE GATT
+- WS2812 LED strip (15 LEDs): rainbow on PTT when BLE connected
+- Legacy I2S driver for clean audio (INMP441)
+- BLE GATT service 0x1820 with 5 characteristics
+- BTDM dual-mode controller (SCO + BLE coexistence)
+- Audio DSP: high-pass filter + moving average
+
+### Windows App (C# WPF)
+- BLE scan (BluetoothLEAdvertisementWatcher), connect, GATT R/W
+- Win32 key capture hook (bypasses IME, detects modifiers)
+- keybd_event keyboard simulation
+- Auto-start on boot, auto-connect BLE on launch
+- Single-file EXE publish (25 MB)
+
+### Python App
+- tkinter + bleak + pynput, independent alternative
+- 11 MB PyInstaller single-file EXE
+
+### Removed
+- Multi-device switching (Button 4) — rolled back, spec archived in docs/
+
+----
+
 ## 2026-05-10
 
 ### Multi-Device Switching & LED
