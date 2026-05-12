@@ -25,6 +25,7 @@
 #include "bt_init.h"
 #include "audio_capture.h"
 #include "ble_gatts_config.h"
+#include "config_storage.h"
 #include "osi/allocator.h"
 
 static const char *TAG = "BT_HFP_HF";
@@ -368,6 +369,12 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
 
         if (connected) {
             ESP_LOGI(TAG, "SLC connected, ready for PTT");
+            /* Auto-save as device if this is the first connection */
+            if (config_storage_get_device_count() == 0) {
+                config_storage_save_device(0, hf_peer_addr);
+                config_storage_set_active_device(0);
+                ESP_LOGI(TAG, "Auto-saved first device as dev_0");
+            }
         }
         break;
     }

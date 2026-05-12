@@ -15,7 +15,9 @@
 #include "config_storage.h"
 #include "bt_hfp_hf.h"
 #include "bt_init.h"
+#include "config_storage.h"
 #include "ws2812_led.h"
+#include "esp_hf_client_api.h"
 
 #ifndef CONFIG_BUTTON_4_GPIO
 #define CONFIG_BUTTON_4_GPIO  27
@@ -51,11 +53,40 @@ typedef enum {
 static TaskHandle_t s_btn_task_handle = NULL;
 static bool s_btn_task_running = false;
 
+static void do_pairing_mode(void);
 static void do_device_switch(void)
 {
-    ESP_LOGI(TAG, "Device switch requested");
-    /* Show device indicator: index 0 = 1 blink ×3, index 1 = 2 blinks ×3 */
-    ws2812_device_indicator(0);  /* TODO: replace 0 with actual active_dev */
+    int cur = config_storage_get_active_device();
+    int next = (cur + 1) % MAX_DEVICES;
+    ESP_LOGI(TAG, "Switching device %d → %d", cur, next);
+
+    /* 1. Disconnect current */
+    if (bt_audio_is_active()) {
+        bt_hfp_hf_ptt_release();
+    }
+    if (ble_gatts_is_connected()) {
+        ble_gatts_disconnect();
+    }
+    if (bt_hfp_is_connected()) {
+        bt_hfp_disconnect();
+    }
+
+    /* 2. Check if next device is paired */
+    esp_bd_addr_t next_addr;
+    if (config_storage_load_device(next, next_addr) != ESP_OK) {
+        ESP_LOGI(TAG, "Device %d not paired — entering pairing mode", next);
+        config_storage_set_active_device(next);
+        ws2812_device_indicator(next);
+        do_pairing_mode();
+        return;
+    }
+
+    /* 3. Switch + connect */
+    config_storage_set_active_device(next);
+    ws2812_device_indicator(next);
+    ESP_LOGI(TAG, "Connecting HFP to device %d…", next);
+    esp_hf_client_connect(next_addr);
+    /* BLE auto-connects when new device sees advertisement */
 }
 
 static void do_pairing_mode(void)
