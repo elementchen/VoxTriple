@@ -34,6 +34,13 @@ void ws2812_rainbow_stop(void);
 void ws2812_blink_red(int count);
 
 /**
+ * @brief Indicate device index with green blinks.
+ *        device 0 = 1 blink × 3, device 1 = 2 blinks × 3, etc.
+ *        Blocking, ~6-9 seconds total.
+ */
+void ws2812_device_indicator(int dev_idx);
+
+/**
  * @brief Set all LEDs to a solid color for `duration_ms`.
  *        Non-blocking — starts a background timer.
  */

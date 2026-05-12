@@ -134,6 +134,22 @@ static void led_fill(uint8_t r, uint8_t g, uint8_t b)
 
 static void led_off(void) { led_fill(0, 0, 0); }
 
+void ws2812_device_indicator(int dev_idx)
+{
+    int blinks = dev_idx + 1;   /* device 0→1 blink, device 1→2 blinks, etc. */
+    ws2812_rainbow_stop();
+    ws2812_blink_stop();
+    for (int cycle = 0; cycle < 3; cycle++) {
+        for (int b = 0; b < blinks; b++) {
+            led_fill(0, 64, 0);
+            vTaskDelay(pdMS_TO_TICKS(200));
+            led_off();
+            vTaskDelay(pdMS_TO_TICKS(150));
+        }
+        if (cycle < 2) vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
 void ws2812_blink_red(int count)
 {
     for (int i = 0; i < count; i++) {

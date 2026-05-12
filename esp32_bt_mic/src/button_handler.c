@@ -54,15 +54,8 @@ static bool s_btn_task_running = false;
 static void do_device_switch(void)
 {
     ESP_LOGI(TAG, "Device switch requested");
-    ws2812_blink_color(0, 64, 0, 150);  /* green fast blink */
-
-    /* TODO: cycle dev_count and connect to next device */
-    ESP_LOGI(TAG, "(device list not yet implemented — staying on current)");
-
-    /* Simulate success: green solid 3s */
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    ws2812_solid_color(0, 64, 0, 3000);
-    /* After that, normal PTT mode resumes with next PTT press */
+    /* Show device indicator: index 0 = 1 blink ×3, index 1 = 2 blinks ×3 */
+    ws2812_device_indicator(0);  /* TODO: replace 0 with actual active_dev */
 }
 
 static void do_pairing_mode(void)
