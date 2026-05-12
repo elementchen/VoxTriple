@@ -78,8 +78,6 @@ static void button_task_func(void *arg)
                         bt_hfp_hf_ptt_press();
                         if (ble_gatts_is_connected()) {
                             ws2812_rainbow_start();
-                        } else {
-                            ws2812_blink_red(3);
                         }
                     }
 
