@@ -83,4 +83,9 @@ void ble_gatts_adv_start(void);
  */
 bool ble_gatts_is_connected(void);
 
+/**
+ * @brief Actively close the current BLE connection
+ */
+void ble_gatts_disconnect(void);
+
 #endif /* __BLE_GATTS_CONFIG_H__ */

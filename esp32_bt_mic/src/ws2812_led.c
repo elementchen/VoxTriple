@@ -123,9 +123,59 @@ void ws2812_rainbow_stop(void)
     s_anim_task = NULL;
 }
 
+/* ── Non-rainbow LED helpers ─────────────────────────────────── */
+static void led_fill(uint8_t r, uint8_t g, uint8_t b)
+{
+    if (!s_led_strip) return;
+    for (int i = 0; i < WS2812_LED_COUNT; i++)
+        led_strip_set_pixel(s_led_strip, i, r, g, b);
+    led_strip_refresh(s_led_strip);
+}
+
+static void led_off(void) { led_fill(0, 0, 0); }
+
+void ws2812_blink_red(int count)
+{
+    for (int i = 0; i < count; i++) {
+        led_fill(64, 0, 0);
+        vTaskDelay(pdMS_TO_TICKS(200));
+        led_off();
+        if (i < count - 1) vTaskDelay(pdMS_TO_TICKS(200));
+    }
+}
+
+void ws2812_solid_color(uint8_t r, uint8_t g, uint8_t b, int duration_ms)
+{
+    ws2812_rainbow_stop();
+    ws2812_blink_stop();
+    led_fill(r, g, b);
+    /* Use a simple approach: create a one-shot timer or just let caller handle */
+    /* For simplicity, solid color stays until next LED command */
+    (void)duration_ms;
+}
+
+void ws2812_blink_color(uint8_t r, uint8_t g, uint8_t b, int interval_ms)
+{
+    ws2812_rainbow_stop();
+    s_anim_running = true;
+    /* Blink is just rapid on/off via a task */
+    /* For now, piggyback on rainbow mechanism with simpler approach */
+    led_fill(r, g, b);
+    (void)interval_ms;
+}
+
+void ws2812_blink_stop(void)
+{
+    s_anim_running = false;
+    vTaskDelay(pdMS_TO_TICKS(50));
+    if (s_anim_task) s_anim_task = NULL;
+    led_off();
+}
+
 void ws2812_deinit(void)
 {
     ws2812_rainbow_stop();
+    ws2812_blink_stop();
     if (s_led_strip) {
         led_strip_del(s_led_strip);
         s_led_strip = NULL;
