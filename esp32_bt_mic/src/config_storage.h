@@ -59,4 +59,9 @@ int config_storage_get_device_count(void);
 int  config_storage_get_active_device(void);
 void config_storage_set_active_device(int idx);
 
+/**
+ * @brief Clear (erase) a device slot.
+ */
+void config_storage_clear_device(int idx);
+
 #endif /* __CONFIG_STORAGE_H__ */

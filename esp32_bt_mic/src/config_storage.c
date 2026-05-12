@@ -186,3 +186,22 @@ void config_storage_set_active_device(int idx)
         nvs_close(h);
     }
 }
+
+void config_storage_clear_device(int idx)
+{
+    if (idx < 0 || idx >= MAX_DEVICES) return;
+    nvs_handle_t h;
+    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &h) != ESP_OK) return;
+    const char *keys[] = {NVS_KEY_DEV_0, NVS_KEY_DEV_1};
+    nvs_erase_key(h, keys[idx]);
+    /* Update dev_count */
+    int count = 0;
+    for (int i = 0; i < MAX_DEVICES; i++) {
+        size_t len = ESP_BD_ADDR_LEN;
+        if (nvs_get_blob(h, keys[i], NULL, &len) == ESP_OK) count++;
+    }
+    nvs_set_u8(h, NVS_KEY_DEV_COUNT, (uint8_t)count);
+    nvs_commit(h);
+    nvs_close(h);
+    ESP_LOGI(TAG, "Device %d cleared", idx);
+}

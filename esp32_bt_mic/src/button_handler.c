@@ -28,7 +28,7 @@ static const char *TAG = "BTN_HANDLER";
 /* Button GPIO configuration */
 #define DEBOUNCE_MS          50
 #define LONG_PRESS_MS        1000
-#define BTN4_LONG_PRESS_MS   2000    /* Button 4 long-press: pairing mode */
+#define BTN4_LONG_PRESS_MS   5000    /* Button 4 long-press: clear + pairing */
 #define PAIRING_TIMEOUT_MS   30000   /* 30s pairing window */
 
 /* Pairing-mode state (kept across polling ticks) */
@@ -135,11 +135,10 @@ static void pairing_tick(void)
         return;
     }
 
-    /* Timeout */
+    /* Timeout: just stop blinking, blue off */
     if ((now - s_pairing_start) > PAIRING_TIMEOUT_MS) {
-        ESP_LOGW(TAG, "Pairing timeout");
+        ESP_LOGI(TAG, "Pairing timeout — exiting");
         ws2812_blink_stop();
-        ws2812_blink_red(2);
         s_pairing_active = false;
     }
 }
@@ -248,19 +247,25 @@ static void button_task_func(void *arg)
                 break;
 
             case BTN_STATE_PRESSED:
+            {
+                uint32_t duration = now - btn4_press_time;
+                /* Long-press triggers IMMEDIATELY when 5s reached, even if still held */
+                if (duration >= BTN4_LONG_PRESS_MS) {
+                    ESP_LOGI(TAG, "Button 4 long-press triggered (clear device + pairing)");
+                    int cur = config_storage_get_active_device();
+                    config_storage_clear_device(cur);
+                    ESP_LOGI(TAG, "Cleared device %d pairing record", cur);
+                    do_pairing_mode();
+                    btn4_state = BTN_STATE_IDLE; /* reset after trigger */
+                    break;
+                }
                 if (!pressed) {
-                    uint32_t duration = now - btn4_press_time;
                     ESP_LOGI(TAG, "Button 4 released (duration: %lu ms)", duration);
-
-                    if (duration >= BTN4_LONG_PRESS_MS) {
-                        do_pairing_mode();
-                    } else {
-                        do_device_switch();
-                    }
-
+                    do_device_switch();
                     btn4_state = BTN_STATE_IDLE;
                 }
                 break;
+            }
             }
         }
 
