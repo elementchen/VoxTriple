@@ -151,14 +151,24 @@ void ws2812_device_indicator(int dev_idx)
     }
 }
 
-void ws2812_blink_red(int count)
+static void blink_red_task(void *arg)
 {
+    int count = (int)(uintptr_t)arg;
     for (int i = 0; i < count; i++) {
         led_fill(64, 0, 0);
         vTaskDelay(pdMS_TO_TICKS(200));
         led_off();
-        if (i < count - 1) vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
+    vTaskDelete(NULL);
+}
+
+void ws2812_blink_red(int count)
+{
+    ws2812_rainbow_stop();
+    ws2812_blink_stop();
+    xTaskCreate(blink_red_task, "red_blink", 1024,
+                (void *)(uintptr_t)count, 1, NULL);
 }
 
 void ws2812_solid_color(uint8_t r, uint8_t g, uint8_t b, int duration_ms)
