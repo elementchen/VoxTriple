@@ -48,8 +48,8 @@ static void ws2812_anim_task(void *arg)
 
     while (s_anim_running) {
         for (int i = 0; i < WS2812_LED_COUNT; i++) {
-            /* Each LED offset by 20° to spread rainbow across strip */
-            uint16_t hue = (base_hue + i * 20) % 360;
+            /* Each LED offset by 45° across yellow-green-blue range (60-240°) */
+            uint16_t hue = 60 + (base_hue + i * 45) % 180;
             uint8_t r, g, b;
             hsv_to_rgb(hue, 255, 64, &r, &g, &b);
             led_strip_set_pixel(s_led_strip, i, r, g, b);
