@@ -146,11 +146,15 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         }
         break;
     case ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT:
-        ESP_LOGI(TAG, "update connection params status = %d, conn_int = %d, latency = %d, timeout = %d",
+        ESP_LOGI(TAG, "update connection params status=%d conn_int=%d latency=%d timeout=%d",
                  param->update_conn_params.status,
                  param->update_conn_params.conn_int,
                  param->update_conn_params.latency,
                  param->update_conn_params.timeout);
+        break;
+
+    case ESP_GAP_BLE_LOCAL_IR_EVT:
+    case ESP_GAP_BLE_LOCAL_ER_EVT:
         break;
     default:
         break;
@@ -473,6 +477,14 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         ESP_LOGI(TAG, "BLE connected, conn_id %d", param->connect.conn_id);
         s_conn_id = param->connect.conn_id;
         s_ble_connected = true;
+        /* Request fast connection interval for low-latency keyboard events */
+        esp_ble_conn_update_params_t conn_params = {
+            .min_int = 12,     /* 15ms — fast for first press */
+            .max_int = 24,     /* 30ms */
+            .latency = 0,      /* no slave latency */
+            .timeout = 500,    /* 5s supervision timeout */
+        };
+        esp_ble_gap_update_conn_params(&conn_params);
         break;
     }
 
