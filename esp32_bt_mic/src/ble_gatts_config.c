@@ -585,12 +585,3 @@ bool ble_gatts_is_connected(void)
 {
     return s_ble_connected;
 }
-
-void ble_gatts_disconnect(void)
-{
-    if (!s_ble_connected) return;
-    ESP_LOGI(TAG, "Closing BLE connection conn_id=%d", s_conn_id);
-    esp_ble_gatts_close(s_gatts_if, s_conn_id);
-    s_ble_connected = false;
-    s_conn_id = 0;
-}

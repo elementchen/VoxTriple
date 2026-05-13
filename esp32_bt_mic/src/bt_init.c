@@ -56,19 +56,6 @@ void bt_audio_set_active(bool active)
     s_audio_active = active;
 }
 
-esp_err_t bt_hfp_disconnect(void)
-{
-    extern esp_bd_addr_t hf_peer_addr;
-    if (!s_hfp_connected) {
-        ESP_LOGW(TAG, "HFP not connected, nothing to disconnect");
-        return ESP_ERR_INVALID_STATE;
-    }
-    ESP_LOGI(TAG, "Disconnecting HFP from current peer");
-    s_hfp_connected = false;
-    s_audio_active = false;
-    return esp_hf_client_disconnect(hf_peer_addr);
-}
-
 static void bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
     switch (event) {

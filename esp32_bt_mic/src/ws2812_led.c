@@ -18,7 +18,6 @@ static const char *TAG = "WS2812";
 static led_strip_handle_t s_led_strip = NULL;
 static TaskHandle_t s_anim_task = NULL;
 static volatile bool s_anim_running = false;
-static volatile bool s_blink_running = false;
 
 /* HSV → RGB helper */
 static void hsv_to_rgb(uint16_t h, uint8_t s, uint8_t v,
@@ -124,104 +123,9 @@ void ws2812_rainbow_stop(void)
     s_anim_task = NULL;
 }
 
-/* ── Non-rainbow LED helpers ─────────────────────────────────── */
-static void led_fill(uint8_t r, uint8_t g, uint8_t b)
-{
-    if (!s_led_strip) return;
-    for (int i = 0; i < WS2812_LED_COUNT; i++)
-        led_strip_set_pixel(s_led_strip, i, r, g, b);
-    led_strip_refresh(s_led_strip);
-}
-
-static void led_off(void) { led_fill(0, 0, 0); }
-
-void ws2812_device_indicator(int dev_idx)
-{
-    int blinks = dev_idx + 1;   /* device 0→1 blink, device 1→2 blinks, etc. */
-    ws2812_rainbow_stop();
-    ws2812_blink_stop();
-    for (int cycle = 0; cycle < 3; cycle++) {
-        for (int b = 0; b < blinks; b++) {
-            led_fill(0, 64, 0);
-            vTaskDelay(pdMS_TO_TICKS(200));
-            led_off();
-            vTaskDelay(pdMS_TO_TICKS(150));
-        }
-        if (cycle < 2) vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-}
-
-static void blink_red_task(void *arg)
-{
-    int count = (int)(uintptr_t)arg;
-    for (int i = 0; i < count; i++) {
-        led_fill(64, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(200));
-        led_off();
-        vTaskDelay(pdMS_TO_TICKS(200));
-    }
-    vTaskDelete(NULL);
-}
-
-void ws2812_blink_red(int count)
-{
-    ws2812_rainbow_stop();
-    ws2812_blink_stop();
-    xTaskCreate(blink_red_task, "red_blink", 1024,
-                (void *)(uintptr_t)count, 1, NULL);
-}
-
-void ws2812_solid_color(uint8_t r, uint8_t g, uint8_t b, int duration_ms)
-{
-    ws2812_rainbow_stop();
-    ws2812_blink_stop();
-    led_fill(r, g, b);
-    if (duration_ms > 0) {
-        vTaskDelay(pdMS_TO_TICKS(duration_ms));
-        led_off();
-    }
-}
-
-static void blink_task(void *arg)
-{
-    uint8_t *color = (uint8_t *)arg;
-    uint8_t r = color[0], g = color[1], b = color[2];
-    int interval = color[3] | (color[4] << 8);
-    while (s_blink_running) {
-        led_fill(r, g, b);
-        vTaskDelay(pdMS_TO_TICKS(interval));
-        if (!s_blink_running) break;
-        led_off();
-        vTaskDelay(pdMS_TO_TICKS(interval));
-    }
-    led_off();
-    vTaskDelete(NULL);
-}
-
-void ws2812_blink_color(uint8_t r, uint8_t g, uint8_t b, int interval_ms)
-{
-    ws2812_rainbow_stop();
-    ws2812_blink_stop();
-    s_blink_running = true;
-    static uint8_t params[6];
-    params[0]=r; params[1]=g; params[2]=b;
-    params[3]=interval_ms & 0xFF; params[4]=(interval_ms>>8) & 0xFF;
-    xTaskCreate(blink_task, "led_blink", 1536, params, 1, &s_anim_task);
-}
-
-void ws2812_blink_stop(void)
-{
-    s_anim_running = false;
-    s_blink_running = false;
-    vTaskDelay(pdMS_TO_TICKS(80));
-    if (s_anim_task) { s_anim_task = NULL; }
-    led_off();
-}
-
 void ws2812_deinit(void)
 {
     ws2812_rainbow_stop();
-    ws2812_blink_stop();
     if (s_led_strip) {
         led_strip_del(s_led_strip);
         s_led_strip = NULL;

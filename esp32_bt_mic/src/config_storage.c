@@ -112,4 +112,3 @@ esp_err_t config_storage_load_button(uint8_t button_id, uint8_t *vk_code, uint8_
     nvs_close(nvs_handle);
     return ret;
 }
-

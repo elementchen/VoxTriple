@@ -44,9 +44,4 @@ void bt_hfp_set_connected(bool connected);
  */
 void bt_audio_set_active(bool active);
 
-/**
- * @brief Gracefully disconnect HFP service-level connection from current peer
- */
-esp_err_t bt_hfp_disconnect(void);
-
 #endif /* __BT_INIT_H__ */

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2024 VoxTriple Project
+ * SPDX-FileCopyrightText: 2024 ESP32 BT Microphone Project
  *
  * SPDX-License-Identifier: Unlicense OR CC0-1.0
  */
@@ -18,7 +18,9 @@
 
 static const char *TAG = "BTN_HANDLER";
 
+/* Button GPIO configuration */
 #define DEBOUNCE_MS          50
+#define LONG_PRESS_MS        1000
 #define BUTTON_TASK_STACK    4096
 #define BUTTON_TASK_PRIORITY 3
 
@@ -37,6 +39,9 @@ typedef enum {
 static TaskHandle_t s_btn_task_handle = NULL;
 static bool s_btn_task_running = false;
 
+/**
+ * @brief Button monitoring task with debounce
+ */
 static void button_task_func(void *arg)
 {
     btn_state_t state[BUTTON_NUM];
@@ -56,7 +61,7 @@ static void button_task_func(void *arg)
 
         for (int i = 0; i < BUTTON_NUM; i++) {
             int level = gpio_get_level(s_button_pins[i]);
-            int pressed = (level == 0);
+            int pressed = (level == 0);  /* Active low: pressed = low */
 
             switch (state[i]) {
             case BTN_STATE_IDLE:
@@ -74,6 +79,7 @@ static void button_task_func(void *arg)
                     press_time[i] = now;
                     ESP_LOGI(TAG, "Button %d pressed", i + 1);
 
+                    /* Button 1: PTT press → open SCO audio + start LED rainbow */
                     if (i == 0) {
                         bt_hfp_hf_ptt_press();
                         if (ble_gatts_is_connected()) {
@@ -81,9 +87,8 @@ static void button_task_func(void *arg)
                         }
                     }
 
-                    if (ble_gatts_is_connected()) {
-                        ble_send_button_event(i, 1);
-                    }
+                    /* Send BLE notification for keyboard simulation */
+                    ble_send_button_event(i, 1);
                 }
                 break;
 
@@ -92,14 +97,14 @@ static void button_task_func(void *arg)
                     uint32_t duration = now - press_time[i];
                     ESP_LOGI(TAG, "Button %d released (duration: %lu ms)", i + 1, duration);
 
+                    /* Button 1: PTT release → close SCO audio + stop LED */
                     if (i == 0) {
                         bt_hfp_hf_ptt_release();
                         ws2812_rainbow_stop();
                     }
 
-                    if (ble_gatts_is_connected()) {
-                        ble_send_button_event(i, 0);
-                    }
+                    /* Send BLE notification */
+                    ble_send_button_event(i, 0);
 
                     state[i] = BTN_STATE_IDLE;
                 }
@@ -107,7 +112,7 @@ static void button_task_func(void *arg)
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(10));  /* 10ms polling */
     }
 
     ESP_LOGI(TAG, "Button task stopped");
@@ -118,6 +123,7 @@ void button_handler_init(void)
 {
     ESP_LOGI(TAG, "Initializing button handler");
 
+    /* Configure GPIO pins as input with pull-up */
     gpio_config_t io_conf = {
         .pin_bit_mask = 0,
         .mode = GPIO_MODE_INPUT,
@@ -126,8 +132,9 @@ void button_handler_init(void)
         .intr_type = GPIO_INTR_DISABLE,
     };
 
-    for (int i = 0; i < BUTTON_NUM; i++)
+    for (int i = 0; i < BUTTON_NUM; i++) {
         io_conf.pin_bit_mask |= (1ULL << s_button_pins[i]);
+    }
 
     esp_err_t ret = gpio_config(&io_conf);
     if (ret != ESP_OK) {
@@ -135,6 +142,7 @@ void button_handler_init(void)
         return;
     }
 
+    /* Start button monitoring task */
     s_btn_task_running = true;
     xTaskCreate(button_task_func, "BtnTask", BUTTON_TASK_STACK,
                 NULL, BUTTON_TASK_PRIORITY, &s_btn_task_handle);
@@ -145,7 +153,9 @@ void button_handler_init(void)
 void button_handler_deinit(void)
 {
     ESP_LOGI(TAG, "Deinitializing button handler");
+
     s_btn_task_running = false;
+
     if (s_btn_task_handle) {
         vTaskDelay(pdMS_TO_TICKS(50));
         s_btn_task_handle = NULL;
