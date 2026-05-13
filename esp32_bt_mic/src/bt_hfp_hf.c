@@ -214,6 +214,10 @@ void bt_hfp_hf_audio_start(void)
 
     s_audio_running = true;
 
+    /* Stop rainbow LED during SCO — RMT conflicts with BT controller */
+    extern void ws2812_rainbow_stop(void);
+    ws2812_rainbow_stop();
+
     s_m_rb = xRingbufferCreate(ESP_HFP_RINGBUF_SIZE, RINGBUF_TYPE_BYTEBUF);
     assert(s_m_rb);
 
