@@ -1,25 +1,42 @@
 # Changelog
 
+## 2026-05-13
+
+### Firmware
+- **Simplified architecture**: buttons only send BLE keyboard events, no SCO control
+  - HFP audio pipeline always ready, Windows AG manages SCO start/stop
+  - Eliminates task_wdt crashes caused by SCO teardown in BTU_TASK
+- **BTU_TASK starvation fix**: audio pipeline work deferred to app task via `bt_app_work_dispatch`
+- **BLE fast connection**: request `conn_int=12-24` (15-30ms) for low-latency keyboard events
+- **WS2812 rainbow restored**: 4 LEDs, Button 1 press=start, release=stop
+  - Rainbow task safe now — no longer conflicts with SCO (buttons don't touch audio)
+- Audio send task priority lowered from 22 to 5
+
+### Python App
+- **Keyboard simulation**: `keybd_event` (pure VK codes, no SCANCODE conflict)
+- Windows C# app archived to `_Archive/`
+- Python EXE rebuilt (11 MB)
+
+----
+
 ## v1.0-stable (2026-05-10)
 
 > Stable single-device release. All core features working reliably.
 
 ### Firmware
 - HFP HF Client + mSBC 16kHz — Windows native Bluetooth microphone
-- Button 1 PTT: hold to speak, release to mute
-- Button 2/3: configurable keyboard shortcuts via BLE GATT
-- WS2812 LED strip (15 LEDs): rainbow on PTT when BLE connected
+- 3 buttons: configurable keyboard shortcuts via BLE GATT
+- WS2812 LED strip (4 LEDs): rainbow on Button 1 press
 - Legacy I2S driver for clean audio (INMP441)
 - BLE GATT service 0x1820 with 5 characteristics
 - BTDM dual-mode controller (SCO + BLE coexistence)
 - Audio DSP: high-pass filter + moving average
 
-### Windows App (C# WPF)
+### Windows App (C# WPF, archived)
 - BLE scan (BluetoothLEAdvertisementWatcher), connect, GATT R/W
 - Win32 key capture hook (bypasses IME, detects modifiers)
 - keybd_event keyboard simulation
 - Auto-start on boot, auto-connect BLE on launch
-- Single-file EXE publish (25 MB)
 
 ### Python App
 - tkinter + bleak + pynput, independent alternative
