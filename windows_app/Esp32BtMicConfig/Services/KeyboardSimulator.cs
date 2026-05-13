@@ -84,17 +84,16 @@ public static class KeyboardSimulator
 
     private static INPUT MkKey(ushort vk, bool down)
     {
-        uint scan = MapVirtualKey(vk, MAPVK_VK_TO_VSC);
         bool ext = vk is 0x21 or 0x22 or 0x23 or 0x24 or 0x25 or 0x26 or 0x27 or 0x28
                    or 0x2D or 0x2E or 0x5B or 0x5C or 0x5D or 0xA2 or 0xA3 or 0xA4 or 0xA5;
-        uint flags = (down ? KEYEVENTF_KEYDOWN : KEYEVENTF_KEYUP) | KEYEVENTF_SCANCODE;
+        uint flags = down ? KEYEVENTF_KEYDOWN : KEYEVENTF_KEYUP;
         if (ext) flags |= KEYEVENTF_EXTENDEDKEY;
         return new INPUT
         {
             type = INPUT_KEYBOARD,
             union = new INPUTUNION
             {
-                ki = new KEYBDINPUT { wVk = vk, wScan = (ushort)scan, dwFlags = flags }
+                ki = new KEYBDINPUT { wVk = vk, dwFlags = flags }
             }
         };
     }
