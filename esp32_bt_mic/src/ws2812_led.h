@@ -10,7 +10,7 @@
 #include <stdbool.h>
 
 #define WS2812_GPIO        CONFIG_WS2812_GPIO
-#define WS2812_LED_COUNT   15
+#define WS2812_LED_COUNT   4
 
 /**
  * @brief Initialize WS2812 LED strip (RMT driver)
