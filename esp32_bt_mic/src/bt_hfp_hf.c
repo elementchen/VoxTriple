@@ -129,6 +129,7 @@ static TaskHandle_t s_bt_send_task_handle = NULL;
 static esp_hf_client_audio_state_t s_audio_codec = ESP_HF_CLIENT_AUDIO_STATE_DISCONNECTED;
 static esp_timer_handle_t s_periodic_timer = NULL;
 static volatile bool s_audio_running = false;
+static volatile bool s_ptt_opened_audio = false;  /* track if PTT (not Windows) opened SCO */
 
 /**
  * @brief Outgoing data callback.  Returns PCM data from ring buffer.
@@ -282,23 +283,23 @@ void bt_hfp_hf_ptt_press(void)
         return;
     }
     if (bt_audio_is_active()) {
-        ESP_LOGI(TAG, "PTT: audio already active");
+        ESP_LOGI(TAG, "PTT: audio already active (AG-opened)");
         return;
     }
     ESP_LOGI(TAG, "PTT press — opening audio to AG");
+    s_ptt_opened_audio = true;
     esp_hf_client_connect_audio(hf_peer_addr);
 }
 
 void bt_hfp_hf_ptt_release(void)
 {
-    if (!bt_audio_is_active()) {
-        return;
-    }
-    ESP_LOGI(TAG, "PTT release — stopping pipeline then closing SCO");
-    /* Stop data pipeline BEFORE disconnecting to prevent
-     * outgoing callbacks from hitting a dead SCO link. */
+    if (!bt_audio_is_active()) return;
+    ESP_LOGI(TAG, "PTT release — stopping pipeline");
     bt_hfp_hf_audio_pipeline_stop();
-    esp_hf_client_disconnect_audio(hf_peer_addr);
+    if (s_ptt_opened_audio) {
+        s_ptt_opened_audio = false;
+        esp_hf_client_disconnect_audio(hf_peer_addr);
+    }
 }
 
 /* HFP HF Client event strings */
@@ -392,6 +393,7 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
 
         } else if (param->audio_stat.state == ESP_HF_CLIENT_AUDIO_STATE_DISCONNECTED) {
             ESP_LOGI(TAG, "Audio disconnected");
+            s_ptt_opened_audio = false;
             bt_audio_set_active(false);
             bt_hfp_hf_audio_stop();
 

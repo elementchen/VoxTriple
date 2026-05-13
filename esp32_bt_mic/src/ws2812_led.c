@@ -118,8 +118,8 @@ void ws2812_rainbow_stop(void)
 {
     if (!s_anim_running) return;
     s_anim_running = false;
-    /* Wait for task to clean up and turn off LEDs */
-    vTaskDelay(pdMS_TO_TICKS(50));
+    /* Let the rainbow task detect the flag and exit on its own.
+     * Don't block here — vTaskDelay starves the BT controller. */
     s_anim_task = NULL;
 }
 
