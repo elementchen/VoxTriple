@@ -298,12 +298,9 @@ void bt_hfp_hf_ptt_press(void)
 void bt_hfp_hf_ptt_release(void)
 {
     if (!bt_audio_is_active()) return;
-    ESP_LOGI(TAG, "PTT release — stopping pipeline");
+    ESP_LOGI(TAG, "PTT release — stopping pipeline (SCO teardown left to AG)");
     bt_hfp_hf_audio_pipeline_stop();
-    if (s_ptt_opened_audio) {
-        s_ptt_opened_audio = false;
-        esp_hf_client_disconnect_audio(hf_peer_addr);
-    }
+    s_ptt_opened_audio = false;
 }
 
 /* HFP HF Client event strings */
