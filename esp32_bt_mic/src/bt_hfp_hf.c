@@ -29,6 +29,10 @@
 
 static const char *TAG = "BT_HFP_HF";
 
+/* Dispatched handlers — run in app task, not BTU_TASK (prototypes) */
+static void audio_start_handler(uint16_t event, void *param);
+static void audio_stop_handler(uint16_t event, void *param);
+
 /* ----------------------------------------------------------------
  * Audio DSP: high-pass filter + noise gate for cleaner voice input
  * All filters use int64_t intermediates to avoid overflow on ESP32.
@@ -279,6 +283,17 @@ void bt_hfp_hf_audio_stop(void)
 
 #endif /* CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI */
 
+/* Dispatched handlers — called from app task via bt_app_work_dispatch */
+static void audio_start_handler(uint16_t event, void *param)
+{
+    bt_hfp_hf_audio_start();
+}
+
+static void audio_stop_handler(uint16_t event, void *param)
+{
+    bt_hfp_hf_audio_stop();
+}
+
 /* PTT (Push-To-Talk) — Button 1 controls SCO audio on/off */
 void bt_hfp_hf_ptt_press(void)
 {
@@ -383,11 +398,13 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
 
             s_audio_codec = param->audio_stat.state;
 
-            /* Register legacy data callbacks for outgoing/incoming audio */
+            /* Register legacy data callbacks — safe in BTU_TASK */
             esp_hf_client_register_data_callback(bt_app_hf_incoming_cb, bt_app_hf_outgoing_cb);
 
             bt_audio_set_active(true);
-            bt_hfp_hf_audio_start();
+
+            /* Defer heavy work (ringbuf, timer, task, I2S) to app task */
+            bt_app_work_dispatch(audio_start_handler, 0, NULL, 0, NULL);
 
             extern void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
             ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());
@@ -396,7 +413,9 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
             ESP_LOGI(TAG, "Audio disconnected");
             s_ptt_opened_audio = false;
             bt_audio_set_active(false);
-            bt_hfp_hf_audio_stop();
+
+            /* Defer heavy cleanup to app task */
+            bt_app_work_dispatch(audio_stop_handler, 0, NULL, 0, NULL);
 
             extern void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
             ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());
