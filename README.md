@@ -4,9 +4,9 @@
 [![PlatformIO](https://img.shields.io/badge/build-PlatformIO-orange.svg)](https://platformio.org/)
 [![.NET](https://img.shields.io/badge/app-.NET%208-purple.svg)](https://dotnet.microsoft.com/)
 
-> An ESP32-based Bluetooth microphone system with three physical buttons: one PTT (push-to-talk) button plus two programmable keyboard shortcuts. Designed for Windows voice input.
+> An ESP32-based Bluetooth microphone system with three physical buttons: programmable keyboard shortcuts. Button 1 also drives a WS2812 rainbow LED strip. Designed for Windows voice input.
 >
-> 基于 ESP32 的蓝牙麦克风系统。三键物理按钮，一键 PTT 通话 + 两颗可编程键盘快捷键。专为 Windows 语音输入（语音识别 / 讯飞）设计。
+> 基于 ESP32 的蓝牙麦克风系统。三键物理按钮均可编程为键盘快捷键，Button 1 同时驱动 WS2812 彩虹灯带。专为 Windows 语音输入（语音识别 / 讯飞）设计。
 
 ----
 
@@ -16,9 +16,9 @@
   
   **蓝牙麦克风** — ESP32 扮演 HFP Hands-Free Client 角色，Windows 原生识别为蓝牙音频输入设备，免驱即用。
 
-- **PTT (Push-to-Talk)** — Button 1 operates like a walkie-talkie. Hold to capture audio, release to mute. Perfect for voice input workflows.
+- **Rainbow LED** — Button 1 lights a 4-LED WS2812 rainbow strip on GPIO 15. Press to start animation, release to stop.
 
-  **PTT 按住说话** — Button 1 模拟对讲机，按住采集音频，松开关闭。搭配语音输入法使用体验极佳。
+  **彩虹灯带** — Button 1 驱动 4 颗 WS2812 彩虹灯珠（GPIO 15）。按住播放动画，松手熄灭。
 
 - **Programmable Shortcuts** — All 3 buttons can be mapped to any Windows key combination including modifiers (Ctrl / Shift / Alt / Win). Configurable wirelessly.
 
@@ -60,9 +60,14 @@ INMP441 → ESP32:
   WS   → GPIO 25       Word select / 字选择 (LRCLK)
   SCK  → GPIO 26       Bit clock / 位时钟 (BCLK)
 
-Button 1 → GPIO 13     PTT + keyboard shortcut / PTT + 快捷键
+Button 1 → GPIO 13     Keyboard shortcut + LED rainbow / 快捷键 + 彩虹灯
 Button 2 → GPIO 12     Keyboard shortcut / 快捷键
 Button 3 → GPIO 14     Keyboard shortcut / 快捷键
+
+WS2812 → ESP32:
+  DIN → GPIO 15         Data in / 数据输入
+  VCC → 5V              External power (4 LEDs ≈ 240mA) / 外部供电
+  GND → GND             Common ground / 共地
 
 Buttons are wired active-low (GPIO → button → GND) with internal pull-up enabled.
 按钮为低电平有效（GPIO → 按键 → GND），使用内部上拉电阻。
