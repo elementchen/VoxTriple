@@ -224,7 +224,7 @@ void bt_hfp_hf_audio_start(void)
     s_send_data_sem = xSemaphoreCreateBinary();
 
     xTaskCreate(bt_app_send_data_task, "BtSendData", 4096, NULL,
-                configMAX_PRIORITIES - 3, &s_bt_send_task_handle);
+                5, &s_bt_send_task_handle);
 
     const esp_timer_create_args_t timer_args = {
         .callback = &bt_app_send_data_timer_cb,
