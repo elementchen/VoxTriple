@@ -1,6 +1,39 @@
 # Changelog
 
-## 2026-05-13
+## v1.1-stable (2026-05-13)
+
+> Simplified architecture: buttons only send BLE keyboard events, HFP audio fully managed by Windows AG. Zero task_wdt crashes.
+
+### Firmware
+- **Architecture simplified**: buttons no longer control SCO audio — only send BLE keyboard events
+  - HFP pipeline always ready, Windows AG manages audio start/stop
+  - Eliminates all BTU_TASK task_wdt deadlocks
+- **BTU_TASK fix**: audio pipeline work deferred to app task via `bt_app_work_dispatch`
+- **BLE fast connection**: request `conn_int=12-24` (15-30ms) for low-latency keyboard events
+- **WS2812 rainbow restored**: 4 LEDs on GPIO 15, Button 1 press=start, release=stop
+  - Hue limited to yellow-green-blue (60-240°), ping-pong gradient
+  - Safe to run alongside Bluetooth — no RMT/BT conflict
+- BLE connection interval forced to 15-30ms for low latency
+- Audio send task priority lowered from 22 to 5
+
+### Python App
+- Keyboard simulation: `keybd_event` (pure VK codes, stable in all apps)
+- BLE client: resolve characteristics by handle within service scope (fixes bleak UUID conflict)
+- Key capture: pynput win32_event_filter, dispatched to tkinter main thread
+- Single-file EXE: 11 MB PyInstaller output
+- Auto-start on boot + auto-connect BLE on launch
+
+### Docs
+- README: full bilingual (English + Chinese)
+- CHANGELOG.md: incremental version history
+- Multi-device switching spec archived in docs/
+
+### Windows C# App
+- Archived to `_Archive/windows_app_csharp/`
+
+----
+
+## v1.0-stable (2026-05-10)
 
 ### Firmware
 - **Simplified architecture**: buttons only send BLE keyboard events, no SCO control
