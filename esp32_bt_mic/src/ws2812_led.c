@@ -113,7 +113,7 @@ void ws2812_rainbow_start(void)
     }
 
     s_anim_running = true;
-    xTaskCreate(ws2812_anim_task, "ws2812_anim", 2048, NULL, 2, &s_anim_task);
+    xTaskCreate(ws2812_anim_task, "ws2812_anim", 4096, NULL, 2, &s_anim_task);
 }
 
 void ws2812_rainbow_stop(void)

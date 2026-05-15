@@ -10,6 +10,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_log.h"
+#include "esp_bt.h"
 #include "sdkconfig.h"
 
 #include "bt_init.h"
@@ -17,7 +18,6 @@
 #include "audio_capture.h"
 #include "button_handler.h"
 #include "config_storage.h"
-#include "ws2812_led.h"
 
 static const char *TAG = "MAIN";
 
@@ -44,6 +44,11 @@ void app_main(void)
     ESP_LOGI(TAG, "Step 4: Initializing Bluetooth stack...");
     ESP_ERROR_CHECK(bt_stack_init());
 
+    /* Disable Bluetooth sleep/sniff mode to prevent SCO audio latency.
+     * Without this, the HFP ACL link enters sniff (500ms wake interval),
+     * adding up to 500ms delay each time Windows opens the SCO audio channel. */
+    esp_bt_sleep_disable();
+
     /* Step 5: Initialize BLE GATT server */
     ESP_LOGI(TAG, "Step 5: Initializing BLE GATT server...");
     ble_gatts_init();
@@ -52,17 +57,16 @@ void app_main(void)
     ESP_LOGI(TAG, "Step 6: Initializing button handler...");
     button_handler_init();
 
-    /* Step 7: Initialize WS2812 LED strip */
-    ESP_LOGI(TAG, "Step 7: Initializing WS2812 LED strip...");
-    ws2812_init();
-
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  System initialized successfully!");
     ESP_LOGI(TAG, "  Waiting for Bluetooth connections...");
     ESP_LOGI(TAG, "============================================");
 
+    /* Suppress all INFO logs to reduce serial traffic and CPU load.
+     * Only WARN/ERROR will appear. Comment this line to restore debug logs. */
+    esp_log_level_set("*", ESP_LOG_WARN);
+
     /* Main task done - other tasks handle everything */
-    /* Keep main task alive (optional, could delete) */
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }

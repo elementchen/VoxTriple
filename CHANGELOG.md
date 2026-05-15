@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.2-stable (2026-05-15)
+
+> Audio pipeline refactored: continuous operation across SCO cycles. Log output reduced. WS2812 removed (RMT/BT conflict). Sniff-mode mitigation via ACL wake on button press.
+
+### Firmware
+- **Audio pipeline refactored**: starts on HFP SLC connect, runs continuously across SCO cycles
+  - No per-cycle ringbuf/task/timer create/delete — eliminates "invalid air mode: 255" corruption
+  - `outgoing_data_ready()` guarded by `bt_audio_is_active()` to prevent dead-SCO calls
+  - Ring buffer flush on SCO open prevents cross-session audio bleed
+- **Log suppression**: `esp_log_level_set("*", ESP_LOG_WARN)` after init — only WARN/ERROR on serial
+- **Sniff mitigation**: `CONFIG_BTDM_CTRL_MODEM_SLEEP=n` + `BTM_SetPowerMode(ACTIVE)` on button press
+  - Reduces SCO open latency; partial fix (sniff still enters after ~7s idle, ~500ms re-activation)
+- **WS2812 removed**: eliminated RMT/BT conflict causing `ws2812_anim` stack overflow & reboot
+- **BLE conn params fix**: `remote_bda` copied from `ESP_GATTS_CONNECT_EVT` into `conn_params`
+
+### Known limitations
+- `invalid air mode: 255` appears once per SCO disconnect — benign Bluedroid race, does not affect function
+- HFP ACL still enters sniff after ~7s idle; button wake reduces but doesn't eliminate SCO latency
+- First ~2-3 characters may still be lost when speaking after long silence
+
+----
+
 ## v1.1-stable (2026-05-13)
 
 > Simplified architecture: buttons only send BLE keyboard events, HFP audio fully managed by Windows AG. Zero task_wdt crashes.

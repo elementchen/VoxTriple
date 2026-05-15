@@ -27,6 +27,20 @@
 #include "ble_gatts_config.h"
 #include "osi/allocator.h"
 
+/* --- Local BTM power-mode API (internal, not in public headers) --- */
+#define BTM_PM_SET_ONLY_ID  0x80
+#define BTM_PM_MD_ACTIVE    0x00
+
+typedef struct {
+    uint16_t max;
+    uint16_t min;
+    uint16_t attempt;
+    uint16_t timeout;
+    uint8_t  mode;
+} btm_pm_pwr_md_t;
+
+extern int BTM_SetPowerMode(uint8_t pm_id, uint8_t *remote_bda, btm_pm_pwr_md_t *p_mode);
+
 static const char *TAG = "BT_HFP_HF";
 
 /* Dispatched handlers — run in app task, not BTU_TASK (prototypes) */
@@ -134,6 +148,7 @@ static esp_hf_client_audio_state_t s_audio_codec = ESP_HF_CLIENT_AUDIO_STATE_DIS
 static esp_timer_handle_t s_periodic_timer = NULL;
 static volatile bool s_audio_running = false;
 static volatile bool s_ptt_opened_audio = false;  /* track if PTT (not Windows) opened SCO */
+static volatile bool s_flush_ringbuf = false;      /* discard stale data on SCO open */
 
 /**
  * @brief Outgoing data callback.  Returns PCM data from ring buffer.
@@ -145,6 +160,18 @@ static uint32_t bt_app_hf_outgoing_cb(uint8_t *p_buf, uint32_t sz)
     size_t item_size = 0;
 
     if (!s_m_rb || !s_audio_running) {
+        memset(p_buf, 0, sz);
+        return sz;
+    }
+
+    /* On first call after SCO opens, discard stale audio from the
+     * previous session so it doesn't contaminate the current one. */
+    if (s_flush_ringbuf) {
+        s_flush_ringbuf = false;
+        void *stale;
+        while ((stale = xRingbufferReceive(s_m_rb, &item_size, 0)) != NULL) {
+            vRingbufferReturnItem(s_m_rb, stale);
+        }
         memset(p_buf, 0, sz);
         return sz;
     }
@@ -196,8 +223,9 @@ static void bt_app_send_data_task(void *arg)
 
             size_t item_size = 0;
             vRingbufferGetInfo(s_m_rb, NULL, NULL, NULL, NULL, &item_size);
-            /* Signal ready when we have at least one mSBC frame (240B) */
-            if (item_size >= 240) {
+            /* Only signal data-ready when SCO is active — calling this
+             * on a dead SCO link triggers "invalid air mode: 255". */
+            if (item_size >= 240 && bt_audio_is_active()) {
                 esp_hf_client_outgoing_data_ready();
             }
         }
@@ -233,9 +261,6 @@ void bt_hfp_hf_audio_start(void)
     ESP_ERROR_CHECK(esp_timer_create(&timer_args, &s_periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(s_periodic_timer, PCM_GENERATOR_TICK_US));
 
-    /* Pause BLE advertising to avoid BTDM scheduling conflicts with SCO */
-    ble_gatts_adv_stop();
-
     audio_capture_start();
 }
 
@@ -257,9 +282,6 @@ void bt_hfp_hf_audio_stop(void)
     bt_hfp_hf_audio_pipeline_stop();
 
     audio_capture_stop();
-
-    /* Resume BLE advertising now that SCO is released */
-    ble_gatts_adv_start();
 
     if (s_bt_send_task_handle) {
         vTaskDelete(s_bt_send_task_handle);
@@ -312,6 +334,18 @@ void bt_hfp_hf_ptt_release(void)
     ESP_LOGI(TAG, "PTT release — stopping pipeline (SCO teardown left to AG)");
     bt_hfp_hf_audio_pipeline_stop();
     s_ptt_opened_audio = false;
+}
+
+/* Wake the HFP ACL out of sniff mode. Call on button press to reduce
+ * the latency before Windows opens SCO audio. */
+void bt_hfp_hf_wake_acl(void)
+{
+    if (!bt_hfp_is_connected()) return;
+
+    btm_pm_pwr_md_t active_mode = {
+        .mode = BTM_PM_MD_ACTIVE,
+    };
+    BTM_SetPowerMode(BTM_PM_SET_ONLY_ID, hf_peer_addr, &active_mode);
 }
 
 /* HFP HF Client event strings */
@@ -380,7 +414,14 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
         ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());
 
         if (connected) {
-            ESP_LOGI(TAG, "SLC connected, ready for PTT");
+            ESP_LOGI(TAG, "SLC connected, starting audio pipeline");
+            /* Start audio pipeline once on SLC connect — stays running
+             * across multiple SCO start/stop cycles. Avoids per-cycle
+             * create/delete races that cause "invalid air mode: 255". */
+            bt_app_work_dispatch(audio_start_handler, 0, NULL, 0, NULL);
+        } else if (param->conn_stat.state == ESP_HF_CLIENT_CONNECTION_STATE_DISCONNECTED) {
+            /* Stop audio pipeline when HFP disconnects entirely */
+            bt_app_work_dispatch(audio_stop_handler, 0, NULL, 0, NULL);
         }
         break;
     }
@@ -394,13 +435,18 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
 
             s_audio_codec = param->audio_stat.state;
 
-            /* Register legacy data callbacks — safe in BTU_TASK */
+            /* Pause BLE advertising during active SCO — avoids BTDM
+             * scheduling conflicts between BLE and SCO timeslots. */
+            ble_gatts_adv_stop();
+
+            /* Discard stale audio from the ring buffer so the
+             * previous session doesn't bleed into this one. */
+            s_flush_ringbuf = true;
+
+            /* Register data callbacks — safe in BTU_TASK */
             esp_hf_client_register_data_callback(bt_app_hf_incoming_cb, bt_app_hf_outgoing_cb);
 
             bt_audio_set_active(true);
-
-            /* Defer heavy work (ringbuf, timer, task, I2S) to app task */
-            bt_app_work_dispatch(audio_start_handler, 0, NULL, 0, NULL);
 
             extern void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
             ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());
@@ -410,8 +456,11 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
             s_ptt_opened_audio = false;
             bt_audio_set_active(false);
 
-            /* Defer heavy cleanup to app task */
-            bt_app_work_dispatch(audio_stop_handler, 0, NULL, 0, NULL);
+            /* Unregister data callbacks — pipeline keeps running */
+            esp_hf_client_register_data_callback(NULL, NULL);
+
+            /* Resume BLE advertising now that SCO timeslots are freed */
+            ble_gatts_adv_start();
 
             extern void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
             ble_send_device_status(bt_hfp_is_connected(), bt_audio_is_active());

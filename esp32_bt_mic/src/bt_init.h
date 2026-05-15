@@ -44,4 +44,10 @@ void bt_hfp_set_connected(bool connected);
  */
 void bt_audio_set_active(bool active);
 
+/**
+ * @brief Force HFP ACL out of sniff mode to reduce SCO open latency.
+ *        Should be called on button press (before Windows opens SCO).
+ */
+void bt_hfp_hf_wake_acl(void);
+
 #endif /* __BT_INIT_H__ */

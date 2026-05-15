@@ -13,7 +13,7 @@
 #include "button_handler.h"
 #include "ble_gatts_config.h"
 #include "config_storage.h"
-#include "ws2812_led.h"
+#include "bt_init.h"
 
 static const char *TAG = "BTN_HANDLER";
 
@@ -78,8 +78,8 @@ static void button_task_func(void *arg)
                     press_time[i] = now;
                     ESP_LOGI(TAG, "Button %d pressed", i + 1);
 
-                    /* Button 1: start rainbow LED */
-                    if (i == 0) ws2812_rainbow_start();
+                    /* Wake HFP ACL from sniff to reduce SCO open latency */
+                    bt_hfp_hf_wake_acl();
 
                     /* BLE notification for keyboard shortcut */
                     ble_send_button_event(i, 1);
@@ -90,9 +90,6 @@ static void button_task_func(void *arg)
                 if (!pressed) {
                     uint32_t duration = now - press_time[i];
                     ESP_LOGI(TAG, "Button %d released (duration: %lu ms)", i + 1, duration);
-
-                    /* Button 1: stop rainbow LED */
-                    if (i == 0) ws2812_rainbow_stop();
 
                     /* BLE notification for keyboard shortcut release */
                     ble_send_button_event(i, 0);
