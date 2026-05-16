@@ -23,6 +23,8 @@ static const char *TAG = "BTN_HANDLER";
 #define BUTTON_TASK_STACK    4096
 #define BUTTON_TASK_PRIORITY 3
 
+#define INDICATOR_LED_GPIO   GPIO_NUM_15
+
 static const gpio_num_t s_button_pins[BUTTON_NUM] = {
     CONFIG_BUTTON_1_GPIO,
     CONFIG_BUTTON_2_GPIO,
@@ -81,6 +83,9 @@ static void button_task_func(void *arg)
                     /* Wake HFP ACL from sniff to reduce SCO open latency */
                     bt_hfp_hf_wake_acl();
 
+                    /* Indicator LED on Button 1 */
+                    if (i == 0) gpio_set_level(INDICATOR_LED_GPIO, 1);
+
                     /* BLE notification for keyboard shortcut */
                     ble_send_button_event(i, 1);
                 }
@@ -90,6 +95,9 @@ static void button_task_func(void *arg)
                 if (!pressed) {
                     uint32_t duration = now - press_time[i];
                     ESP_LOGI(TAG, "Button %d released (duration: %lu ms)", i + 1, duration);
+
+                    /* Indicator LED off on Button 1 release */
+                    if (i == 0) gpio_set_level(INDICATOR_LED_GPIO, 0);
 
                     /* BLE notification for keyboard shortcut release */
                     ble_send_button_event(i, 0);
@@ -129,6 +137,10 @@ void button_handler_init(void)
         ESP_LOGE(TAG, "GPIO config failed: %s", esp_err_to_name(ret));
         return;
     }
+
+    /* Indicator LED — simple GPIO, no RMT/DMA conflict with BT */
+    gpio_set_direction(INDICATOR_LED_GPIO, GPIO_MODE_OUTPUT);
+    gpio_set_level(INDICATOR_LED_GPIO, 0);
 
     /* Start button monitoring task */
     s_btn_task_running = true;

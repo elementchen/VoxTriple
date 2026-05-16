@@ -11,6 +11,7 @@
 #include "esp_system.h"
 #include "esp_log.h"
 #include "esp_bt.h"
+#include "driver/gpio.h"
 #include "sdkconfig.h"
 
 #include "bt_init.h"
@@ -23,6 +24,18 @@ static const char *TAG = "MAIN";
 
 void app_main(void)
 {
+    /* Drive indicator LED low immediately — GPIO 15 is a strapping pin
+     * (MTDO) and floats until configured, causing the LED to glow dimly. */
+    gpio_config_t led_cfg = {
+        .pin_bit_mask = (1ULL << GPIO_NUM_15),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&led_cfg);
+    gpio_set_level(GPIO_NUM_15, 0);
+
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  ESP32 Bluetooth Microphone - PTT Mode");
     ESP_LOGI(TAG, "  HFP HF Client + BLE GATT Server");
