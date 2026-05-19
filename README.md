@@ -4,9 +4,9 @@
 [![PlatformIO](https://img.shields.io/badge/build-PlatformIO-orange.svg)](https://platformio.org/)
 [![.NET](https://img.shields.io/badge/app-.NET%208-purple.svg)](https://dotnet.microsoft.com/)
 
-> An ESP32-based Bluetooth microphone system with three physical buttons: programmable keyboard shortcuts. Button 1 also drives a WS2812 rainbow LED strip. Designed for Windows voice input.
+> An ESP32-based Bluetooth microphone system with three physical buttons: programmable keyboard shortcuts. Button 1 also drives a simple GPIO indicator LED. Designed for Windows voice input.
 >
-> 基于 ESP32 的蓝牙麦克风系统。三键物理按钮均可编程为键盘快捷键，Button 1 同时驱动 WS2812 彩虹灯带。专为 Windows 语音输入（语音识别 / 讯飞）设计。
+> 基于 ESP32 的蓝牙麦克风系统。三键物理按钮均可编程为键盘快捷键，Button 1 同时驱动 GPIO 指示灯。专为 Windows 语音输入（语音识别 / 讯飞）设计。
 
 ----
 
@@ -16,9 +16,9 @@
   
   **蓝牙麦克风** — ESP32 扮演 HFP Hands-Free Client 角色，Windows 原生识别为蓝牙音频输入设备，免驱即用。
 
-- **Rainbow LED** — Button 1 lights a 4-LED WS2812 rainbow strip on GPIO 15. Press to start animation, release to stop.
+- **Indicator LED** — Button 1 drives a simple GPIO LED on GPIO 26. Press to light up, release to turn off.
 
-  **彩虹灯带** — Button 1 驱动 4 颗 WS2812 彩虹灯珠（GPIO 15）。按住播放动画，松手熄灭。
+  **指示灯** — Button 1 驱动 GPIO 指示灯（GPIO 26）。按下点亮，松开熄灭。
 
 - **Programmable Shortcuts** — All 3 buttons can be mapped to any Windows key combination including modifiers (Ctrl / Shift / Alt / Win). Configurable wirelessly.
 
@@ -56,21 +56,25 @@ INMP441 → ESP32:
   VDD  → 3.3V          Never connect to 5V! / 不可接 5V！
   GND  → GND
   L/R  → GND           Left channel / 左声道
-  SD   → GPIO 32       I2S data input / 数据输入
-  WS   → GPIO 25       Word select / 字选择 (LRCLK)
-  SCK  → GPIO 26       Bit clock / 位时钟 (BCLK)
+  SD   → GPIO 17       I2S data input / 数据输入 (left side, away from antenna)
+  WS   → GPIO 33       Word select / 字选择 (LRCLK)
+  SCK  → GPIO 25       Bit clock / 位时钟 (BCLK)
 
-Button 1 → GPIO 13     Keyboard shortcut + LED rainbow / 快捷键 + 彩虹灯
-Button 2 → GPIO 12     Keyboard shortcut / 快捷键
-Button 3 → GPIO 14     Keyboard shortcut / 快捷键
+Button 1 → GPIO 16     Keyboard shortcut + indicator LED / 快捷键 + 指示灯
+Button 2 → GPIO 14     Keyboard shortcut / 快捷键
+Button 3 → GPIO 18     Keyboard shortcut / 快捷键
 
-WS2812 → ESP32:
-  DIN → GPIO 15         Data in / 数据输入
-  VCC → 5V              External power (4 LEDs ≈ 240mA) / 外部供电
-  GND → GND             Common ground / 共地
+LED → ESP32:
+  Anode → GPIO 26       via current-limiting resistor / 经限流电阻
+  Cathode → GND
 
 Buttons are wired active-low (GPIO → button → GND) with internal pull-up enabled.
 按钮为低电平有效（GPIO → 按键 → GND），使用内部上拉电阻。
+
+Antenna keep-out / 天线净空:
+  Keep wires away from the right edge of the ESP32 module (PCB antenna area).
+  I2S DATA (high-speed) should be routed on the left side to avoid RF interference.
+  布线请避开模组右侧边缘（PCB 天线区域）。高速 I2S 数据线请走左侧，避免射频干扰。
 ```
 
 ## Quick Start / 快速开始
@@ -85,9 +89,9 @@ pio run -t upload --upload-port COM4
 
 ### 2. Pair Bluetooth / 蓝牙配对
 
-Open Windows Bluetooth settings → Add device → `ESP32_BT_MIC` → enter PIN `1234`
+Open Windows Bluetooth settings → Add device → look for `ESP32_BT_MIC_XX` (where `XX` is the last two hex digits of the board's MAC address) → pairing is automatic via SSP
 
-打开 Windows 蓝牙设置 → 添加设备 → 搜索 `ESP32_BT_MIC` → 配对码 `1234`
+打开 Windows 蓝牙设置 → 添加设备 → 搜索 `ESP32_BT_MIC_XX`（`XX` 为板子 MAC 地址末两位十六进制）→ SSP 自动配对，无需输入配对码
 
 ### 3. Build & Run Config App / 编译运行配置应用
 
@@ -110,8 +114,8 @@ dotnet publish -r win-x64 -c Release -p:PublishSingleFile=true --self-contained 
    应用启动时自动连接 BLE 并读取 ESP32 上当前的按钮映射。
 2. Click `Capture Key`, press any key on your keyboard, optionally check modifier boxes (Ctrl, Shift, etc.), then click `Write to Device`.
    点击 `Capture Key`，按下键盘上的任意按键，可选勾选修饰键（Ctrl/Shift 等），然后点击 `Write to Device`。
-3. Hold **Button 1** to speak (PTT). The audio opens while you hold and closes when you release.
-   按住 **Button 1** 说话（PTT），音频在按住期间打开，松开后关闭。
+3. Hold **Button 1** to speak (PTT). Windows opens the Bluetooth microphone audio channel while the mapped key is held.
+   按住 **Button 1** 说话（PTT），Windows 在按住期间打开蓝牙麦克风音频通道。
 4. Press **Button 2** / **Button 3** to trigger their configured keyboard shortcuts.
    按下 **Button 2** / **Button 3** 触发各自配置的键盘快捷键。
 5. Check `开机自动启动` in the app to have it launch automatically when Windows boots.

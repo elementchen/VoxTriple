@@ -2,14 +2,17 @@
 
 ## v1.3-stable (2026-05-19)
 
-> GPIO pinout reworked for cleaner wiring. BLE-triggered HFP auto-reconnect retained from prior session.
+> GPIO pinout reworked for cleaner wiring and antenna interference avoidance. Dynamic device name. BLE-triggered HFP auto-reconnect retained.
 
 ### Firmware
-- **GPIO pinout reworked** — all active pins moved to right-side header for cleaner PCB wiring
-  - Button 1: GPIO 14, Button 2: GPIO 23, Button 3: GPIO 32
-  - I2S: BCK=GPIO 19, WS=GPIO 18, DATA=GPIO 33
-  - Indicator LED: GPIO 22
-  - `button_handler.c` + `main.c` updated; per-pin GPIO config restored (no input-only restrictions)
+- **Dynamic device name**: `ESP32_BT_MIC_XX` where `XX` is the last byte of the Bluetooth MAC address
+  - Allows multiple boards to coexist with distinguishable names
+  - `g_bt_device_name` shared between Classic BT (`bt_init.c`) and BLE advertising (`ble_gatts_config.c`)
+- **GPIO pinout reworked** — sensitive I2S DATA moved to left side away from PCB antenna; clock/control on right
+  - Left (away from antenna): Button 1=GPIO 16, Button 3=GPIO 18, I2S DATA=GPIO 17
+  - Right: WS=GPIO 33, SCK=GPIO 25, LED=GPIO 26, Button 2=GPIO 14
+  - Eliminates RF interference from high-speed I2S data line near antenna
+- **Bluetooth TX power**: set to +3dBm (`ESP_PWR_LVL_P3`) for stable indoor range
 - **BLE-triggered HFP auto-reconnect**: on BLE connect, auto-reconnect Classic HFP to last paired Windows device
   - `config_storage` NVS blob for HFP peer address persistence
   - `bt_hfp_hf_wake_acl()` via internal `BTM_SetPowerMode()` API to exit sniff on button press

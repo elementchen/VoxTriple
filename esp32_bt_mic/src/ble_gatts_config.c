@@ -37,7 +37,7 @@ static const char *TAG = "BLE_GATTS";
 #define GATTS_APP_ID         0x01
 #define PREPARE_BUF_MAX_SIZE 1024
 
-#define BLE_ADV_NAME          "ESP32_BT_MIC"
+extern char g_bt_device_name[];
 
 /* Characteristic value lengths */
 #define BTN_MAP_CHAR_LEN      2
@@ -264,7 +264,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
             return;
         }
         esp_ble_gap_config_local_privacy(true);
-        ble_init_adv_data(BLE_ADV_NAME);
+        ble_init_adv_data(g_bt_device_name);
 
         /* Create service */
         esp_gatt_srvc_id_t service_id = {

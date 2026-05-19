@@ -34,7 +34,8 @@ static bool s_audio_active = false;
 #define CONFIG_BT_MIC_DEVICE_NAME "ESP32_BT_MIC"
 #endif
 
-static const char local_device_name[] = CONFIG_BT_MIC_DEVICE_NAME;
+/* Dynamic device name includes MAC last byte for multi-board区分 */
+char g_bt_device_name[32] = "ESP32_BT_MIC";
 
 bool bt_hfp_is_connected(void)
 {
@@ -111,7 +112,7 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
     switch (event) {
     case BT_APP_EVT_STACK_UP: {
         /* Set device name for Classic BT */
-        esp_bt_gap_set_device_name(local_device_name);
+        esp_bt_gap_set_device_name(g_bt_device_name);
 
         /* Register GAP callback */
         esp_bt_gap_register_callback(bt_gap_cb);
@@ -141,10 +142,16 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         pin_code[3] = '0';
         esp_bt_gap_set_pin(pin_type, 4, pin_code);
 
+        /* Reduce Classic BT TX power to lower peak current draw
+         * (-6dBm is sufficient for indoor 1-2m range) */
+        /* Increase Classic BT TX power for better range/quality
+         * (+3dBm is safe for ESP32-WROOM-32 PCB antenna) */
+        esp_bredr_tx_power_set(ESP_PWR_LVL_P3, ESP_PWR_LVL_P3);
+
         /* Set discoverable and connectable */
         esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
 
-        ESP_LOGI(TAG, "BT stack initialized, name: %s", local_device_name);
+        ESP_LOGI(TAG, "BT stack initialized, name: %s", g_bt_device_name);
         break;
     }
     default:
@@ -196,6 +203,13 @@ esp_err_t bt_stack_init(void)
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "%s enable bluedroid failed: %s", __func__, esp_err_to_name(ret));
         return ret;
+    }
+
+    /* Generate dynamic device name from MAC address last byte */
+    const uint8_t *addr = esp_bt_dev_get_address();
+    if (addr) {
+        snprintf(g_bt_device_name, sizeof(g_bt_device_name),
+                 "ESP32_BT_MIC_%02X", addr[5]);
     }
 
     ESP_LOGI(TAG, "Bluetooth controller mode: BTDM (dual mode)");

@@ -8,33 +8,33 @@ menu "BT Microphone Configuration"
 
     config I2S_MIC_BCK_PIN
         int "I2S Bit Clock GPIO pin"
-        default 19
+        default 25
         help
             GPIO pin number for I2S SCK (bit clock) signal.
 
     config I2S_MIC_WS_PIN
         int "I2S Word Select GPIO pin"
-        default 18
+        default 33
         help
             GPIO pin number for I2S WS (word select) signal.
 
     config I2S_MIC_DATA_PIN
         int "I2S Data In GPIO pin"
-        default 33
+        default 17
         help
             GPIO pin number for I2S SD (serial data) signal.
 
     config BUTTON_1_GPIO
         int "Button 1 GPIO pin"
-        default 14
+        default 16
 
     config BUTTON_2_GPIO
         int "Button 2 GPIO pin"
-        default 23
+        default 14
 
     config BUTTON_3_GPIO
         int "Button 3 GPIO pin"
-        default 32
+        default 18
 
     config WS2812_GPIO
         int "WS2812 LED data GPIO pin"
