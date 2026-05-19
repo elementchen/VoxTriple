@@ -112,3 +112,34 @@ esp_err_t config_storage_load_button(uint8_t button_id, uint8_t *vk_code, uint8_
     nvs_close(nvs_handle);
     return ret;
 }
+
+#define NVS_KEY_HFP_ADDR "hfp_addr"
+
+esp_err_t config_storage_save_hfp_addr(esp_bd_addr_t addr)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    ret = nvs_set_blob(nvs_handle, NVS_KEY_HFP_ADDR, addr, ESP_BD_ADDR_LEN);
+    if (ret == ESP_OK) nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "HFP addr saved: %02x:%02x:%02x:%02x:%02x:%02x",
+                 addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+    }
+    return ret;
+}
+
+esp_err_t config_storage_load_hfp_addr(esp_bd_addr_t addr)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    size_t len = ESP_BD_ADDR_LEN;
+    ret = nvs_get_blob(nvs_handle, NVS_KEY_HFP_ADDR, addr, &len);
+    nvs_close(nvs_handle);
+    return ret;
+}

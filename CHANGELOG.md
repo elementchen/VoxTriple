@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3-stable (2026-05-19)
+
+> GPIO pinout reworked for cleaner wiring. BLE-triggered HFP auto-reconnect retained from prior session.
+
+### Firmware
+- **GPIO pinout reworked** — all active pins moved to right-side header for cleaner PCB wiring
+  - Button 1: GPIO 14, Button 2: GPIO 23, Button 3: GPIO 32
+  - I2S: BCK=GPIO 19, WS=GPIO 18, DATA=GPIO 33
+  - Indicator LED: GPIO 22
+  - `button_handler.c` + `main.c` updated; per-pin GPIO config restored (no input-only restrictions)
+- **BLE-triggered HFP auto-reconnect**: on BLE connect, auto-reconnect Classic HFP to last paired Windows device
+  - `config_storage` NVS blob for HFP peer address persistence
+  - `bt_hfp_hf_wake_acl()` via internal `BTM_SetPowerMode()` API to exit sniff on button press
+- **Windows pairing note**: if audio stops working after pinout changes, delete the Bluetooth microphone device in Windows and re-pair
+
+----
+
 ## v1.2-stable (2026-05-15)
 
 > Audio pipeline refactored: continuous operation across SCO cycles. Log output reduced. WS2812 removed (RMT/BT conflict). Sniff-mode mitigation via ACL wake on button press.

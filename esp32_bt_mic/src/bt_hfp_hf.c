@@ -23,6 +23,7 @@
 #include "bt_app_core.h"
 #include "bt_app_hf.h"
 #include "bt_init.h"
+#include "config_storage.h"
 #include "audio_capture.h"
 #include "ble_gatts_config.h"
 #include "osi/allocator.h"
@@ -415,6 +416,8 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
 
         if (connected) {
             ESP_LOGI(TAG, "SLC connected, starting audio pipeline");
+            /* Remember this device so BLE connect can trigger HFP reconnect */
+            config_storage_save_hfp_addr(hf_peer_addr);
             /* Start audio pipeline once on SLC connect — stays running
              * across multiple SCO start/stop cycles. Avoids per-cycle
              * create/delete races that cause "invalid air mode: 255". */

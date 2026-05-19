@@ -17,6 +17,8 @@
 #include "esp_gatt_common_api.h"
 #include "ble_gatts_config.h"
 #include "config_storage.h"
+#include "bt_init.h"
+#include "esp_hf_client_api.h"
 
 static const char *TAG = "BLE_GATTS";
 
@@ -485,6 +487,20 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         conn_params.latency = 0;
         conn_params.timeout = 500;
         esp_ble_gap_update_conn_params(&conn_params);
+
+        /* BLE-triggered HFP reconnect: when the desktop app connects via
+         * BLE, automatically re-establish the classic Bluetooth HFP link
+         * to the last paired Windows device. Saves the user from opening
+         * Windows Bluetooth settings after each reboot. */
+        if (!bt_hfp_is_connected()) {
+            esp_bd_addr_t saved_addr = {0};
+            if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
+                ESP_LOGI(TAG, "Triggering HFP reconnect to %02x:%02x:%02x:%02x:%02x:%02x",
+                         saved_addr[0], saved_addr[1], saved_addr[2],
+                         saved_addr[3], saved_addr[4], saved_addr[5]);
+                esp_hf_client_connect(saved_addr);
+            }
+        }
         break;
     }
 

@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "esp_bt_defs.h"
 #include "esp_err.h"
 
 #define NVS_NAMESPACE  "bt_mic_cfg"
@@ -42,5 +43,16 @@ esp_err_t config_storage_save_button(uint8_t button_id, uint8_t vk_code, uint8_t
  * @return ESP_OK on success, ESP_ERR_NVS_NOT_FOUND if not saved
  */
 esp_err_t config_storage_load_button(uint8_t button_id, uint8_t *vk_code, uint8_t *modifier);
+
+/**
+ * @brief Save paired HFP device address for BLE-triggered auto-reconnect
+ */
+esp_err_t config_storage_save_hfp_addr(esp_bd_addr_t addr);
+
+/**
+ * @brief Load last paired HFP device address
+ * @return ESP_OK on success, ESP_ERR_NOT_FOUND if no address saved
+ */
+esp_err_t config_storage_load_hfp_addr(esp_bd_addr_t addr);
 
 #endif /* __CONFIG_STORAGE_H__ */
