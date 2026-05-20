@@ -18,10 +18,13 @@ public class BleGattClient : IDisposable
     private static readonly Guid Button3MapUuid    = Guid.Parse("00002A03-0000-1000-8000-00805F9B34FB");
     private static readonly Guid ButtonEventUuid   = Guid.Parse("00002A04-0000-1000-8000-00805F9B34FB");
     private static readonly Guid DeviceStatusUuid  = Guid.Parse("00002A05-0000-1000-8000-00805F9B34FB");
+    private static readonly Guid TxPowerUuid       = Guid.Parse("00002A06-0000-1000-8000-00805F9B34FB");
+    private static readonly Guid SleepModeUuid     = Guid.Parse("00002A07-0000-1000-8000-00805F9B34FB");
 
     private BluetoothLEDevice? _device;
     private GattCharacteristic? _button1Char, _button2Char, _button3Char;
     private GattCharacteristic? _buttonEventChar, _deviceStatusChar;
+    private GattCharacteristic? _txPowerChar, _sleepModeChar;
 
     public bool IsConnected => _device != null;
     public string DeviceName => _device?.Name ?? string.Empty;
@@ -142,6 +145,8 @@ public class BleGattClient : IDisposable
         _button3Char    = allChars.FirstOrDefault(c => c.Uuid == Button3MapUuid);
         _buttonEventChar  = allChars.FirstOrDefault(c => c.Uuid == ButtonEventUuid);
         _deviceStatusChar = allChars.FirstOrDefault(c => c.Uuid == DeviceStatusUuid);
+        _txPowerChar      = allChars.FirstOrDefault(c => c.Uuid == TxPowerUuid);
+        _sleepModeChar    = allChars.FirstOrDefault(c => c.Uuid == SleepModeUuid);
 
         // Subscribe
         if (_buttonEventChar != null)
@@ -168,7 +173,7 @@ public class BleGattClient : IDisposable
         }
 
         _device.ConnectionStatusChanged += OnConnectionChanged;
-        LastError += $" | btn1={_button1Char!=null} btn2={_button2Char!=null} btn3={_button3Char!=null} evt={_buttonEventChar!=null} st={_deviceStatusChar!=null}";
+        LastError += $" | btn1={_button1Char!=null} btn2={_button2Char!=null} btn3={_button3Char!=null} evt={_buttonEventChar!=null} st={_deviceStatusChar!=null} tx={_txPowerChar!=null} sl={_sleepModeChar!=null}";
         return true;
     }
 
@@ -201,6 +206,44 @@ public class BleGattClient : IDisposable
         return (a.Value.Vk, a.Value.Mod, b.Value.Vk, b.Value.Mod, c.Value.Vk, c.Value.Mod);
     }
 
+    public async Task<bool> WriteTxPowerAsync(byte level)
+    {
+        if (_txPowerChar == null) return false;
+        var w = new DataWriter();
+        w.WriteByte(level);
+        var r = await _txPowerChar.WriteValueAsync(w.DetachBuffer(), GattWriteOption.WriteWithResponse);
+        return r == GattCommunicationStatus.Success;
+    }
+
+    public async Task<byte?> ReadTxPowerAsync()
+    {
+        if (_txPowerChar == null) return null;
+        var r = await _txPowerChar.ReadValueAsync();
+        if (r.Status != GattCommunicationStatus.Success) return null;
+        var d = DataReader.FromBuffer(r.Value);
+        if (d.UnconsumedBufferLength < 1) return null;
+        return d.ReadByte();
+    }
+
+    public async Task<bool> WriteSleepModeAsync(byte enabled)
+    {
+        if (_sleepModeChar == null) return false;
+        var w = new DataWriter();
+        w.WriteByte(enabled);
+        var r = await _sleepModeChar.WriteValueAsync(w.DetachBuffer(), GattWriteOption.WriteWithResponse);
+        return r == GattCommunicationStatus.Success;
+    }
+
+    public async Task<byte?> ReadSleepModeAsync()
+    {
+        if (_sleepModeChar == null) return null;
+        var r = await _sleepModeChar.ReadValueAsync();
+        if (r.Status != GattCommunicationStatus.Success) return null;
+        var d = DataReader.FromBuffer(r.Value);
+        if (d.UnconsumedBufferLength < 1) return null;
+        return d.ReadByte();
+    }
+
     private void OnButtonEvent(GattCharacteristic s, GattValueChangedEventArgs a)
     {
         var d = DataReader.FromBuffer(a.CharacteristicValue);
@@ -226,7 +269,7 @@ public class BleGattClient : IDisposable
         if (_buttonEventChar != null) _buttonEventChar.ValueChanged -= OnButtonEvent;
         if (_deviceStatusChar != null) _deviceStatusChar.ValueChanged -= OnDeviceStatus;
         if (_device != null) { _device.ConnectionStatusChanged -= OnConnectionChanged; _device.Dispose(); _device = null; }
-        _button1Char = _button2Char = _button3Char = _buttonEventChar = _deviceStatusChar = null;
+        _button1Char = _button2Char = _button3Char = _buttonEventChar = _deviceStatusChar = _txPowerChar = _sleepModeChar = null;
     }
 
     public void Dispose() { Disconnect(); GC.SuppressFinalize(this); }

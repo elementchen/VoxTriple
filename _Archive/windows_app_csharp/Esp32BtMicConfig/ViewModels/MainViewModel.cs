@@ -168,6 +168,14 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _button3Capturing;
 
+    // TX Power (0-7, maps to ESP_PWR_LVL_N12..ESP_PWR_LVL_P9)
+    [ObservableProperty]
+    private byte _txPowerLevel = 7;
+
+    // Sleep Mode (false = disabled, true = enabled)
+    [ObservableProperty]
+    private bool _sleepModeEnabled;
+
     // Currently capturing button index (0-2, -1 = none)
     private int _capturingIndex = -1;
 
@@ -235,7 +243,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 IsConnected = true;
                 ConnectionStatusText = $"Auto-connected: {_bleClient.DeviceName}";
                 _config.DeviceAddress = _bleClient.DeviceAddress;
-                await ReadMappingsFromDeviceAsync();
+                await ReadSettingsFromDeviceAsync();
             }
             else
             {
@@ -280,7 +288,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 _config.BleAddress = BleGattClient.FoundBluetoothAddress.Value;
                 SaveConfigFile();
             }
-            await ReadMappingsFromDeviceAsync();
+            await ReadSettingsFromDeviceAsync();
         }
         catch (Exception ex)
         {
@@ -314,11 +322,13 @@ public partial class MainViewModel : ObservableObject, IDisposable
             var ok1 = await _bleClient.WriteButtonMappingAsync(0, mapping1.VkCode, mapping1.Modifier);
             var ok2 = await _bleClient.WriteButtonMappingAsync(1, mapping2.VkCode, mapping2.Modifier);
             var ok3 = await _bleClient.WriteButtonMappingAsync(2, mapping3.VkCode, mapping3.Modifier);
+            var ok4 = await _bleClient.WriteTxPowerAsync(TxPowerLevel);
+            var ok5 = await _bleClient.WriteSleepModeAsync((byte)(SleepModeEnabled ? 1 : 0));
 
-            if (ok1 && ok2 && ok3)
-                ConnectionStatusText = "Mappings saved to device.";
+            if (ok1 && ok2 && ok3 && ok4 && ok5)
+                ConnectionStatusText = "Settings saved to device.";
             else
-                ConnectionStatusText = "Failed to write some mappings to device.";
+                ConnectionStatusText = "Failed to write some settings to device.";
         }
         catch (Exception ex)
         {
@@ -333,6 +343,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _config.Button2 = BuildMapping(1);
         _config.Button3 = BuildMapping(2);
         _config.AutoStart = AutoStart;
+        _config.TxPower = TxPowerLevel;
+        _config.SleepMode = SleepModeEnabled;
         ConfigurationService.Save(_config);
         ConnectionStatusText = "Configuration saved to file.";
     }
@@ -473,6 +485,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         ApplyMappingToUi(0, _config.Button1);
         ApplyMappingToUi(1, _config.Button2);
         ApplyMappingToUi(2, _config.Button3);
+        TxPowerLevel = _config.TxPower;
+        SleepModeEnabled = _config.SleepMode;
     }
 
     private void ApplyMappingToUi(int index, ButtonMapping mapping)
@@ -504,7 +518,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private async Task ReadMappingsFromDeviceAsync()
+    private async Task ReadSettingsFromDeviceAsync()
     {
         if (!IsConnected) return;
 
@@ -516,12 +530,19 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 ApplyMappingToUi(0, ButtonMapping.FromBytes(mappings.Value.V1, mappings.Value.M1));
                 ApplyMappingToUi(1, ButtonMapping.FromBytes(mappings.Value.V2, mappings.Value.M2));
                 ApplyMappingToUi(2, ButtonMapping.FromBytes(mappings.Value.V3, mappings.Value.M3));
-                ConnectionStatusText = "Connected - Mappings read from device.";
             }
+
+            var tx = await _bleClient.ReadTxPowerAsync();
+            if (tx.HasValue) TxPowerLevel = tx.Value;
+
+            var sl = await _bleClient.ReadSleepModeAsync();
+            if (sl.HasValue) SleepModeEnabled = sl.Value != 0;
+
+            ConnectionStatusText = "Connected - Settings read from device.";
         }
         catch
         {
-            ConnectionStatusText = "Connected (could not read mappings from device).";
+            ConnectionStatusText = "Connected (could not read settings from device).";
         }
     }
 

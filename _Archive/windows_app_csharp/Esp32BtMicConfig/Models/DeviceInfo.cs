@@ -24,4 +24,10 @@ public class DeviceConfig
 
     [JsonPropertyName("button3")]
     public ButtonMapping Button3 { get; set; } = new();
+
+    [JsonPropertyName("tx_power")]
+    public byte TxPower { get; set; } = 7;
+
+    [JsonPropertyName("sleep_mode")]
+    public bool SleepMode { get; set; }
 }

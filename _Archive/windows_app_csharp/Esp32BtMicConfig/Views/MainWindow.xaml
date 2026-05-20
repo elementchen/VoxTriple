@@ -28,6 +28,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -165,8 +166,29 @@
                       VerticalAlignment="Center" Margin="20,0,0,0"/>
         </StackPanel>
 
+        <!-- Device Settings -->
+        <GroupBox Grid.Row="6" Header="Device Settings">
+            <StackPanel Orientation="Horizontal" Margin="4">
+                <TextBlock Text="TX Power:" FontWeight="SemiBold" VerticalAlignment="Center" Width="70"/>
+                <ComboBox Width="120" VerticalAlignment="Center" Margin="0,0,12,0"
+                          SelectedIndex="{Binding TxPowerLevel}" IsEnabled="{Binding IsConnected}">
+                    <ComboBoxItem Content="0: -12 dBm (min)"/>
+                    <ComboBoxItem Content="1: -9 dBm"/>
+                    <ComboBoxItem Content="2: -6 dBm"/>
+                    <ComboBoxItem Content="3: -3 dBm"/>
+                    <ComboBoxItem Content="4: 0 dBm"/>
+                    <ComboBoxItem Content="5: +3 dBm"/>
+                    <ComboBoxItem Content="6: +6 dBm"/>
+                    <ComboBoxItem Content="7: +9 dBm (max)"/>
+                </ComboBox>
+                <TextBlock Text="Sleep Mode:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,4,0"/>
+                <CheckBox Content="Enabled" IsChecked="{Binding SleepModeEnabled}" IsEnabled="{Binding IsConnected}" VerticalAlignment="Center"/>
+                <TextBlock Text="(requires Write to Device)" Foreground="Gray" VerticalAlignment="Center" Margin="8,0,0,0"/>
+            </StackPanel>
+        </GroupBox>
+
         <!-- Log / Info -->
-        <GroupBox Grid.Row="6" Header="Info">
+        <GroupBox Grid.Row="7" Header="Info">
             <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11">
                 <Run Text="BLE Service UUID: "/><Run Text="0x1820" FontWeight="SemiBold"/><LineBreak/>
                 <Run Text="Device Name: "/><Run Text="ESP32_BT_MIC" FontWeight="SemiBold"/><LineBreak/>
