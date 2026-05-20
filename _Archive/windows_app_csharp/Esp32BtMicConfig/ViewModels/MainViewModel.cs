@@ -170,7 +170,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     // TX Power (0-7, maps to ESP_PWR_LVL_N12..ESP_PWR_LVL_P9)
     [ObservableProperty]
-    private byte _txPowerLevel = 7;
+    private int _txPowerLevel = 7;
 
     // Sleep Mode (false = disabled, true = enabled)
     [ObservableProperty]
@@ -322,7 +322,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             var ok1 = await _bleClient.WriteButtonMappingAsync(0, mapping1.VkCode, mapping1.Modifier);
             var ok2 = await _bleClient.WriteButtonMappingAsync(1, mapping2.VkCode, mapping2.Modifier);
             var ok3 = await _bleClient.WriteButtonMappingAsync(2, mapping3.VkCode, mapping3.Modifier);
-            var ok4 = await _bleClient.WriteTxPowerAsync(TxPowerLevel);
+            var ok4 = await _bleClient.WriteTxPowerAsync((byte)TxPowerLevel);
             var ok5 = await _bleClient.WriteSleepModeAsync((byte)(SleepModeEnabled ? 1 : 0));
 
             if (ok1 && ok2 && ok3 && ok4 && ok5)
@@ -343,7 +343,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _config.Button2 = BuildMapping(1);
         _config.Button3 = BuildMapping(2);
         _config.AutoStart = AutoStart;
-        _config.TxPower = TxPowerLevel;
+        _config.TxPower = (byte)TxPowerLevel;
         _config.SleepMode = SleepModeEnabled;
         ConfigurationService.Save(_config);
         ConnectionStatusText = "Configuration saved to file.";
