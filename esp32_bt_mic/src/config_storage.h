@@ -55,4 +55,32 @@ esp_err_t config_storage_save_hfp_addr(esp_bd_addr_t addr);
  */
 esp_err_t config_storage_load_hfp_addr(esp_bd_addr_t addr);
 
+/**
+ * @brief Save Classic BT TX power level to NVS
+ * @param level  Power level (0-7, maps to ESP_PWR_LVL_N12..ESP_PWR_LVL_P9)
+ * @return ESP_OK on success
+ */
+esp_err_t config_storage_save_tx_power(uint8_t level);
+
+/**
+ * @brief Load Classic BT TX power level from NVS
+ * @param level  Output: power level (0-7)
+ * @return ESP_OK on success, ESP_ERR_NVS_NOT_FOUND if not saved
+ */
+esp_err_t config_storage_load_tx_power(uint8_t *level);
+
+/**
+ * @brief Save BT controller sleep mode to NVS
+ * @param enabled  0=disabled, 1=enabled
+ * @return ESP_OK on success
+ */
+esp_err_t config_storage_save_sleep_mode(uint8_t enabled);
+
+/**
+ * @brief Load BT controller sleep mode from NVS
+ * @param enabled  Output: 0=disabled, 1=enabled
+ * @return ESP_OK on success, ESP_ERR_NVS_NOT_FOUND if not saved
+ */
+esp_err_t config_storage_load_sleep_mode(uint8_t *enabled);
+
 #endif /* __CONFIG_STORAGE_H__ */

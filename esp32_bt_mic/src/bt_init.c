@@ -21,6 +21,7 @@
 #include "bt_init.h"
 #include "bt_app_core.h"
 #include "bt_app_hf.h"
+#include "config_storage.h"
 
 static const char *TAG = "BT_INIT";
 
@@ -142,11 +143,13 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         pin_code[3] = '0';
         esp_bt_gap_set_pin(pin_type, 4, pin_code);
 
-        /* Reduce Classic BT TX power to lower peak current draw
-         * (-6dBm is sufficient for indoor 1-2m range) */
-        /* Increase Classic BT TX power for better range/quality
-         * (+3dBm is safe for ESP32-WROOM-32 PCB antenna) */
-        esp_bredr_tx_power_set(ESP_PWR_LVL_P3, ESP_PWR_LVL_P3);
+        /* Set Classic BT TX power: load from NVS or default to max (+9dBm) */
+        uint8_t tx_power_level = 7;  /* Default: P9 (+9dBm) */
+        if (config_storage_load_tx_power(&tx_power_level) != ESP_OK || tx_power_level > 7) {
+            tx_power_level = 7;
+        }
+        esp_bredr_tx_power_set((esp_power_level_t)tx_power_level, (esp_power_level_t)tx_power_level);
+        ESP_LOGI(TAG, "Classic BT TX power set to level %d", tx_power_level);
 
         /* Set discoverable and connectable */
         esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);

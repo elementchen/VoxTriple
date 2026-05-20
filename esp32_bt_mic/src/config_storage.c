@@ -143,3 +143,64 @@ esp_err_t config_storage_load_hfp_addr(esp_bd_addr_t addr)
     nvs_close(nvs_handle);
     return ret;
 }
+
+#define NVS_KEY_TX_POWER   "tx_power"
+#define NVS_KEY_SLEEP_MODE "sleep_mode"
+
+esp_err_t config_storage_save_tx_power(uint8_t level)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    ret = nvs_set_u8(nvs_handle, NVS_KEY_TX_POWER, level);
+    if (ret == ESP_OK) nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "TX power level saved: %d", level);
+    }
+    return ret;
+}
+
+esp_err_t config_storage_load_tx_power(uint8_t *level)
+{
+    if (!level) return ESP_ERR_INVALID_ARG;
+
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    ret = nvs_get_u8(nvs_handle, NVS_KEY_TX_POWER, level);
+    nvs_close(nvs_handle);
+    return ret;
+}
+
+esp_err_t config_storage_save_sleep_mode(uint8_t enabled)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    ret = nvs_set_u8(nvs_handle, NVS_KEY_SLEEP_MODE, enabled);
+    if (ret == ESP_OK) nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Sleep mode saved: %s", enabled ? "enabled" : "disabled");
+    }
+    return ret;
+}
+
+esp_err_t config_storage_load_sleep_mode(uint8_t *enabled)
+{
+    if (!enabled) return ESP_ERR_INVALID_ARG;
+
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    ret = nvs_get_u8(nvs_handle, NVS_KEY_SLEEP_MODE, enabled);
+    nvs_close(nvs_handle);
+    return ret;
+}

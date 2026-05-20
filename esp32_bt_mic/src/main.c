@@ -13,6 +13,7 @@
 #include "esp_bt.h"
 #include "driver/gpio.h"
 #include "sdkconfig.h"
+#include "esp_wifi.h"
 
 #include "bt_init.h"
 #include "ble_gatts_config.h"
@@ -56,10 +57,23 @@ void app_main(void)
     ESP_LOGI(TAG, "Step 4: Initializing Bluetooth stack...");
     ESP_ERROR_CHECK(bt_stack_init());
 
-    /* Disable Bluetooth sleep/sniff mode to prevent SCO audio latency.
-     * Without this, the HFP ACL link enters sniff (500ms wake interval),
-     * adding up to 500ms delay each time Windows opens the SCO audio channel. */
-    esp_bt_sleep_disable();
+    /* Load and apply saved BT sleep mode setting.
+     * Default to disabled to prevent SCO audio latency caused by sniff mode. */
+    uint8_t sleep_mode = 0;
+    if (config_storage_load_sleep_mode(&sleep_mode) == ESP_OK && sleep_mode) {
+        esp_bt_sleep_enable();
+        ESP_LOGI(TAG, "BT sleep mode enabled");
+    } else {
+        esp_bt_sleep_disable();
+        ESP_LOGI(TAG, "BT sleep mode disabled");
+    }
+
+    /* Disable WiFi to save power — we only use Bluetooth */
+    esp_err_t wifi_ret = esp_wifi_stop();
+    if (wifi_ret == ESP_OK) {
+        esp_wifi_deinit();
+        ESP_LOGI(TAG, "WiFi disabled for power saving");
+    }
 
     /* Step 5: Initialize BLE GATT server */
     ESP_LOGI(TAG, "Step 5: Initializing BLE GATT server...");

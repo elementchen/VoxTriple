@@ -15,6 +15,7 @@
 #include "esp_gatts_api.h"
 #include "esp_bt_defs.h"
 #include "esp_gatt_common_api.h"
+#include "esp_bt.h"
 #include "ble_gatts_config.h"
 #include "config_storage.h"
 #include "bt_init.h"
@@ -32,6 +33,8 @@ static const char *TAG = "BLE_GATTS";
 #define GATTS_CHAR_BTN3_MAP_UUID 0x2A03
 #define GATTS_CHAR_BTN_EVENT_UUID 0x2A04
 #define GATTS_CHAR_DEV_STATUS_UUID 0x2A05
+#define GATTS_CHAR_TX_POWER_UUID   0x2A06
+#define GATTS_CHAR_SLEEP_MODE_UUID 0x2A07
 
 #define GATTS_NUM_HANDLES    16
 #define GATTS_APP_ID         0x01
@@ -60,6 +63,8 @@ static uint16_t s_btn2_map_handle = 0;
 static uint16_t s_btn3_map_handle = 0;
 static uint16_t s_btn_event_handle = 0;
 static uint16_t s_dev_status_handle = 0;
+static uint16_t s_tx_power_handle = 0;
+static uint16_t s_sleep_mode_handle = 0;
 static uint16_t s_btn_event_descr_handle = 0;
 static uint16_t s_dev_status_descr_handle = 0;
 
@@ -74,6 +79,8 @@ static uint8_t s_btn2_map[BTN_MAP_LEN] = {0x1B, 0x00};  /* VK_ESCAPE */
 static uint8_t s_btn3_map[BTN_MAP_LEN] = {0x20, 0x00};  /* VK_SPACE */
 static uint8_t s_btn_event[BTN_EVENT_CHAR_LEN] = {0, 0};
 static uint8_t s_dev_status[DEV_STATUS_CHAR_LEN] = {0, 0};
+static uint8_t s_tx_power = 7;     /* Default: +9 dBm (max) */
+static uint8_t s_sleep_mode = 0;   /* Default: disabled */
 
 /* Advertising parameters */
 static esp_ble_adv_params_t adv_params = {
@@ -349,6 +356,23 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 }
                 }
                 break;
+            case 6: /* TX Power - add Sleep Mode characteristic */
+                s_tx_power_handle = param->add_char.attr_handle;
+                add_characteristic(s_service_handle, &s_sleep_mode_handle,
+                                   GATTS_CHAR_SLEEP_MODE_UUID, s_char_property,
+                                   &s_sleep_mode, 1, NULL);
+                break;
+            case 7: /* Sleep Mode - all characteristics done, start service */
+                s_sleep_mode_handle = param->add_char.attr_handle;
+                {
+                esp_err_t ret = esp_ble_gatts_start_service(s_service_handle);
+                if (ret != ESP_OK) {
+                    ESP_LOGE(TAG, "start service failed: 0x%x", ret);
+                } else {
+                    ESP_LOGI(TAG, "Service 0x1820 started");
+                }
+                }
+                break;
         }
         break;
     }
@@ -363,15 +387,12 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                                GATTS_CHAR_DEV_STATUS_UUID, s_char_property,
                                s_dev_status, DEV_STATUS_CHAR_LEN, NULL);
         } else if (s_dev_status_descr_handle == 0) {
-            /* Device Status CCCD handle received — all chars + descs done.
-             * Now START the service so it becomes visible to BLE clients. */
+            /* Device Status CCCD handle received.
+             * Now add TX Power characteristic. */
             s_dev_status_descr_handle = param->add_char_descr.attr_handle;
-            esp_err_t ret = esp_ble_gatts_start_service(s_service_handle);
-            if (ret != ESP_OK) {
-                ESP_LOGE(TAG, "start service failed: 0x%x", ret);
-            } else {
-                ESP_LOGI(TAG, "Service 0x1820 started");
-            }
+            add_characteristic(s_service_handle, &s_tx_power_handle,
+                               GATTS_CHAR_TX_POWER_UUID, s_char_property,
+                               &s_tx_power, 1, NULL);
         }
         break;
     }
@@ -405,6 +426,12 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         } else if (param->read.handle == s_dev_status_handle) {
             rsp.attr_value.len = DEV_STATUS_CHAR_LEN;
             memcpy(rsp.attr_value.value, s_dev_status, DEV_STATUS_CHAR_LEN);
+        } else if (param->read.handle == s_tx_power_handle) {
+            rsp.attr_value.len = 1;
+            rsp.attr_value.value[0] = s_tx_power;
+        } else if (param->read.handle == s_sleep_mode_handle) {
+            rsp.attr_value.len = 1;
+            rsp.attr_value.value[0] = s_sleep_mode;
         }
 
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
@@ -440,6 +467,28 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 s_btn3_map[1] = param->write.value[1];
                 config_storage_save_button(BUTTON_ID_3, s_btn3_map[0], s_btn3_map[1]);
                 ESP_LOGI(TAG, "Button 3 mapped to VK=0x%02X, MOD=0x%02X", s_btn3_map[0], s_btn3_map[1]);
+            }
+            /* Handle TX Power write (1 byte, 0-7) */
+            else if (param->write.handle == s_tx_power_handle && param->write.len >= 1) {
+                uint8_t level = param->write.value[0];
+                if (level <= 7) {
+                    s_tx_power = level;
+                    config_storage_save_tx_power(level);
+                    esp_bredr_tx_power_set((esp_power_level_t)level, (esp_power_level_t)level);
+                    ESP_LOGI(TAG, "TX power set to level %d", level);
+                }
+            }
+            /* Handle Sleep Mode write (1 byte, 0 or 1) */
+            else if (param->write.handle == s_sleep_mode_handle && param->write.len >= 1) {
+                uint8_t enabled = param->write.value[0] ? 1 : 0;
+                s_sleep_mode = enabled;
+                config_storage_save_sleep_mode(enabled);
+                if (enabled) {
+                    esp_bt_sleep_enable();
+                } else {
+                    esp_bt_sleep_disable();
+                }
+                ESP_LOGI(TAG, "Sleep mode %s", enabled ? "enabled" : "disabled");
             }
             /* Handle CCCD write (notification enable/disable) for Device Status */
             else if ((param->write.handle == s_dev_status_descr_handle) && param->write.len == 2) {
