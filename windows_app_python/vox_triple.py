@@ -73,8 +73,8 @@ class VoxTripleApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title("VoxTriple — ESP32 BT Mic Config (Python)")
-        root.geometry("620x720")
-        root.minsize(580, 680)
+        root.geometry("620x780")
+        root.minsize(580, 740)
         root.resizable(True, True)
 
         self.ble = ble_client.BleClient()
@@ -102,6 +102,9 @@ class VoxTripleApp:
 
         self._auto_start = tk.BooleanVar(value=self._cfg.get("auto_start", False))
         self._auto_start.trace_add("write", self._on_auto_start_changed)
+
+        self._tx_power = tk.IntVar(value=self._cfg.get("tx_power", 7))
+        self._sleep_mode = tk.BooleanVar(value=self._cfg.get("sleep_mode", False))
 
         self._status_text = tk.StringVar(value="Ready. Click Scan & Connect.")
         self._last_event_text = tk.StringVar(value="None")
@@ -143,6 +146,21 @@ class VoxTripleApp:
         evt_frame = ttk.LabelFrame(self.root, text="Last Button Event / 最近按钮事件", padding=8)
         evt_frame.pack(fill="x", padx=8, pady=4)
         ttk.Label(evt_frame, textvariable=self._last_event_text, font=("", 12, "bold")).pack()
+
+        # Device Settings
+        dev_frame = ttk.LabelFrame(self.root, text="Device Settings / 设备设置", padding=8)
+        dev_frame.pack(fill="x", padx=8, pady=4)
+        dev_row = ttk.Frame(dev_frame)
+        dev_row.pack(fill="x")
+        ttk.Label(dev_row, text="TX Power / 发射功率:", font=("", 9, "bold")).pack(side="left", padx=4)
+        tx_combo = ttk.Combobox(dev_row, textvariable=self._tx_power, width=18,
+                                values=["0: -12 dBm (min)", "1: -9 dBm", "2: -6 dBm",
+                                        "3: -3 dBm", "4: 0 dBm", "5: +3 dBm",
+                                        "6: +6 dBm", "7: +9 dBm (max)"],
+                                state="readonly")
+        tx_combo.pack(side="left", padx=4)
+        ttk.Label(dev_row, text="Sleep Mode / 睡眠模式:", font=("", 9, "bold")).pack(side="left", padx=(16, 4))
+        ttk.Checkbutton(dev_row, text="Enabled / 启用", variable=self._sleep_mode).pack(side="left")
 
         # Action buttons
         act_frame = ttk.Frame(self.root)
@@ -225,6 +243,13 @@ class VoxTripleApp:
                     for mk, mask in _MOD_MASKS.items():
                         self._btn[i]["mod_vars"][mk].set(bool(r[1] & mask))
                     self._update_display(i)
+            # Read TX power and sleep mode
+            tx = await self.ble.read_tx_power()
+            if tx is not None:
+                self._tx_power.set(tx)
+            sl = await self.ble.read_sleep_mode()
+            if sl is not None:
+                self._sleep_mode.set(bool(sl))
         else:
             self._status_text.set("Connection failed.")
 
@@ -242,6 +267,12 @@ class VoxTripleApp:
                         for mk, mask in _MOD_MASKS.items():
                             self._btn[i]["mod_vars"][mk].set(bool(r[1] & mask))
                         self._update_display(i)
+                tx = await self.ble.read_tx_power()
+                if tx is not None:
+                    self._tx_power.set(tx)
+                sl = await self.ble.read_sleep_mode()
+                if sl is not None:
+                    self._sleep_mode.set(bool(sl))
 
     def _disconnect(self):
         _run_async(self.ble.disconnect())
@@ -262,7 +293,15 @@ class VoxTripleApp:
             if not ok:
                 self._status_text.set(f"Write btn{i+1} failed.")
                 return
-        self._status_text.set("Mappings written to device.")
+        ok_tx = await self.ble.write_tx_power(self._tx_power.get())
+        if not ok_tx:
+            self._status_text.set("Write TX power failed.")
+            return
+        ok_sl = await self.ble.write_sleep_mode(1 if self._sleep_mode.get() else 0)
+        if not ok_sl:
+            self._status_text.set("Write sleep mode failed.")
+            return
+        self._status_text.set("Settings written to device.")
 
     def _save_file(self):
         for i in range(3):
@@ -272,6 +311,8 @@ class VoxTripleApp:
                 "modifier": _build_modifier(self._btn[i]["mod_vars"]),
             }
         self._cfg["auto_start"] = self._auto_start.get()
+        self._cfg["tx_power"] = self._tx_power.get()
+        self._cfg["sleep_mode"] = self._sleep_mode.get()
         config_service.save(self._cfg)
         self._status_text.set("Configuration saved to file.")
 
@@ -285,6 +326,8 @@ class VoxTripleApp:
                 self._btn[i]["mod_vars"][mk].set(bool(b["modifier"] & mask))
             self._update_display(i)
         self._auto_start.set(self._cfg.get("auto_start", False))
+        self._tx_power.set(self._cfg.get("tx_power", 7))
+        self._sleep_mode.set(self._cfg.get("sleep_mode", False))
         self._status_text.set("Configuration loaded from file.")
 
     # ── Key capture ─────────────────────────────────────────────

@@ -26,6 +26,8 @@ def load() -> dict:
         "device_address": "",
         "ble_address": 0,
         "auto_start": False,
+        "tx_power": 7,
+        "sleep_mode": False,
         "button1": {"vk_code": 0x0D, "modifier": 0x00},
         "button2": {"vk_code": 0x1B, "modifier": 0x00},
         "button3": {"vk_code": 0x20, "modifier": 0x00},

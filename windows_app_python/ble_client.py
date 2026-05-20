@@ -18,6 +18,8 @@ CHAR_BTN2_MAP    = "00002a02-0000-1000-8000-00805f9b34fb"
 CHAR_BTN3_MAP    = "00002a03-0000-1000-8000-00805f9b34fb"
 CHAR_BTN_EVENT   = "00002a04-0000-1000-8000-00805f9b34fb"
 CHAR_DEV_STATUS  = "00002a05-0000-1000-8000-00805f9b34fb"
+CHAR_TX_POWER    = "00002a06-0000-1000-8000-00805f9b34fb"
+CHAR_SLEEP_MODE  = "00002a07-0000-1000-8000-00805f9b34fb"
 
 
 class BleClient:
@@ -35,6 +37,8 @@ class BleClient:
         self._ch = [None, None, None]       # BTN1_MAP, BTN2_MAP, BTN3_MAP
         self._ch_event: BleakGATTCharacteristic | None = None
         self._ch_status: BleakGATTCharacteristic | None = None
+        self._ch_tx_power: BleakGATTCharacteristic | None = None
+        self._ch_sleep_mode: BleakGATTCharacteristic | None = None
 
     @property
     def is_connected(self) -> bool:
@@ -89,10 +93,15 @@ class BleClient:
                     self._ch_event = c
                 elif c.uuid.lower() == CHAR_DEV_STATUS:
                     self._ch_status = c
+                elif c.uuid.lower() == CHAR_TX_POWER:
+                    self._ch_tx_power = c
+                elif c.uuid.lower() == CHAR_SLEEP_MODE:
+                    self._ch_sleep_mode = c
 
             log.info(f"Resolved: btn1={self._ch[0] is not None} btn2={self._ch[1] is not None} "
                      f"btn3={self._ch[2] is not None} evt={self._ch_event is not None} "
-                     f"st={self._ch_status is not None}")
+                     f"st={self._ch_status is not None} tx={self._ch_tx_power is not None} "
+                     f"sl={self._ch_sleep_mode is not None}")
 
             # Subscribe — use characteristic objects (handle-based, no UUID ambiguity)
             if self._ch_event:
@@ -133,6 +142,48 @@ class BleClient:
             return True
         except Exception as e:
             log.error(f"Write btn{idx+1} failed: {e}")
+            return False
+
+    async def read_tx_power(self) -> int | None:
+        if not self._client or not self._ch_tx_power:
+            return None
+        try:
+            data = await self._client.read_gatt_char(self._ch_tx_power)
+            if len(data) >= 1:
+                return data[0]
+        except Exception as e:
+            log.error(f"Read TX power failed: {e}")
+        return None
+
+    async def write_tx_power(self, level: int) -> bool:
+        if not self._client or not self._ch_tx_power:
+            return False
+        try:
+            await self._client.write_gatt_char(self._ch_tx_power, bytes([level]), response=True)
+            return True
+        except Exception as e:
+            log.error(f"Write TX power failed: {e}")
+            return False
+
+    async def read_sleep_mode(self) -> int | None:
+        if not self._client or not self._ch_sleep_mode:
+            return None
+        try:
+            data = await self._client.read_gatt_char(self._ch_sleep_mode)
+            if len(data) >= 1:
+                return data[0]
+        except Exception as e:
+            log.error(f"Read sleep mode failed: {e}")
+        return None
+
+    async def write_sleep_mode(self, enabled: int) -> bool:
+        if not self._client or not self._ch_sleep_mode:
+            return False
+        try:
+            await self._client.write_gatt_char(self._ch_sleep_mode, bytes([enabled]), response=True)
+            return True
+        except Exception as e:
+            log.error(f"Write sleep mode failed: {e}")
             return False
 
     def _on_button_event(self, _sender, data: bytearray):
