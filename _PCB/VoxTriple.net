@@ -1,150 +1,69 @@
-# =============================================================================
-#  VoxTriple — ESP32 BT Microphone PCB Netlist
-#  Generated: 2026-05-23
-#  Format: Tango/Protel compatible (.enet)
-#  Board: ESP32 NodeMCU-32S (38-pin)
-# =============================================================================
-
-# ---------------------------------------------------------------------------
-# Component List / 元件清单
-# ---------------------------------------------------------------------------
-# REF  | Footprint              | Description
-# -----+------------------------+-----------------------------------------------
-# MOD1 | ESP32_NODEMCU_38P_2R19 | ESP32-WROOM-32 dev board, 2x19 2.54mm header
-# MOD2 | INMP441_BREAKOUT_6P    | INMP441 I2S MEMS mic, 6-pin 2.54mm breakout
-# SW1  | TACT_SWITCH_2P_6x6mm   | Tactile push button, 6x6mm, SPST
-# SW2  | TACT_SWITCH_2P_6x6mm   | Tactile push button, 6x6mm, SPST
-# SW3  | TACT_SWITCH_2P_6x6mm   | Tactile push button, 6x6mm, SPST
-# LED1 | LED_3MM_TH             | Indicator LED, 3mm red, through-hole
-# R1   | RES_0805_OR_1_4W_TH    | Current-limit resistor, 220Ω (0805 or 1/4W TH)
-# ---------------------------------------------------------------------------
-
-# ---------------------------------------------------------------------------
-# Net Definitions / 网表定义
-# ---------------------------------------------------------------------------
-
-[3V3]
-MOD1-3V3
-MOD2-VDD
-
-[GND]
-MOD1-GND
-MOD2-GND
-MOD2-L_R
-SW1-2
-SW2-2
-SW3-2
-LED1-K
-
-[I2S_BCK]
-MOD1-GPIO25
-MOD2-SCK
-
-[I2S_WS]
-MOD1-GPIO33
-MOD2-WS
-
-[I2S_DATA]
-MOD1-GPIO17
-MOD2-SD
-
-[BTN1]
-MOD1-GPIO18
-SW1-1
-
-[BTN2]
-MOD1-GPIO14
-SW2-1
-
-[BTN3]
-MOD1-GPIO16
-SW3-1
-
-[LED]
-MOD1-GPIO26
-R1-1
-
-[LED_ANODE]
-R1-2
-LED1-A
-
-# ---------------------------------------------------------------------------
-# Pin Assignment Summary / 引脚分配总表
-# ---------------------------------------------------------------------------
-#
-#  MOD1 (ESP32 NodeMCU-32S)          MOD2 (INMP441 Microphone)
-#  ┌──────────────────────┐          ┌────────────────────────┐
-#  │ GPIO25 ──── I2S_BCK ─┼──────────┼→ SCK (bit clock)      │
-#  │ GPIO33 ──── I2S_WS  ─┼──────────┼→ WS  (word select)    │
-#  │ GPIO17 ──── I2S_DATA─┼──────────┼→ SD  (serial data)    │
-#  │ 3V3     ──── 3V3    ─┼──────────┼→ VDD (power)          │
-#  │ GND     ──── GND    ─┼──┬───────┼→ GND                   │
-#  │                       │  └───────┼→ L/R (left channel)   │
-#  │ GPIO18 ──── BTN1    ─┼───── SW1 (Button 1)              │
-#  │ GPIO14 ──── BTN2    ─┼───── SW2 (Button 2)              │
-#  │ GPIO16 ──── BTN3    ─┼───── SW3 (Button 3)              │
-#  │ GPIO26 ──── LED     ─┼── R1 ── LED1 ── GND (indicator) │
-#  └──────────────────────┘          └────────────────────────┘
-#
-#  Active-Low Buttons: GPIO → Button Terminal A → Button Terminal B → GND
-#  (Internal pull-up enabled, short to GND when pressed)
-#  低电平有效按钮：GPIO → 按键引脚A → 按键引脚B → GND
-#  (使用内部上拉，按下时 GPIO 拉低)
-#
-#  LED: GPIO26 → R1(220Ω) → LED Anode(+) → LED Cathode(-) → GND
-#  LED1 lights when GPIO26 is driven HIGH (Button 1 pressed)
-
-# ---------------------------------------------------------------------------
-# ESP32 NodeMCU-32S Complete Pin Reference / 完整引脚参考
-# ---------------------------------------------------------------------------
-#
-#  Left Row (J1, top→bottom)        Right Row (J2, top→bottom)
-#  ┌────────────────────┐          ┌────────────────────┐
-#  │ 1.  3V3            │          │ 1.  GND            │
-#  │ 2.  EN (RST)       │          │ 2.  GPIO23         │
-#  │ 3.  GPIO36 (VP)    │          │ 3.  GPIO22         │
-#  │ 4.  GPIO39 (VN)    │          │ 4.  TXD0 (GPIO1)   │
-#  │ 5.  GPIO34         │          │ 5.  RXD0 (GPIO3)   │
-#  │ 6.  GPIO35         │          │ 6.  GPIO21         │
-#  │ 7.  GPIO32         │          │ 7.  GND             │
-#  │ 8.  GPIO33  [WS]   │          │ 8.  GPIO19          │
-#  │ 9.  GPIO25  [BCK]  │          │ 9.  GPIO18  [BTN1]  │
-#  │ 10. GPIO26  [LED]  │          │ 10. GPIO5           │
-#  │ 11. GPIO27         │          │ 11. GPIO17  [DATA]  │
-#  │ 12. GPIO14  [BTN2] │          │ 12. GPIO16  [BTN3]  │
-#  │ 13. GPIO12  **     │          │ 13. GPIO4           │
-#  │ 14. GND            │          │ 14. GPIO0 (BOOT)    │
-#  │ 15. GPIO13         │          │ 15. GPIO2           │
-#  │ 16. D2 (GPIO9)     │          │ 16. GPIO15          │
-#  │ 17. D3 (GPIO10)    │          │ 17. D1 (GPIO8)      │
-#  │ 18. CMD (GPIO11)   │          │ 18. D0 (GPIO7)      │
-#  │ 19. 5V (VIN)       │          │ 19. GND             │
-#  └────────────────────┘          └────────────────────┘
-#
-#  ** GPIO12 is a strapping pin (MTDI) — do NOT pull low during boot.
-#     It affects Flash voltage. Avoid using for active-low buttons.
-#     GPIO12 是启动引脚(MTDI)，不要在启动时拉低，避免用于低电平按钮。
-#
-#  Pins marked [BCK]/[WS]/[DATA]/[BTN1]/[BTN2]/[BTN3]/[LED] are used.
-#  Pins not marked are available for future expansion.
-#  标记 [xxx] 的引脚已被使用，未标记的引脚可用于未来扩展。
-
-# ---------------------------------------------------------------------------
-# Bill of Materials / 物料清单 (BOM)
-# ---------------------------------------------------------------------------
-#
-#  Qty | Ref   | Part                            | Footprint
-#  ----+-------+---------------------------------+-----------------------
-#   1  | MOD1  | ESP32-WROOM-32 NodeMCU 38-pin  | 2x19P 2.54mm header
-#   1  | MOD2  | INMP441 I2S MEMS Microphone    | 6P 2.54mm male header
-#   3  | SW1-3 | Tactile switch 6x6mm SPST      | 2P 6x6mm TH
-#   1  | LED1  | Red LED 3mm                    | 3mm TH
-#   1  | R1    | 220Ω resistor                  | 0805 SMD or 1/4W TH
-#  ----+-------+---------------------------------+-----------------------
-#
-#  Power: USB 5V via NodeMCU micro-USB port
-#  供电：通过 NodeMCU 的 Micro-USB 接口，5V
-#
-#  Note: INMP441 VDD must connect to 3.3V, NEVER 5V (will damage mic).
-#  注意：INMP441 的 VDD 必须接 3.3V，绝不能接 5V（会烧毁麦克风）。
-# =============================================================================
+(export (version D)
+  (design
+    (source "VoxTriple.sch")
+    (date "2026-05-23")
+    (tool "Generated for VoxTriple ESP32 BT Microphone"))
+  (components
+    (comp (ref MOD1)
+      (value "ESP32_NodeMCU_32S")
+      (footprint "ESP32_NodeMCU_38P"))
+    (comp (ref MOD2)
+      (value "INMP441_I2S_MEMS_Mic")
+      (footprint "INMP441_6P"))
+    (comp (ref SW1)
+      (value "Button1_GPIO18")
+      (footprint "SW_TACT_6x6mm"))
+    (comp (ref SW2)
+      (value "Button2_GPIO14")
+      (footprint "SW_TACT_6x6mm"))
+    (comp (ref SW3)
+      (value "Button3_GPIO16")
+      (footprint "SW_TACT_6x6mm"))
+    (comp (ref LED1)
+      (value "Red_Indicator_LED")
+      (footprint "LED_3mm_TH"))
+    (comp (ref R1)
+      (value "220R")
+      (footprint "R_0805"))
+  )
+  (nets
+    (net (code 1) (name "3V3")
+      (node (ref MOD1) (pin "1"))
+      (node (ref MOD2) (pin "1")))
+    (net (code 2) (name "GND")
+      (node (ref MOD1) (pin "14"))
+      (node (ref MOD1) (pin "20"))
+      (node (ref MOD1) (pin "26"))
+      (node (ref MOD1) (pin "38"))
+      (node (ref MOD2) (pin "2"))
+      (node (ref MOD2) (pin "3"))
+      (node (ref SW1) (pin "2"))
+      (node (ref SW2) (pin "2"))
+      (node (ref SW3) (pin "2"))
+      (node (ref LED1) (pin "K")))
+    (net (code 3) (name "I2S_BCK")
+      (node (ref MOD1) (pin "9"))
+      (node (ref MOD2) (pin "6")))
+    (net (code 4) (name "I2S_WS")
+      (node (ref MOD1) (pin "8"))
+      (node (ref MOD2) (pin "5")))
+    (net (code 5) (name "I2S_DATA")
+      (node (ref MOD1) (pin "30"))
+      (node (ref MOD2) (pin "4")))
+    (net (code 6) (name "BTN1")
+      (node (ref MOD1) (pin "28"))
+      (node (ref SW1) (pin "1")))
+    (net (code 7) (name "BTN2")
+      (node (ref MOD1) (pin "12"))
+      (node (ref SW2) (pin "1")))
+    (net (code 8) (name "BTN3")
+      (node (ref MOD1) (pin "31"))
+      (node (ref SW3) (pin "1")))
+    (net (code 9) (name "LED_NET")
+      (node (ref MOD1) (pin "10"))
+      (node (ref R1) (pin "1")))
+    (net (code 10) (name "LED_ANODE")
+      (node (ref R1) (pin "2"))
+      (node (ref LED1) (pin "A")))
+  )
+)
