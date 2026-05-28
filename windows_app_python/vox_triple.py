@@ -103,7 +103,7 @@ class VoxTripleApp:
         self._auto_start = tk.BooleanVar(value=self._cfg.get("auto_start", False))
         self._auto_start.trace_add("write", self._on_auto_start_changed)
 
-        self._tx_power = tk.IntVar(value=self._cfg.get("tx_power", 7))
+        self._tx_power = self._cfg.get("tx_power", 7)  # plain int, updated via combobox
         self._sleep_mode = tk.BooleanVar(value=self._cfg.get("sleep_mode", False))
 
         self._status_text = tk.StringVar(value="Ready. Click Scan & Connect.")
@@ -153,12 +153,14 @@ class VoxTripleApp:
         dev_row = ttk.Frame(dev_frame)
         dev_row.pack(fill="x")
         ttk.Label(dev_row, text="TX Power / 发射功率:", font=("", 9, "bold")).pack(side="left", padx=4)
-        tx_combo = ttk.Combobox(dev_row, textvariable=self._tx_power, width=18,
+        self._tx_combo = ttk.Combobox(dev_row, width=18,
                                 values=["0: -12 dBm (min)", "1: -9 dBm", "2: -6 dBm",
                                         "3: -3 dBm", "4: 0 dBm", "5: +3 dBm",
                                         "6: +6 dBm", "7: +9 dBm (max)"],
                                 state="readonly")
-        tx_combo.pack(side="left", padx=4)
+        self._tx_combo.current(self._tx_power)  # set initial selection
+        self._tx_combo.bind("<<ComboboxSelected>>", self._on_tx_power_change)
+        self._tx_combo.pack(side="left", padx=4)
         ttk.Label(dev_row, text="Sleep Mode / 睡眠模式:", font=("", 9, "bold")).pack(side="left", padx=(16, 4))
         ttk.Checkbutton(dev_row, text="Enabled / 启用", variable=self._sleep_mode).pack(side="left")
 
@@ -246,7 +248,8 @@ class VoxTripleApp:
             # Read TX power and sleep mode
             tx = await self.ble.read_tx_power()
             if tx is not None:
-                self._tx_power.set(tx)
+                self._tx_power = tx
+                self._tx_combo.current(tx)
             sl = await self.ble.read_sleep_mode()
             if sl is not None:
                 self._sleep_mode.set(bool(sl))
@@ -269,7 +272,8 @@ class VoxTripleApp:
                         self._update_display(i)
                 tx = await self.ble.read_tx_power()
                 if tx is not None:
-                    self._tx_power.set(tx)
+                    self._tx_power = tx
+                    self._tx_combo.current(tx)
                 sl = await self.ble.read_sleep_mode()
                 if sl is not None:
                     self._sleep_mode.set(bool(sl))
@@ -293,7 +297,7 @@ class VoxTripleApp:
             if not ok:
                 self._status_text.set(f"Write btn{i+1} failed.")
                 return
-        ok_tx = await self.ble.write_tx_power(self._tx_power.get())
+        ok_tx = await self.ble.write_tx_power(self._tx_power)
         if not ok_tx:
             self._status_text.set("Write TX power failed.")
             return
@@ -311,7 +315,7 @@ class VoxTripleApp:
                 "modifier": _build_modifier(self._btn[i]["mod_vars"]),
             }
         self._cfg["auto_start"] = self._auto_start.get()
-        self._cfg["tx_power"] = self._tx_power.get()
+        self._cfg["tx_power"] = self._tx_power
         self._cfg["sleep_mode"] = self._sleep_mode.get()
         config_service.save(self._cfg)
         self._status_text.set("Configuration saved to file.")
@@ -326,7 +330,8 @@ class VoxTripleApp:
                 self._btn[i]["mod_vars"][mk].set(bool(b["modifier"] & mask))
             self._update_display(i)
         self._auto_start.set(self._cfg.get("auto_start", False))
-        self._tx_power.set(self._cfg.get("tx_power", 7))
+        self._tx_power = self._cfg.get("tx_power", 7)
+        self._tx_combo.current(self._tx_power)
         self._sleep_mode.set(self._cfg.get("sleep_mode", False))
         self._status_text.set("Configuration loaded from file.")
 
@@ -391,6 +396,12 @@ class VoxTripleApp:
         self._audio_label.configure(text=f"Audio: {'Active' if audio else '--'}")
 
     # ── Auto-start ───────────────────────────────────────────────
+    def _on_tx_power_change(self, event):
+        """Update _tx_power int when combobox selection changes."""
+        self._tx_power = self._tx_combo.current()
+        if self._tx_power < 0:
+            self._tx_power = 7  # default if current() returns -1
+
     def _on_auto_start_changed(self, *_):
         self._apply_auto_start()
 
