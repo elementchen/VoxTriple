@@ -27,14 +27,14 @@ void app_main(void)
 {
     /* Drive indicator LED low immediately so it stays off until a button press. */
     gpio_config_t led_cfg = {
-        .pin_bit_mask = (1ULL << GPIO_NUM_26),
+        .pin_bit_mask = (1ULL << GPIO_NUM_23),
         .mode = GPIO_MODE_OUTPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
     gpio_config(&led_cfg);
-    gpio_set_level(GPIO_NUM_26, 0);
+    gpio_set_level(GPIO_NUM_23, 0);
 
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  ESP32 Bluetooth Microphone - PTT Mode");

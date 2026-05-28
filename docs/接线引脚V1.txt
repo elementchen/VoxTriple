@@ -1,0 +1,50 @@
+VoxTriple v1.5 — 全部引脚右侧排 接线图
+============================================
+
+INMP441 → ESP32 (全部右侧排):
+  VDD  → 3V3          左侧排 Pin 1（唯一左侧引线）
+  GND  → GND          右侧排 Pin 1/7/19
+  L/R  → GND          左侧声道
+  SD   → GPIO 17      右侧排 Pin 11 (I2S DATA)
+  WS   → GPIO 22      右侧排 Pin 3  (I2S WS / LRCLK)
+  SCK  → GPIO 21      右侧排 Pin 6  (I2S BCK / BCLK)
+
+Button 1 → GPIO 18    右侧排 Pin 9  (快捷键)
+Button 2 → GPIO 19    右侧排 Pin 8  (快捷键)
+Button 3 → GPIO 16    右侧排 Pin 12 (快捷键)
+
+LED 指示灯:
+  GPIO23 → R1(220Ω) → LED阳极(A) → LED阴极(K) → GND
+  右侧排 Pin 2
+
+电源:
+  3V3  → INMP441 VDD  (唯一左侧引线，其他全部右侧)
+  GND  → 所有模块共地  (右侧排 Pin 1/7/19)
+
+ESP32 NodeMCU-32S 右侧排 (J2) 全貌:
+  Pin 1  GND         ← 接地
+  Pin 2  GPIO23      ← LED 指示灯
+  Pin 3  GPIO22      ← I2S WS (字选)
+  Pin 4  TXD/GPIO1   (保留)
+  Pin 5  RXD/GPIO3   (保留)
+  Pin 6  GPIO21      ← I2S BCK (位时钟)
+  Pin 7  GND         ← 接地
+  Pin 8  GPIO19      ← Button 2
+  Pin 9  GPIO18      ← Button 1
+  Pin 10 GPIO5       (保留)
+  Pin 11 GPIO17      ← I2S DATA (数据)
+  Pin 12 GPIO16      ← Button 3
+  Pin 13 GPIO4       (保留)
+  Pin 14 GPIO0       (BOOT引脚，不使用)
+  Pin 15 GPIO2       (保留)
+  Pin 16 GPIO15      (保留)
+  Pin 17 D1/GPIO8    (保留)
+  Pin 18 D0/GPIO7    (保留)
+  Pin 19 GND         ← 接地
+
+注意:
+  - INMP441 VDD 必须接 3.3V，绝不能接 5V（会烧毁麦克风）
+  - GPIO12 是启动引脚(MTDI)，不要使用
+  - GPIO0 是 BOOT 引脚，不能用作低电平按钮
+  - 按键低电平有效（按下短路到GND），使用ESP32内部上拉
+  - 所有模块共地

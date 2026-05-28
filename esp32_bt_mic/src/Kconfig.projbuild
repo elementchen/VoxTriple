@@ -8,13 +8,13 @@ menu "BT Microphone Configuration"
 
     config I2S_MIC_BCK_PIN
         int "I2S Bit Clock GPIO pin"
-        default 25
+        default 21
         help
             GPIO pin number for I2S SCK (bit clock) signal.
 
     config I2S_MIC_WS_PIN
         int "I2S Word Select GPIO pin"
-        default 33
+        default 22
         help
             GPIO pin number for I2S WS (word select) signal.
 
@@ -30,7 +30,7 @@ menu "BT Microphone Configuration"
 
     config BUTTON_2_GPIO
         int "Button 2 GPIO pin"
-        default 14
+        default 19
 
     config BUTTON_3_GPIO
         int "Button 3 GPIO pin"
