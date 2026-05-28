@@ -87,7 +87,7 @@ class VoxTripleApp:
 
         # Button state
         self._btn = []
-        for i in range(3):
+        for i in range(4):
             key = f"button{i+1}"
             b = self._cfg.get(key, {"vk_code": 0x0D, "modifier": 0})
             self._btn.append({
