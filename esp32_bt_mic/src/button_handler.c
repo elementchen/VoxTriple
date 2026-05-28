@@ -23,7 +23,7 @@ static const char *TAG = "BTN_HANDLER";
 #define BUTTON_TASK_STACK    4096
 #define BUTTON_TASK_PRIORITY 3
 
-#define INDICATOR_LED_GPIO   GPIO_NUM_23
+#define INDICATOR_LED_GPIO   GPIO_NUM_18
 
 static const gpio_num_t s_button_pins[BUTTON_NUM] = {
     CONFIG_BUTTON_1_GPIO,

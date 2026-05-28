@@ -9,13 +9,13 @@ INMP441 → ESP32 (全部右侧排):
   WS   → GPIO 22      右侧排 Pin 3  (I2S WS / LRCLK)
   SCK  → GPIO 21      右侧排 Pin 6  (I2S BCK / BCLK)
 
-Button 1 → GPIO 18    右侧排 Pin 9  (快捷键)
-Button 2 → GPIO 19    右侧排 Pin 8  (快捷键)
-Button 3 → GPIO 16    右侧排 Pin 12 (快捷键)
-Button 4 → GPIO 4     右侧排 Pin 13 (快捷键)
+Button 1 → GPIO 4     右侧排 Pin 13 (快捷键)
+Button 2 → GPIO 16    右侧排 Pin 12 (快捷键)
+Button 3 → GPIO 19    右侧排 Pin 8  (快捷键)
+Button 4 → GPIO 23    右侧排 Pin 2  (快捷键)
 
 LED 指示灯:
-  GPIO23 → R1(220Ω) → LED阳极(A) → LED阴极(K) → GND
+  GPIO18 → R1(220Ω) → LED阳极(A) → LED阴极(K) → GND
   右侧排 Pin 2
 
 电源:
@@ -24,18 +24,18 @@ LED 指示灯:
 
 ESP32 NodeMCU-32S 右侧排 (J2) 全貌:
   Pin 1  GND         ← 接地
-  Pin 2  GPIO23      ← LED 指示灯
+  Pin 2  GPIO23      ← Button 4
   Pin 3  GPIO22      ← I2S WS (字选)
   Pin 4  TXD/GPIO1   (保留)
   Pin 5  RXD/GPIO3   (保留)
   Pin 6  GPIO21      ← I2S BCK (位时钟)
   Pin 7  GND         ← 接地
-  Pin 8  GPIO19      ← Button 2
-  Pin 9  GPIO18      ← Button 1
+  Pin 8  GPIO19      ← Button 3
+  Pin 9  GPIO18      ← LED 指示灯
   Pin 10 GPIO5       (保留)
   Pin 11 GPIO17      ← I2S DATA (数据)
-  Pin 12 GPIO16      ← Button 3
-  Pin 13 GPIO4       (保留)
+  Pin 12 GPIO16      ← Button 2
+  Pin 13 GPIO4       ← Button 1
   Pin 14 GPIO0       (BOOT引脚，不使用)
   Pin 15 GPIO2       (保留)
   Pin 16 GPIO15      (保留)
