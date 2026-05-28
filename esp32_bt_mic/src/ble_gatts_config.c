@@ -37,7 +37,7 @@ static const char *TAG = "BLE_GATTS";
 #define GATTS_CHAR_SLEEP_MODE_UUID 0x2A07
 #define GATTS_CHAR_BTN4_MAP_UUID   0x2A08
 
-#define GATTS_NUM_HANDLES    16
+#define GATTS_NUM_HANDLES    24
 #define GATTS_APP_ID         0x01
 #define PREPARE_BUF_MAX_SIZE 1024
 
