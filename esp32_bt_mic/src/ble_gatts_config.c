@@ -99,23 +99,20 @@ static esp_ble_adv_params_t adv_params = {
 
 static void ble_init_adv_data(const char *name)
 {
-    /* BLE device name for keyboard (separate from Classic BT HFP name) */
-    char ble_name[32];
+    /* BLE device name for keyboard (separate from Classic BT HFP name).
+     * Keep short to fit in 31-byte advertising data budget. */
+    char ble_name[20];
     const uint8_t *addr = esp_bt_dev_get_address();
     if (addr) {
-        snprintf(ble_name, sizeof(ble_name), "ESP32_BT_KeyBoard_%02X", addr[5]);
+        snprintf(ble_name, sizeof(ble_name), "ESP32_KBD_%02X", addr[5]);
     } else {
-        snprintf(ble_name, sizeof(ble_name), "ESP32_BT_KeyBoard");
+        snprintf(ble_name, sizeof(ble_name), "ESP32_KBD");
     }
     esp_ble_gap_set_device_name(ble_name);
 
-    /* HID service 128-bit UUID (based on 0x1812) */
-    const uint8_t hid_uuid128[] = {
-        0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80,
-        0x00, 0x10, 0x00, 0x00, 0x12, 0x18, 0x00, 0x00,
-    };
-
-    /* Structured advertising: name, appearance=keyboard, HID service UUID */
+    /* Advertising data (must fit in 31 bytes):
+     * Flags(3) + TXPower(3) + Appearance(4) + 16bit-HID-UUID(4) + ShortName(2+14)
+     * = 30 bytes — just fits within BLE 31-byte limit */
     esp_ble_adv_data_t adv_data = {
         .set_scan_rsp       = false,
         .include_name       = true,
@@ -127,14 +124,33 @@ static void ble_init_adv_data(const char *name)
         .p_manufacturer_data = NULL,
         .service_data_len   = 0,
         .p_service_data     = NULL,
-        .service_uuid_len   = sizeof(hid_uuid128),
-        .p_service_uuid     = (uint8_t *)hid_uuid128,
+        .service_uuid_len   = 2,
+        .p_service_uuid     = NULL,  /* will be set via raw config below */
         .flag               = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
     };
 
     esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
     if (ret) {
-        ESP_LOGE(TAG, "config adv data failed, error code = 0x%x", ret);
+        ESP_LOGE(TAG, "config adv data failed (0x%x), trying raw", ret);
+
+        /* Fallback: raw advertising with HID 16-bit UUID */
+        uint8_t raw[30];
+        int p = 0;
+        raw[p++] = 0x02; raw[p++] = ESP_BLE_AD_TYPE_FLAG;
+        raw[p++] = ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT;
+        raw[p++] = 0x03; raw[p++] = ESP_BLE_AD_TYPE_APPEARANCE;
+        raw[p++] = 0xC1; raw[p++] = 0x03;  /* keyboard */
+        raw[p++] = 0x03; raw[p++] = ESP_BLE_AD_TYPE_16SRV_CMPL;
+        raw[p++] = 0x12; raw[p++] = 0x18;  /* HID UUID 0x1812 */
+        int name_len = (int)strlen(name);
+        raw[p++] = name_len + 1;
+        raw[p++] = ESP_BLE_AD_TYPE_NAME_SHORT;
+        memcpy(&raw[p], name, name_len);
+        p += name_len;
+        ret = esp_ble_gap_config_adv_data_raw(raw, p);
+        if (ret) {
+            ESP_LOGE(TAG, "config raw adv data failed, error code = 0x%x", ret);
+        }
     }
 
     /* Scan response: our custom 128-bit UUID (0x1820) for Python app */
