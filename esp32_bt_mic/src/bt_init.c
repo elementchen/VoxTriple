@@ -143,8 +143,8 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         pin_code[3] = '0';
         esp_bt_gap_set_pin(pin_type, 4, pin_code);
 
-        /* Set Classic BT TX power: load from NVS or default to max (+9dBm) */
-        uint8_t tx_power_level = 7;  /* Default: P9 (+9dBm) */
+        /* Set Classic BT TX power: load from NVS or default to 0 dBm */
+        uint8_t tx_power_level = 4;  /* Default: 0 dBm */
         if (config_storage_load_tx_power(&tx_power_level) != ESP_OK || tx_power_level > 7) {
             tx_power_level = 7;
         }

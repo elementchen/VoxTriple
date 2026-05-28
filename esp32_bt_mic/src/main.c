@@ -58,8 +58,8 @@ void app_main(void)
     ESP_ERROR_CHECK(bt_stack_init());
 
     /* Load and apply saved BT sleep mode setting.
-     * Default to disabled to prevent SCO audio latency caused by sniff mode. */
-    uint8_t sleep_mode = 0;
+     * Default to enabled for new devices. */
+    uint8_t sleep_mode = 1;
     if (config_storage_load_sleep_mode(&sleep_mode) == ESP_OK && sleep_mode) {
         esp_bt_sleep_enable();
         ESP_LOGI(TAG, "BT sleep mode enabled");

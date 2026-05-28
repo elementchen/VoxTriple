@@ -82,8 +82,8 @@ static uint8_t s_btn3_map[BTN_MAP_LEN] = {0x20, 0x00};  /* VK_SPACE */
 static uint8_t s_btn4_map[BTN_MAP_LEN] = {0x09, 0x00};  /* VK_TAB */
 static uint8_t s_btn_event[BTN_EVENT_CHAR_LEN] = {0, 0};
 static uint8_t s_dev_status[DEV_STATUS_CHAR_LEN] = {0, 0};
-static uint8_t s_tx_power = 7;     /* Default: +9 dBm (max) */
-static uint8_t s_sleep_mode = 0;   /* Default: disabled */
+static uint8_t s_tx_power = 4;     /* Default: 0 dBm */
+static uint8_t s_sleep_mode = 1;   /* Default: enabled */
 
 /* Advertising parameters */
 static esp_ble_adv_params_t adv_params = {

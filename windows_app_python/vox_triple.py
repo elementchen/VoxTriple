@@ -103,8 +103,8 @@ class VoxTripleApp:
         self._auto_start = tk.BooleanVar(value=self._cfg.get("auto_start", False))
         self._auto_start.trace_add("write", self._on_auto_start_changed)
 
-        self._tx_power = self._cfg.get("tx_power", 7)  # plain int, updated via combobox
-        self._sleep_mode = tk.BooleanVar(value=self._cfg.get("sleep_mode", False))
+        self._tx_power = self._cfg.get("tx_power", 4)  # plain int, updated via combobox
+        self._sleep_mode = tk.BooleanVar(value=self._cfg.get("sleep_mode", True))
 
         self._status_text = tk.StringVar(value="Ready. Click Scan & Connect.")
         self._last_event_text = tk.StringVar(value="None")
@@ -306,6 +306,9 @@ class VoxTripleApp:
             self._status_text.set("Write sleep mode failed.")
             return
         self._status_text.set("Settings written to device.")
+        # Reset status after 3 seconds to show connection info
+        self.root.after(3000, lambda: self._status_text.set(
+            f"Connected: {self.ble.address}" if self._connected else "Disconnected."))
 
     def _save_file(self):
         for i in range(4):
