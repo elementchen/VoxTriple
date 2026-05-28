@@ -306,9 +306,10 @@ class VoxTripleApp:
             self._status_text.set("Write sleep mode failed.")
             return
         self._status_text.set("Settings written to device.")
-        # Reset status after 3 seconds to show connection info
-        self.root.after(3000, lambda: self._status_text.set(
-            f"Connected: {self.ble.address}" if self._connected else "Disconnected."))
+        # Reset status after 3 seconds — use saved text, not live _connected
+        addr = self.ble.address
+        prev = f"Connected: {addr}" if addr else "Ready."
+        self.root.after(3000, lambda p=prev: self._status_text.set(p))
 
     def _save_file(self):
         for i in range(4):
