@@ -195,12 +195,12 @@ class VoxTripleApp:
         key_row.pack(fill="x")
         ttk.Label(key_row, text="Key:", width=5, font=("", 9, "bold")).pack(side="left")
         ttk.Label(key_row, textvariable=b["display"], width=18, relief="sunken", background="#f0f0f0").pack(side="left", padx=4)
-        self._cap_btns = getattr(self, "_cap_btns", [None, None, None])
+        self._cap_btns = getattr(self, "_cap_btns", [None, None, None, None])
         btn = ttk.Button(key_row, text="Capture Key / 捕获按键",
                          command=lambda idx=i: self._begin_capture(idx))
         btn.pack(side="left", padx=4)
         if not hasattr(self, "_cap_btns"):
-            self._cap_btns = [None, None, None]
+            self._cap_btns = [None, None, None, None]
         self._cap_btns[i] = btn
 
         mod_frame = ttk.Frame(group)
