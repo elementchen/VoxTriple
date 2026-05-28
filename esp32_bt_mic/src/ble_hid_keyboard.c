@@ -274,7 +274,9 @@ void ble_hid_send_key(uint8_t vk_code, uint8_t modifier, bool pressed)
 {
     if (!s_hid_dev) return;
 
-    uint8_t report[8] = {0};
+    /* Standard boot keyboard input report (7 bytes without report ID):
+     * [0]=modifier  [1]=reserved(0)  [2-6]=keycode slots */
+    uint8_t report[7] = {0};
 
     if (pressed) {
         report[0] = vk_mod_to_hid(modifier);

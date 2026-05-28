@@ -99,52 +99,64 @@ static esp_ble_adv_params_t adv_params = {
 
 static void ble_init_adv_data(const char *name)
 {
-    /* BTDM mode shares device name between Classic BT and BLE.
-     * Classic BT GAP already set name to "ESP32_BT_MIC_XX" in bt_stack_up_handler.
-     * We advertise the same name — Windows distinguishes keyboard vs audio by
-     * the HID service UUID in BLE advertising vs the HFP profile in Classic BT. */
-
-    /* BLE SMP — Secure Connections bonding, no I/O capability.
-     * Windows requires bonding for HID keyboards but will auto-pair
-     * when IO_CAP_NONE (no user confirmation needed). */
+    /* BLE SMP — Secure Connections bonding, no I/O capability. */
     esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_BOND;
     esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;
     esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, 1);
     esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap, 1);
 
-    /* Raw advertising (fits within BLE 31-byte limit):
-     * Flags(3) + Appearance(4) + 16bit-HID-UUID(4) + ShortName(2+name_len)
-     * DO NOT set BREDR_NOT_SPT — we are dual-mode (BTDM) for HFP audio */
-    uint8_t raw[31];
-    int p = 0;
-    raw[p++] = 0x02; raw[p++] = ESP_BLE_AD_TYPE_FLAG;
-    raw[p++] = ESP_BLE_ADV_FLAG_GEN_DISC;  /* no BREDR_NOT_SPT */
-    raw[p++] = 0x03; raw[p++] = ESP_BLE_AD_TYPE_APPEARANCE;
-    raw[p++] = 0xC1; raw[p++] = 0x03;  /* HID Keyboard */
-    raw[p++] = 0x03; raw[p++] = ESP_BLE_AD_TYPE_16SRV_CMPL;
-    raw[p++] = 0x12; raw[p++] = 0x18;  /* HID UUID 0x1812 */
-    int name_len = (int)strlen(name);
-    raw[p++] = (uint8_t)(name_len + 1);
-    raw[p++] = ESP_BLE_AD_TYPE_NAME_SHORT;
-    memcpy(&raw[p], name, name_len);
-    p += name_len;
+    /* 128-bit HID service UUID for advertising */
+    const uint8_t hid_uuid128[] = {
+        0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80,
+        0x00, 0x10, 0x00, 0x00, 0x12, 0x18, 0x00, 0x00,
+    };
 
-    esp_err_t ret = esp_ble_gap_config_adv_data_raw(raw, p);
+    /* Structured advertising — the stack manages 31-byte budget:
+     * puts name in scan-rsp if needed, splits fields intelligently */
+    esp_ble_adv_data_t adv_data = {
+        .set_scan_rsp       = false,
+        .include_name       = true,
+        .include_txpower    = true,
+        .appearance         = 0x03C1,  /* HID Keyboard */
+        .min_interval       = 0x0006,
+        .max_interval       = 0x0010,
+        .manufacturer_len   = 0,
+        .p_manufacturer_data = NULL,
+        .service_data_len   = 0,
+        .p_service_data     = NULL,
+        .service_uuid_len   = sizeof(hid_uuid128),
+        .p_service_uuid     = (uint8_t *)hid_uuid128,
+        .flag               = ESP_BLE_ADV_FLAG_GEN_DISC,
+    };
+
+    esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
     if (ret) {
-        ESP_LOGE(TAG, "config raw adv data failed, error code = 0x%x", ret);
+        ESP_LOGW(TAG, "config adv data failed (0x%x), using raw fallback", ret);
+        /* Fallback: minimal raw advertising */
+        uint8_t raw[31];
+        int p = 0;
+        raw[p++] = 0x02; raw[p++] = ESP_BLE_AD_TYPE_FLAG;
+        raw[p++] = ESP_BLE_ADV_FLAG_GEN_DISC;
+        raw[p++] = 0x03; raw[p++] = ESP_BLE_AD_TYPE_APPEARANCE;
+        raw[p++] = 0xC1; raw[p++] = 0x03;
+        raw[p++] = 17; raw[p++] = ESP_BLE_AD_TYPE_128SRV_CMPL;
+        memcpy(&raw[p], hid_uuid128, 16); p += 16;
+        ret = esp_ble_gap_config_adv_data_raw(raw, p);
+        if (ret) {
+            ESP_LOGE(TAG, "raw adv data failed: 0x%x", ret);
+        }
     }
 
-    /* Scan response: our custom 128-bit UUID (0x1820) for Python app */
+    /* Scan response: our custom 128-bit UUID for Python app discovery */
     uint8_t scan_rsp[18];
     scan_rsp[0] = 17;
     scan_rsp[1] = ESP_BLE_AD_TYPE_128SRV_CMPL;
     uint8_t uuid128[16] = {0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80,
                            0x00, 0x10, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00};
     memcpy(&scan_rsp[2], uuid128, 16);
-
     ret = esp_ble_gap_config_scan_rsp_data_raw(scan_rsp, sizeof(scan_rsp));
     if (ret) {
-        ESP_LOGE(TAG, "config raw scan rsp data failed, error code = 0x%x", ret);
+        ESP_LOGE(TAG, "scan rsp data failed: 0x%x", ret);
     }
 }
 
@@ -573,7 +585,10 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         break;
 
     case ESP_GATTS_CONNECT_EVT: {
-        ESP_LOGI(TAG, "BLE connected, conn_id %d", param->connect.conn_id);
+        /* Only handle events for our custom GATT app (not HID app) */
+        if (gatts_if != s_gatts_if) break;
+
+        ESP_LOGI(TAG, "BLE client connected, conn_id %d", param->connect.conn_id);
         s_conn_id = param->connect.conn_id;
         s_ble_connected = true;
         /* Request fast connection interval for low-latency keyboard events */
@@ -585,10 +600,9 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         conn_params.timeout = 500;
         esp_ble_gap_update_conn_params(&conn_params);
 
-        /* BLE-triggered HFP reconnect: when the desktop app connects via
-         * BLE, automatically re-establish the classic Bluetooth HFP link
-         * to the last paired Windows device. Saves the user from opening
-         * Windows Bluetooth settings after each reboot. */
+        /* Keep advertising so the Python config app can also connect */
+        esp_ble_gap_start_advertising(&adv_params);
+
         if (!bt_hfp_is_connected()) {
             esp_bd_addr_t saved_addr = {0};
             if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
@@ -602,7 +616,9 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     }
 
     case ESP_GATTS_DISCONNECT_EVT: {
-        ESP_LOGI(TAG, "BLE disconnected, restarting advertising");
+        if (gatts_if != s_gatts_if) break;
+
+        ESP_LOGI(TAG, "BLE client disconnected, restarting advertising");
         s_ble_connected = false;
         s_conn_id = 0;
         esp_ble_gap_start_advertising(&adv_params);
