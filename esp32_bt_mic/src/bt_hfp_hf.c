@@ -438,6 +438,12 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
              * across multiple SCO start/stop cycles. Avoids per-cycle
              * create/delete races that cause "invalid air mode: 255". */
             bt_app_work_dispatch(audio_start_handler, 0, NULL, 0, NULL);
+
+            /* HFP connected — now start BLE keyboard advertising.
+             * Deferred until HFP is stable to avoid BTDM security
+             * manager conflicts and ensure user connects audio first. */
+            extern void ble_gatts_adv_start(void);
+            ble_gatts_adv_start();
         } else if (param->conn_stat.state == ESP_HF_CLIENT_CONNECTION_STATE_DISCONNECTED) {
             /* Stop audio pipeline when HFP disconnects entirely */
             bt_app_work_dispatch(audio_stop_handler, 0, NULL, 0, NULL);

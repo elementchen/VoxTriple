@@ -160,25 +160,15 @@ static void ble_init_adv_data(const char *name)
     }
 }
 
-static void delayed_adv_start_cb(TimerHandle_t xTimer)
-{
-    esp_ble_gap_start_advertising(&adv_params);
-}
-
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
     switch (event) {
     case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
         break;
     case ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
-        /* Delay BLE advertising 5s — let Classic BT HFP connect first
-         * to avoid BTDM Security Manager conflicts. */
-        {
-            static TimerHandle_t adv_timer;
-            adv_timer = xTimerCreate("adv_dly", pdMS_TO_TICKS(5000),
-                                     pdFALSE, NULL, delayed_adv_start_cb);
-            if (adv_timer) xTimerStart(adv_timer, 0);
-        }
+        /* Don't start advertising yet — wait for HFP to connect first.
+         * BLE keyboard advertising is triggered by HFP SLC_CONNECTED
+         * in bt_hfp_hf.c via ble_gatts_adv_start(). */
         break;
     case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
         if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS) {
