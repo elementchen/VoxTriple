@@ -84,8 +84,8 @@ static void button_task_func(void *arg)
                     /* Wake HFP ACL from sniff to reduce SCO open latency */
                     bt_hfp_hf_wake_acl();
 
-                    /* Indicator LED on Button 1 press */
-                    if (i == 0) gpio_set_level(INDICATOR_LED_GPIO, 1);
+                    /* Indicator LED on Button 1 press — only if BLE is connected */
+                    if (i == 0 && ble_gatts_is_connected()) gpio_set_level(INDICATOR_LED_GPIO, 1);
 
                     /* BLE notification for keyboard shortcut */
                     ble_send_button_event(i, 1);

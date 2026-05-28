@@ -91,7 +91,7 @@ class VoxTripleApp:
         self._tx_power = self._cfg.get("tx_power", 4)
         self._sleep_mode = tk.BooleanVar(value=self._cfg.get("sleep_mode", True))
 
-        self._status_text = tk.StringVar(value="Ready. Click Scan & Connect.")
+        self._status_text = tk.StringVar(value="Searching for device...")
         self._last_event_text = tk.StringVar(value="None")
         self._connected = False
 
@@ -111,7 +111,7 @@ class VoxTripleApp:
 
         btn_frame = ttk.Frame(conn_frame)
         btn_frame.pack(fill="x")
-        ttk.Button(btn_frame, text="Scan & Connect", command=self._scan_connect).pack(side="left", **pad)
+        ttk.Button(btn_frame, text="Pair New", command=self._scan_connect).pack(side="left", **pad)
         ttk.Button(btn_frame, text="Disconnect", command=self._disconnect).pack(side="left", **pad)
         ttk.Label(conn_frame, textvariable=self._status_text, foreground="gray").pack(anchor="w", **pad)
 
@@ -262,7 +262,7 @@ class VoxTripleApp:
             ok = await self.ble.connect(addr)
             if ok:
                 self._connected = True
-                self._status_text.set(f"Auto-connected: {addr}")
+                self._status_text.set(f"Connected: {addr}")
                 for i in range(4):
                     r = await self.ble.read_button_mapping(i)
                     if r:
@@ -277,6 +277,8 @@ class VoxTripleApp:
                 sl = await self.ble.read_sleep_mode()
                 if sl is not None:
                     self._sleep_mode.set(bool(sl))
+                return
+        self._status_text.set("Device not found. Click 'Pair New' or check power.")
 
     def _disconnect(self):
         _run_async(self.ble.disconnect())
