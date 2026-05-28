@@ -35,6 +35,7 @@ static const char *TAG = "BLE_GATTS";
 #define GATTS_CHAR_DEV_STATUS_UUID 0x2A05
 #define GATTS_CHAR_TX_POWER_UUID   0x2A06
 #define GATTS_CHAR_SLEEP_MODE_UUID 0x2A07
+#define GATTS_CHAR_BTN4_MAP_UUID   0x2A08
 
 #define GATTS_NUM_HANDLES    16
 #define GATTS_APP_ID         0x01
@@ -61,6 +62,7 @@ static uint16_t s_service_handle = 0;
 static uint16_t s_btn1_map_handle = 0;
 static uint16_t s_btn2_map_handle = 0;
 static uint16_t s_btn3_map_handle = 0;
+static uint16_t s_btn4_map_handle = 0;
 static uint16_t s_btn_event_handle = 0;
 static uint16_t s_dev_status_handle = 0;
 static uint16_t s_tx_power_handle = 0;
@@ -77,6 +79,7 @@ static bool s_ble_connected = false;
 static uint8_t s_btn1_map[BTN_MAP_LEN] = {0x0D, 0x00};  /* VK_RETURN */
 static uint8_t s_btn2_map[BTN_MAP_LEN] = {0x1B, 0x00};  /* VK_ESCAPE */
 static uint8_t s_btn3_map[BTN_MAP_LEN] = {0x20, 0x00};  /* VK_SPACE */
+static uint8_t s_btn4_map[BTN_MAP_LEN] = {0x09, 0x00};  /* VK_TAB */
 static uint8_t s_btn_event[BTN_EVENT_CHAR_LEN] = {0, 0};
 static uint8_t s_dev_status[DEV_STATUS_CHAR_LEN] = {0, 0};
 static uint8_t s_tx_power = 7;     /* Default: +9 dBm (max) */
@@ -324,11 +327,18 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 break;
             case 3: /* Button 3 Map */
                 s_btn3_map_handle = param->add_char.attr_handle;
+                config_storage_load_button(BUTTON_ID_4, &s_btn4_map[0], &s_btn4_map[1]);
+                add_characteristic(s_service_handle, &s_btn4_map_handle,
+                                   GATTS_CHAR_BTN4_MAP_UUID, s_char_property,
+                                   s_btn4_map, BTN_MAP_LEN, NULL);
+                break;
+            case 4: /* Button 4 Map */
+                s_btn4_map_handle = param->add_char.attr_handle;
                 add_characteristic(s_service_handle, &s_btn_event_handle,
                                    GATTS_CHAR_BTN_EVENT_UUID, s_char_property,
                                    s_btn_event, BTN_EVENT_CHAR_LEN, NULL);
                 break;
-            case 4: /* Button Event - add CCCD for it */
+            case 5: /* Button Event - add CCCD for it */
                 s_btn_event_handle = param->add_char.attr_handle;
                 {
                 esp_bt_uuid_t descr_uuid;
@@ -342,7 +352,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 }
                 }
                 break;
-            case 5: /* Device Status - add CCCD for it */
+            case 6: /* Device Status - add CCCD for it */
                 s_dev_status_handle = param->add_char.attr_handle;
                 {
                 esp_bt_uuid_t descr_uuid;
@@ -356,13 +366,13 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 }
                 }
                 break;
-            case 6: /* TX Power - add Sleep Mode characteristic */
+            case 7: /* TX Power - add Sleep Mode characteristic */
                 s_tx_power_handle = param->add_char.attr_handle;
                 add_characteristic(s_service_handle, &s_sleep_mode_handle,
                                    GATTS_CHAR_SLEEP_MODE_UUID, s_char_property,
                                    &s_sleep_mode, 1, NULL);
                 break;
-            case 7: /* Sleep Mode - all characteristics done, start service */
+            case 8: /* Sleep Mode - all characteristics done, start service */
                 s_sleep_mode_handle = param->add_char.attr_handle;
                 {
                 esp_err_t ret = esp_ble_gatts_start_service(s_service_handle);
@@ -420,6 +430,9 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         } else if (param->read.handle == s_btn3_map_handle) {
             rsp.attr_value.len = BTN_MAP_LEN;
             memcpy(rsp.attr_value.value, s_btn3_map, BTN_MAP_LEN);
+        } else if (param->read.handle == s_btn4_map_handle) {
+            rsp.attr_value.len = BTN_MAP_LEN;
+            memcpy(rsp.attr_value.value, s_btn4_map, BTN_MAP_LEN);
         } else if (param->read.handle == s_btn_event_handle) {
             rsp.attr_value.len = BTN_EVENT_CHAR_LEN;
             memcpy(rsp.attr_value.value, s_btn_event, BTN_EVENT_CHAR_LEN);
@@ -467,6 +480,13 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 s_btn3_map[1] = param->write.value[1];
                 config_storage_save_button(BUTTON_ID_3, s_btn3_map[0], s_btn3_map[1]);
                 ESP_LOGI(TAG, "Button 3 mapped to VK=0x%02X, MOD=0x%02X", s_btn3_map[0], s_btn3_map[1]);
+            }
+            /* Handle Button 4 Map write */
+            else if (param->write.handle == s_btn4_map_handle && param->write.len >= BTN_MAP_LEN) {
+                s_btn4_map[0] = param->write.value[0];
+                s_btn4_map[1] = param->write.value[1];
+                config_storage_save_button(BUTTON_ID_4, s_btn4_map[0], s_btn4_map[1]);
+                ESP_LOGI(TAG, "Button 4 mapped to VK=0x%02X, MOD=0x%02X", s_btn4_map[0], s_btn4_map[1]);
             }
             /* Handle TX Power write (1 byte, 0-7) */
             else if (param->write.handle == s_tx_power_handle && param->write.len >= 1) {
@@ -638,6 +658,10 @@ void ble_get_button_mapping(uint8_t button_id, uint8_t *vk_code, uint8_t *modifi
     case BUTTON_ID_3:
         *vk_code = s_btn3_map[0];
         *modifier = s_btn3_map[1];
+        break;
+    case BUTTON_ID_4:
+        *vk_code = s_btn4_map[0];
+        *modifier = s_btn4_map[1];
         break;
     default:
         *vk_code = 0;

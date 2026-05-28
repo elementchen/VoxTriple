@@ -31,6 +31,7 @@ def load() -> dict:
         "button1": {"vk_code": 0x0D, "modifier": 0x00},
         "button2": {"vk_code": 0x1B, "modifier": 0x00},
         "button3": {"vk_code": 0x20, "modifier": 0x00},
+        "button4": {"vk_code": 0x09, "modifier": 0x00},
     }
 
 

@@ -12,6 +12,7 @@ INMP441 → ESP32 (全部右侧排):
 Button 1 → GPIO 18    右侧排 Pin 9  (快捷键)
 Button 2 → GPIO 19    右侧排 Pin 8  (快捷键)
 Button 3 → GPIO 16    右侧排 Pin 12 (快捷键)
+Button 4 → GPIO 4     右侧排 Pin 13 (快捷键)
 
 LED 指示灯:
   GPIO23 → R1(220Ω) → LED阳极(A) → LED阴极(K) → GND

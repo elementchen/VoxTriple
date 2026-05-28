@@ -18,10 +18,12 @@ static const uint8_t s_default_vk[BUTTON_NUM] = {
     0x0D,  /* VK_RETURN (Enter) */
     0x1B,  /* VK_ESCAPE (Esc) */
     0x20,  /* VK_SPACE (Space) */
+    0x09,  /* VK_TAB (Tab) */
 };
 
 static const uint8_t s_default_mod[BUTTON_NUM] = {
     0x00,  /* No modifier */
+    0x00,
     0x00,
     0x00,
 };
@@ -30,6 +32,7 @@ static const char *s_nvs_keys[BUTTON_NUM] = {
     NVS_KEY_BTN1_MAP,
     NVS_KEY_BTN2_MAP,
     NVS_KEY_BTN3_MAP,
+    NVS_KEY_BTN4_MAP,
 };
 
 void config_storage_init(void)

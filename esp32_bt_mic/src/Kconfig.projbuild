@@ -36,6 +36,10 @@ menu "BT Microphone Configuration"
         int "Button 3 GPIO pin"
         default 16
 
+    config BUTTON_4_GPIO
+        int "Button 4 GPIO pin"
+        default 4
+
     config WS2812_GPIO
         int "WS2812 LED data GPIO pin"
         default 15

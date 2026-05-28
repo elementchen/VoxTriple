@@ -73,8 +73,8 @@ class VoxTripleApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title("VoxTriple — ESP32 BT Mic Config (Python)")
-        root.geometry("620x780")
-        root.minsize(580, 740)
+        root.geometry("620x840")
+        root.minsize(580, 800)
         root.resizable(True, True)
 
         self.ble = ble_client.BleClient()
@@ -138,8 +138,8 @@ class VoxTripleApp:
         self._audio_label = ttk.Label(status_sub, text="Audio: --", font=("", 9, "bold"))
         self._audio_label.pack(side="left", padx=8)
 
-        # 3 button groups
-        for i in range(3):
+        # 4 button groups
+        for i in range(4):
             self._build_button_group(i)
 
         # Last event
@@ -236,7 +236,7 @@ class VoxTripleApp:
             config_service.save(self._cfg)
             self._status_text.set(f"Connected: {addr}")
             # Read mappings
-            for i in range(3):
+            for i in range(4):
                 r = await self.ble.read_button_mapping(i)
                 if r:
                     self._btn[i]["vk"].set(r[0])
@@ -260,7 +260,7 @@ class VoxTripleApp:
             if ok:
                 self._connected = True
                 self._status_text.set(f"Auto-connected: {addr}")
-                for i in range(3):
+                for i in range(4):
                     r = await self.ble.read_button_mapping(i)
                     if r:
                         self._btn[i]["vk"].set(r[0])
@@ -286,7 +286,7 @@ class VoxTripleApp:
         _run_async(self._do_write_device())
 
     async def _do_write_device(self):
-        for i in range(3):
+        for i in range(4):
             vk = self._btn[i]["vk"].get()
             mod = _build_modifier(self._btn[i]["mod_vars"])
             ok = await self.ble.write_button_mapping(i, vk, mod)
@@ -304,7 +304,7 @@ class VoxTripleApp:
         self._status_text.set("Settings written to device.")
 
     def _save_file(self):
-        for i in range(3):
+        for i in range(4):
             key = f"button{i+1}"
             self._cfg[key] = {
                 "vk_code": self._btn[i]["vk"].get(),
@@ -318,7 +318,7 @@ class VoxTripleApp:
 
     def _load_file(self):
         self._cfg = config_service.load()
-        for i in range(3):
+        for i in range(4):
             key = f"button{i+1}"
             b = self._cfg.get(key, {"vk_code": 0x0D, "modifier": 0})
             self._btn[i]["vk"].set(b["vk_code"])

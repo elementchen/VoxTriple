@@ -20,6 +20,7 @@ CHAR_BTN_EVENT   = "00002a04-0000-1000-8000-00805f9b34fb"
 CHAR_DEV_STATUS  = "00002a05-0000-1000-8000-00805f9b34fb"
 CHAR_TX_POWER    = "00002a06-0000-1000-8000-00805f9b34fb"
 CHAR_SLEEP_MODE  = "00002a07-0000-1000-8000-00805f9b34fb"
+CHAR_BTN4_MAP    = "00002a08-0000-1000-8000-00805f9b34fb"
 
 
 class BleClient:
@@ -34,7 +35,7 @@ class BleClient:
         self.on_status = None         # callback(hfp: int, audio: int)
 
         # Characteristic handles (resolved from our service only)
-        self._ch = [None, None, None]       # BTN1_MAP, BTN2_MAP, BTN3_MAP
+        self._ch = [None, None, None, None]  # BTN1_MAP, BTN2_MAP, BTN3_MAP, BTN4_MAP
         self._ch_event: BleakGATTCharacteristic | None = None
         self._ch_status: BleakGATTCharacteristic | None = None
         self._ch_tx_power: BleakGATTCharacteristic | None = None
@@ -81,7 +82,7 @@ class BleClient:
                 return False
 
             # Resolve characteristics by handle WITHIN our service
-            char_uuids = [CHAR_BTN1_MAP, CHAR_BTN2_MAP, CHAR_BTN3_MAP]
+            char_uuids = [CHAR_BTN1_MAP, CHAR_BTN2_MAP, CHAR_BTN3_MAP, CHAR_BTN4_MAP]
             for i, uid in enumerate(char_uuids):
                 for c in svc.characteristics:
                     if c.uuid.lower() == uid:
@@ -124,7 +125,7 @@ class BleClient:
         self._connected = False
 
     async def read_button_mapping(self, idx: int) -> tuple[int, int] | None:
-        if idx < 0 or idx > 2 or not self._client or not self._ch[idx]:
+        if idx < 0 or idx > 3 or not self._client or not self._ch[idx]:
             return None
         try:
             data = await self._client.read_gatt_char(self._ch[idx])
@@ -135,7 +136,7 @@ class BleClient:
         return None
 
     async def write_button_mapping(self, idx: int, vk: int, mod: int) -> bool:
-        if idx < 0 or idx > 2 or not self._client or not self._ch[idx]:
+        if idx < 0 or idx > 3 or not self._client or not self._ch[idx]:
             return False
         try:
             await self._client.write_gatt_char(self._ch[idx], bytes([vk, mod]), response=True)

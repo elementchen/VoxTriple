@@ -13,12 +13,13 @@
 #include "esp_err.h"
 
 #define NVS_NAMESPACE  "bt_mic_cfg"
-#define BUTTON_NUM     3
+#define BUTTON_NUM     4
 
 /* NVS key names for button mappings */
 #define NVS_KEY_BTN1_MAP  "btn1_map"
 #define NVS_KEY_BTN2_MAP  "btn2_map"
 #define NVS_KEY_BTN3_MAP  "btn3_map"
+#define NVS_KEY_BTN4_MAP  "btn4_map"
 
 /**
  * @brief Initialize NVS configuration storage

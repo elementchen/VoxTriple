@@ -37,6 +37,7 @@
 #define BUTTON_ID_1   0
 #define BUTTON_ID_2   1
 #define BUTTON_ID_3   2
+#define BUTTON_ID_4   3
 
 /* Device status */
 #define DEVICE_STATUS_LEN  2
