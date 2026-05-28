@@ -372,7 +372,7 @@ class VoxTripleApp:
     def _handle_button_event(self, btn_id: int, state: int):
         s = "PRESSED" if state == 1 else "RELEASED"
         self._last_event_text.set(f"Button {btn_id + 1} {s}")
-        if btn_id < 0 or btn_id > 2:
+        if btn_id < 0 or btn_id > 3:
             return
         vk = self._btn[btn_id]["vk"].get()
         if vk == 0:

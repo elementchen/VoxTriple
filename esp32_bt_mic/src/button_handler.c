@@ -29,6 +29,7 @@ static const gpio_num_t s_button_pins[BUTTON_NUM] = {
     CONFIG_BUTTON_1_GPIO,
     CONFIG_BUTTON_2_GPIO,
     CONFIG_BUTTON_3_GPIO,
+    CONFIG_BUTTON_4_GPIO,
 };
 
 typedef enum {
@@ -54,8 +55,8 @@ static void button_task_func(void *arg)
     memset(press_time, 0, sizeof(press_time));
     memset(last_change, 0, sizeof(last_change));
 
-    ESP_LOGI(TAG, "Button task started (GPIOs: %d, %d, %d)",
-             s_button_pins[0], s_button_pins[1], s_button_pins[2]);
+    ESP_LOGI(TAG, "Button task started (GPIOs: %d, %d, %d, %d)",
+             s_button_pins[0], s_button_pins[1], s_button_pins[2], s_button_pins[3]);
 
     while (s_btn_task_running) {
         now = xTaskGetTickCount() * portTICK_PERIOD_MS;
@@ -83,7 +84,7 @@ static void button_task_func(void *arg)
                     /* Wake HFP ACL from sniff to reduce SCO open latency */
                     bt_hfp_hf_wake_acl();
 
-                    /* Indicator LED on Button 1 */
+                    /* Indicator LED on Button 1 press */
                     if (i == 0) gpio_set_level(INDICATOR_LED_GPIO, 1);
 
                     /* BLE notification for keyboard shortcut */

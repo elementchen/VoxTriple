@@ -128,10 +128,26 @@ static void apply_noise_gate(uint8_t *buf, size_t len)
     }
 }
 
+/* Digital gain: multiply each 16-bit sample, clamp to int16 range */
+#define AUDIO_GAIN_MULTIPLIER  3
+
+static void apply_gain(uint8_t *buf, size_t len)
+{
+    int16_t *samples = (int16_t *)buf;
+    size_t count = len / 2;
+    for (size_t i = 0; i < count; i++) {
+        int32_t s = (int32_t)samples[i] * AUDIO_GAIN_MULTIPLIER;
+        if (s > 32767)      s = 32767;
+        else if (s < -32768) s = -32768;
+        samples[i] = (int16_t)s;
+    }
+}
+
 static void audio_dsp_process(uint8_t *buf, size_t len)
 {
     apply_hpf(buf, len);               /* remove low-frequency rumble */
     apply_moving_average(buf, len);    /* smooth digital hiss/spikes */
+    apply_gain(buf, len);              /* boost volume (3x = ~9.5dB) */
     // apply_noise_gate(buf, len);     /* uncomment to enable gate */
 }
 

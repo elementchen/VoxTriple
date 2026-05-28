@@ -91,6 +91,8 @@ void app_main(void)
     /* Suppress all INFO logs to reduce serial traffic and CPU load.
      * Only WARN/ERROR will appear. Comment this line to restore debug logs. */
     esp_log_level_set("*", ESP_LOG_WARN);
+    esp_log_level_set("BTN_HANDLER", ESP_LOG_DEBUG);
+    esp_log_level_set("BLE_GATTS", ESP_LOG_DEBUG);
 
     /* Main task done - other tasks handle everything */
     while (1) {
