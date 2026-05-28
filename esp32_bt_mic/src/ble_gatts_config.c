@@ -104,6 +104,14 @@ static void ble_init_adv_data(const char *name)
      * We advertise the same name — Windows distinguishes keyboard vs audio by
      * the HID service UUID in BLE advertising vs the HFP profile in Classic BT. */
 
+    /* BLE SMP — Secure Connections bonding, no I/O capability.
+     * Windows requires bonding for HID keyboards but will auto-pair
+     * when IO_CAP_NONE (no user confirmation needed). */
+    esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_BOND;
+    esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;
+    esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, 1);
+    esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap, 1);
+
     /* Raw advertising (fits within BLE 31-byte limit):
      * Flags(3) + Appearance(4) + 16bit-HID-UUID(4) + ShortName(2+name_len)
      * DO NOT set BREDR_NOT_SPT — we are dual-mode (BTDM) for HFP audio */
@@ -140,13 +148,25 @@ static void ble_init_adv_data(const char *name)
     }
 }
 
+static void delayed_adv_start_cb(TimerHandle_t xTimer)
+{
+    esp_ble_gap_start_advertising(&adv_params);
+}
+
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
     switch (event) {
     case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
         break;
     case ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
-        esp_ble_gap_start_advertising(&adv_params);
+        /* Delay BLE advertising 5s — let Classic BT HFP connect first
+         * to avoid BTDM Security Manager conflicts. */
+        {
+            static TimerHandle_t adv_timer;
+            adv_timer = xTimerCreate("adv_dly", pdMS_TO_TICKS(5000),
+                                     pdFALSE, NULL, delayed_adv_start_cb);
+            if (adv_timer) xTimerStart(adv_timer, 0);
+        }
         break;
     case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
         if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS) {
