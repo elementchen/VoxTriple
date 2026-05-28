@@ -12,6 +12,7 @@
 #include "esp_log.h"
 #include "button_handler.h"
 #include "ble_gatts_config.h"
+#include "ble_hid_keyboard.h"
 #include "config_storage.h"
 #include "bt_init.h"
 
@@ -87,8 +88,11 @@ static void button_task_func(void *arg)
                     /* Indicator LED on Button 1 press — only if BLE is connected */
                     if (i == 0 && ble_gatts_is_connected()) gpio_set_level(INDICATOR_LED_GPIO, 1);
 
-                    /* BLE notification for keyboard shortcut */
+                    /* BLE notification for keyboard shortcut (Python app display) */
                     ble_send_button_event(i, 1);
+
+                    /* Send HID keyboard report directly to Windows/Mac */
+                    ble_hid_send_key(ble_get_button_vk(i), ble_get_button_mod(i), true);
                 }
                 break;
 
@@ -102,6 +106,9 @@ static void button_task_func(void *arg)
 
                     /* BLE notification for keyboard shortcut release */
                     ble_send_button_event(i, 0);
+
+                    /* Release HID keyboard key */
+                    ble_hid_send_key(ble_get_button_vk(i), ble_get_button_mod(i), false);
 
                     state[i] = BTN_STATE_IDLE;
                 }

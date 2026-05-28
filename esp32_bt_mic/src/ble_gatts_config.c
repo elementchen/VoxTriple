@@ -14,8 +14,10 @@
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
 #include "esp_bt_defs.h"
+#include "esp_bt_device.h"
 #include "esp_gatt_common_api.h"
 #include "esp_bt.h"
+#include "esp_hidd.h"
 #include "ble_gatts_config.h"
 #include "config_storage.h"
 #include "bt_init.h"
@@ -97,31 +99,45 @@ static esp_ble_adv_params_t adv_params = {
 
 static void ble_init_adv_data(const char *name)
 {
-    int name_len = strlen(name);
-    /* BLE advertising data max 31 bytes.
-     * AD1: Flags (3 bytes)
-     * AD2: Short name (2 + name_len bytes) — fits within 31-byte limit
-     * Service UUID goes in scan response data. */
-    uint8_t raw_adv_data[3 + 2 + name_len];
-    int pos = 0;
+    /* BLE device name for keyboard (separate from Classic BT HFP name) */
+    char ble_name[32];
+    const uint8_t *addr = esp_bt_dev_get_address();
+    if (addr) {
+        snprintf(ble_name, sizeof(ble_name), "ESP32_BT_KeyBoard_%02X", addr[5]);
+    } else {
+        snprintf(ble_name, sizeof(ble_name), "ESP32_BT_KeyBoard");
+    }
+    esp_ble_gap_set_device_name(ble_name);
 
-    /* Flags: General Discoverable, dual-mode (no BREDR_NOT_SPT) */
-    raw_adv_data[pos++] = 2;
-    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_FLAG;
-    raw_adv_data[pos++] = ESP_BLE_ADV_FLAG_GEN_DISC;
+    /* HID service 128-bit UUID (based on 0x1812) */
+    const uint8_t hid_uuid128[] = {
+        0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80,
+        0x00, 0x10, 0x00, 0x00, 0x12, 0x18, 0x00, 0x00,
+    };
 
-    /* Shortened Local Name */
-    raw_adv_data[pos++] = name_len + 1;
-    raw_adv_data[pos++] = ESP_BLE_AD_TYPE_NAME_SHORT;
-    memcpy(&raw_adv_data[pos], name, name_len);
-    pos += name_len;
+    /* Structured advertising: name, appearance=keyboard, HID service UUID */
+    esp_ble_adv_data_t adv_data = {
+        .set_scan_rsp       = false,
+        .include_name       = true,
+        .include_txpower    = true,
+        .appearance         = 0x03C1,  /* HID Keyboard */
+        .min_interval       = 0x0006,
+        .max_interval       = 0x0010,
+        .manufacturer_len   = 0,
+        .p_manufacturer_data = NULL,
+        .service_data_len   = 0,
+        .p_service_data     = NULL,
+        .service_uuid_len   = sizeof(hid_uuid128),
+        .p_service_uuid     = (uint8_t *)hid_uuid128,
+        .flag               = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
+    };
 
-    esp_err_t ret = esp_ble_gap_config_adv_data_raw(raw_adv_data, sizeof(raw_adv_data));
+    esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
     if (ret) {
-        ESP_LOGE(TAG, "config raw adv data failed, error code = 0x%x", ret);
+        ESP_LOGE(TAG, "config adv data failed, error code = 0x%x", ret);
     }
 
-    /* Scan response: 128-bit service UUID for discoverability */
+    /* Scan response: our custom 128-bit UUID (0x1820) for Python app */
     uint8_t scan_rsp[18];
     scan_rsp[0] = 17;
     scan_rsp[1] = ESP_BLE_AD_TYPE_128SRV_CMPL;
@@ -264,6 +280,9 @@ static void add_characteristic(uint16_t service_handle, uint16_t *char_handle,
 
 static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
+    /* Dispatch to HID GATT handler first (for keyboard events) */
+    esp_hidd_gatts_event_handler(event, gatts_if, param);
+
     switch (event) {
     case ESP_GATTS_REG_EVT: {
         ESP_LOGI(TAG, "REGISTER_APP_EVT, status %d, app_id %d", param->reg.status, param->reg.app_id);
@@ -668,6 +687,20 @@ void ble_get_button_mapping(uint8_t button_id, uint8_t *vk_code, uint8_t *modifi
         *modifier = 0;
         break;
     }
+}
+
+uint8_t ble_get_button_vk(uint8_t button_id)
+{
+    uint8_t vk = 0, mod = 0;
+    ble_get_button_mapping(button_id, &vk, &mod);
+    return vk;
+}
+
+uint8_t ble_get_button_mod(uint8_t button_id)
+{
+    uint8_t vk = 0, mod = 0;
+    ble_get_button_mapping(button_id, &vk, &mod);
+    return mod;
 }
 
 void ble_gatts_adv_stop(void)

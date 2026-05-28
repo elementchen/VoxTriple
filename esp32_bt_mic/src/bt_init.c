@@ -216,7 +216,7 @@ esp_err_t bt_stack_init(void)
         return ret;
     }
 
-    /* Generate dynamic device name from MAC address last byte */
+    /* Classic BT HFP device name (microphone/headset audio) */
     const uint8_t *addr = esp_bt_dev_get_address();
     if (addr) {
         snprintf(g_bt_device_name, sizeof(g_bt_device_name),

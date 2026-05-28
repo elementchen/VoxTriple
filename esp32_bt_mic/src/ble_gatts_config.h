@@ -69,6 +69,12 @@ void ble_send_device_status(uint8_t hfp_connected, uint8_t audio_active);
  */
 void ble_get_button_mapping(uint8_t button_id, uint8_t *vk_code, uint8_t *modifier);
 
+/** @brief Get VK code for a button (for HID keyboard reports) */
+uint8_t ble_get_button_vk(uint8_t button_id);
+
+/** @brief Get modifier for a button (for HID keyboard reports) */
+uint8_t ble_get_button_mod(uint8_t button_id);
+
 /**
  * @brief Stop BLE advertising (call when SCO audio is active to avoid interference)
  */

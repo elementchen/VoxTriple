@@ -8,5 +8,7 @@ idf_component_register(SRCS "main.c"
                             "button_handler.c"
                             "config_storage.c"
                             "ws2812_led.c"
+                            "ble_hid_keyboard.c"
                     PRIV_REQUIRES bt nvs_flash driver esp_ringbuf led_strip
+                                 esp_hid
                     INCLUDE_DIRS ".")

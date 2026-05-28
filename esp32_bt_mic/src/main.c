@@ -20,6 +20,7 @@
 #include "audio_capture.h"
 #include "button_handler.h"
 #include "config_storage.h"
+#include "ble_hid_keyboard.h"
 
 static const char *TAG = "MAIN";
 
@@ -75,8 +76,13 @@ void app_main(void)
         ESP_LOGI(TAG, "WiFi disabled for power saving");
     }
 
-    /* Step 5: Initialize BLE GATT server */
-    ESP_LOGI(TAG, "Step 5: Initializing BLE GATT server...");
+    /* Step 5a: Initialize BLE HID Keyboard first (registers its GATT callback) */
+    ESP_LOGI(TAG, "Step 5a: Initializing BLE HID Keyboard...");
+    ESP_ERROR_CHECK(ble_hid_keyboard_init());
+
+    /* Step 5b: Initialize BLE GATT server (overwrites callback with unified
+     * handler that dispatches to HID handler internally) */
+    ESP_LOGI(TAG, "Step 5b: Initializing BLE GATT server...");
     ble_gatts_init();
 
     /* Step 6: Initialize button handler */
