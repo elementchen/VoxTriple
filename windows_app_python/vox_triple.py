@@ -159,8 +159,6 @@ class VoxTripleApp:
         act_frame.pack(pady=8)
         ttk.Button(act_frame, text="Write to Keyboard / 写入到蓝牙键盘",
                    command=self._write_device).pack(side="left", padx=4, ipadx=20, ipady=4)
-        ttk.Button(act_frame, text="Pair New / 配对新设备",
-                   command=self._scan_connect).pack(side="left", padx=16)
 
         # Info (simplified)
         info = ttk.LabelFrame(self.root, text="Info / 说明", padding=8)
