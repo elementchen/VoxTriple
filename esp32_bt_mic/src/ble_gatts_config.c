@@ -624,12 +624,18 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     case ESP_GATTS_DISCONNECT_EVT: {
         if (gatts_if != s_gatts_if) break;
 
-        ESP_LOGI(TAG, "BLE client disconnected, retry advertising in 5s");
+        ESP_LOGI(TAG, "BLE client disconnected");
         s_ble_connected = false;
         s_conn_id = 0;
-        /* Delayed retry — avoids BTDM security manager conflicts
-         * if Classic BT is mid-pairing when BLE disconnects. */
-        TimerHandle_t t = xTimerCreate("adv_retry", pdMS_TO_TICKS(5000),
+
+        /* Aggressive retry: first disconnect → immediate restart.
+         * If it fails again quickly (BTDM conflict), back off to 3s. */
+        static uint32_t last_disc_ms = 0;
+        uint32_t now_ms = xTaskGetTickCount() * portTICK_PERIOD_MS;
+        uint32_t delay_ms = (now_ms - last_disc_ms < 30000) ? 3000 : 0;
+        last_disc_ms = now_ms;
+
+        TimerHandle_t t = xTimerCreate("adv_retry", pdMS_TO_TICKS(delay_ms),
                                        pdFALSE, NULL, adv_retry_cb);
         if (t) xTimerStart(t, 0);
         break;
