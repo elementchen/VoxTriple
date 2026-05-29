@@ -73,8 +73,8 @@ class VoxTripleApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title("VoxTriple — ESP32 BT Mic Config (Python)")
-        root.geometry("620x840")
-        root.minsize(580, 800)
+        root.geometry("620x780")
+        root.minsize(580, 740)
         root.resizable(True, True)
 
         self.ble = ble_client.BleClient()
@@ -100,9 +100,6 @@ class VoxTripleApp:
                 self._btn[i]["mod_vars"][mk] = tk.BooleanVar(value=bool(b["modifier"] & _MOD_MASKS[mk]))
                 self._btn[i]["mod_vars"][mk].trace_add("write", lambda *a, idx=i: self._update_display(idx))
 
-        self._auto_start = tk.BooleanVar(value=self._cfg.get("auto_start", False))
-        self._auto_start.trace_add("write", self._on_auto_start_changed)
-
         self._tx_power = self._cfg.get("tx_power", 4)  # plain int, updated via combobox
         self._sleep_mode = tk.BooleanVar(value=self._cfg.get("sleep_mode", True))
 
@@ -111,7 +108,6 @@ class VoxTripleApp:
         self._connected = False
 
         self._build_ui()
-        self._apply_auto_start()
 
         # Auto-connect on startup if previously paired
         if self._cfg.get("ble_address", 0):
@@ -121,16 +117,10 @@ class VoxTripleApp:
     def _build_ui(self):
         pad = {"padx": 4, "pady": 2}
 
-        # Connection row
-        conn_frame = ttk.LabelFrame(self.root, text="Connection / 连接", padding=8)
+        # Connection status (no buttons — auto-connect handles everything)
+        conn_frame = ttk.LabelFrame(self.root, text="Connection / 连接状态", padding=8)
         conn_frame.pack(fill="x", padx=8, pady=4)
-
-        btn_frame = ttk.Frame(conn_frame)
-        btn_frame.pack(fill="x")
-        ttk.Button(btn_frame, text="Pair New / 配对新设备", command=self._scan_connect).pack(side="left", **pad)
-        ttk.Button(btn_frame, text="Disconnect / 断开", command=self._disconnect).pack(side="left", **pad)
         ttk.Label(conn_frame, textvariable=self._status_text, foreground="gray").pack(anchor="w", **pad)
-
         status_sub = ttk.Frame(conn_frame)
         status_sub.pack(fill="x")
         self._hfp_label = ttk.Label(status_sub, text="HFP: --", font=("", 9, "bold"))
@@ -138,14 +128,14 @@ class VoxTripleApp:
         self._audio_label = ttk.Label(status_sub, text="Audio: --", font=("", 9, "bold"))
         self._audio_label.pack(side="left", padx=8)
 
-        # 4 button groups
-        for i in range(4):
-            self._build_button_group(i)
-
-        # Last event
+        # Last button event (moved up, next to connection)
         evt_frame = ttk.LabelFrame(self.root, text="Last Button Event / 最近按钮事件", padding=8)
         evt_frame.pack(fill="x", padx=8, pady=4)
         ttk.Label(evt_frame, textvariable=self._last_event_text, font=("", 12, "bold")).pack()
+
+        # 4 button groups
+        for i in range(4):
+            self._build_button_group(i)
 
         # Device Settings
         dev_frame = ttk.LabelFrame(self.root, text="Device Settings / 设备设置", padding=8)
@@ -158,31 +148,29 @@ class VoxTripleApp:
                                         "3: -3 dBm", "4: 0 dBm", "5: +3 dBm",
                                         "6: +6 dBm", "7: +9 dBm (max)"],
                                 state="readonly")
-        self._tx_combo.current(self._tx_power)  # set initial selection
+        self._tx_combo.current(self._tx_power)
         self._tx_combo.bind("<<ComboboxSelected>>", self._on_tx_power_change)
         self._tx_combo.pack(side="left", padx=4)
         ttk.Label(dev_row, text="Sleep Mode / 睡眠模式:", font=("", 9, "bold")).pack(side="left", padx=(16, 4))
         ttk.Checkbutton(dev_row, text="Enabled / 启用", variable=self._sleep_mode).pack(side="left")
 
-        # Action buttons
+        # Action buttons — Write is the primary action, big and prominent
         act_frame = ttk.Frame(self.root)
         act_frame.pack(pady=8)
-        ttk.Button(act_frame, text="Write to Device / 写入设备", command=self._write_device).pack(side="left", **pad)
-        ttk.Button(act_frame, text="Save to File / 保存到文件", command=self._save_file).pack(side="left", **pad)
-        ttk.Button(act_frame, text="Load from File / 从文件加载", command=self._load_file).pack(side="left", **pad)
-        ttk.Checkbutton(act_frame, text="Auto-start / 开机自启", variable=self._auto_start).pack(side="left", padx=16)
+        ttk.Button(act_frame, text="Write to Keyboard / 写入到蓝牙键盘",
+                   command=self._write_device).pack(side="left", padx=4, ipadx=20, ipady=4)
+        ttk.Button(act_frame, text="Pair New / 配对新设备",
+                   command=self._scan_connect).pack(side="left", padx=16)
 
-        # Info
+        # Info (simplified)
         info = ttk.LabelFrame(self.root, text="Info / 说明", padding=8)
         info.pack(fill="both", expand=True, padx=8, pady=4)
-        msg = ("BLE Service: 0x1820 | Device: ESP32_BT_MIC\n"
-               "Click 'Capture Key' then press any key to assign it.\n"
-               "Modifier checkboxes apply on Write to Device.\n"
-               "Hold Button 1 on ESP32 to PTT (push-to-talk).\n\n"
-               "BLE 服务: 0x1820 | 设备名: ESP32_BT_MIC\n"
-               "点击「Capture Key」然后按任意键来捕获它。\n"
-               "修饰键勾选框在「写入设备」时生效。\n"
-               "按住 ESP32 上的 Button 1 进入 PTT 模式。")
+        msg = ("Click 'Capture Key' then press a key to assign it.\n"
+               "Modifier checkboxes apply on Write to Keyboard.\n"
+               "The keyboard works without this app — open only to change settings.\n\n"
+               "点击「Capture Key」然后按键来捕获。\n"
+               "修饰键勾选框在「写入到蓝牙键盘」时生效。\n"
+               "蓝牙键盘独立工作 — 此应用仅用于修改配置。")
         ttk.Label(info, text=msg, foreground="gray", font=("", 9)).pack(anchor="w")
 
         # Quit cleanup
@@ -313,34 +301,6 @@ class VoxTripleApp:
         prev = f"Connected: {addr}" if addr else "Ready."
         self.root.after(3000, lambda p=prev: self._status_text.set(p))
 
-    def _save_file(self):
-        for i in range(4):
-            key = f"button{i+1}"
-            self._cfg[key] = {
-                "vk_code": self._btn[i]["vk"].get(),
-                "modifier": _build_modifier(self._btn[i]["mod_vars"]),
-            }
-        self._cfg["auto_start"] = self._auto_start.get()
-        self._cfg["tx_power"] = self._tx_power
-        self._cfg["sleep_mode"] = self._sleep_mode.get()
-        config_service.save(self._cfg)
-        self._status_text.set("Configuration saved to file.")
-
-    def _load_file(self):
-        self._cfg = config_service.load()
-        for i in range(4):
-            key = f"button{i+1}"
-            b = self._cfg.get(key, {"vk_code": 0x0D, "modifier": 0})
-            self._btn[i]["vk"].set(b["vk_code"])
-            for mk, mask in _MOD_MASKS.items():
-                self._btn[i]["mod_vars"][mk].set(bool(b["modifier"] & mask))
-            self._update_display(i)
-        self._auto_start.set(self._cfg.get("auto_start", False))
-        self._tx_power = self._cfg.get("tx_power", 7)
-        self._tx_combo.current(self._tx_power)
-        self._sleep_mode.set(self._cfg.get("sleep_mode", False))
-        self._status_text.set("Configuration loaded from file.")
-
     # ── Key capture ─────────────────────────────────────────────
     def _begin_capture(self, idx: int):
         self._capture_idx = idx
@@ -393,48 +353,12 @@ class VoxTripleApp:
         self._hfp_label.configure(text=f"HFP: {'Connected' if hfp else '--'}")
         self._audio_label.configure(text=f"Audio: {'Active' if audio else '--'}")
 
-    # ── Auto-start ───────────────────────────────────────────────
+    # ── TX Power ─────────────────────────────────────────────────
     def _on_tx_power_change(self, event):
         """Update _tx_power int when combobox selection changes."""
         self._tx_power = self._tx_combo.current()
         if self._tx_power < 0:
-            self._tx_power = 7  # default if current() returns -1
-
-    def _on_auto_start_changed(self, *_):
-        self._apply_auto_start()
-
-    def _apply_auto_start(self):
-        try:
-            startup = os.path.join(
-                os.environ["APPDATA"],
-                r"Microsoft\Windows\Start Menu\Programs\Startup",
-                "VoxTriple.lnk",
-            )
-            if self._auto_start.get():
-                self._create_shortcut(startup)
-            else:
-                if os.path.exists(startup):
-                    os.remove(startup)
-        except Exception as e:
-            log.error(f"Auto-start error: {e}")
-
-    def _create_shortcut(self, path: str):
-        try:
-            import pythoncom
-            from win32com.client import Dispatch
-            pythoncom.CoInitialize()
-            shell = Dispatch("WScript.Shell")
-            sc = shell.CreateShortcut(path)
-            sc.TargetPath = sys.executable
-            sc.Arguments = f'"{__file__}"'
-            sc.WorkingDirectory = os.path.dirname(os.path.abspath(__file__))
-            sc.Description = "VoxTriple Bluetooth Mic Config"
-            sc.Save()
-        except ImportError:
-            # Fallback: create a simple .bat file
-            bat_path = path.replace(".lnk", ".bat")
-            with open(bat_path, "w") as f:
-                f.write(f'@echo off\nstart "" "{sys.executable}" "{__file__}"\n')
+            self._tx_power = 4
 
     # ── Close ───────────────────────────────────────────────────
     def _on_close(self):
