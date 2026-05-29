@@ -160,15 +160,21 @@ static void ble_init_adv_data(const char *name)
     }
 }
 
+static void adv_retry_cb(TimerHandle_t xTimer)
+{
+    esp_ble_gap_start_advertising(&adv_params);
+}
+
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
     switch (event) {
     case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
         break;
     case ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
-        /* Don't start advertising yet — wait for HFP to connect first.
-         * BLE keyboard advertising is triggered by HFP SLC_CONNECTED
-         * in bt_hfp_hf.c via ble_gatts_adv_start(). */
+        /* Start BLE advertising immediately. Both BLE keyboard and
+         * Classic BT HFP are available simultaneously. BTDM security
+         * conflicts are handled by auto-retry on disconnect. */
+        esp_ble_gap_start_advertising(&adv_params);
         break;
     case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
         if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS) {
@@ -608,10 +614,14 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     case ESP_GATTS_DISCONNECT_EVT: {
         if (gatts_if != s_gatts_if) break;
 
-        ESP_LOGI(TAG, "BLE client disconnected, restarting advertising");
+        ESP_LOGI(TAG, "BLE client disconnected, retry advertising in 5s");
         s_ble_connected = false;
         s_conn_id = 0;
-        esp_ble_gap_start_advertising(&adv_params);
+        /* Delayed retry — avoids BTDM security manager conflicts
+         * if Classic BT is mid-pairing when BLE disconnects. */
+        TimerHandle_t t = xTimerCreate("adv_retry", pdMS_TO_TICKS(5000),
+                                       pdFALSE, NULL, adv_retry_cb);
+        if (t) xTimerStart(t, 0);
         break;
     }
 

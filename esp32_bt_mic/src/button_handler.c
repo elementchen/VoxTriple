@@ -15,6 +15,7 @@
 #include "ble_hid_keyboard.h"
 #include "config_storage.h"
 #include "bt_init.h"
+#include "esp_hf_client_api.h"
 
 static const char *TAG = "BTN_HANDLER";
 
@@ -84,6 +85,18 @@ static void button_task_func(void *arg)
 
                     /* Wake HFP ACL from sniff to reduce SCO open latency */
                     bt_hfp_hf_wake_acl();
+
+                    /* Connection wake-up: if HFP or HID is disconnected,
+                     * pressing any button triggers reconnection. */
+                    if (!bt_hfp_is_connected()) {
+                        esp_bd_addr_t saved_addr = {0};
+                        if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
+                            esp_hf_client_connect(saved_addr);
+                        }
+                    }
+                    if (!ble_hid_is_connected()) {
+                        ble_gatts_adv_start();
+                    }
 
                     /* Indicator LED on Button 1 press — only if BLE is connected */
                     if (i == 0 && ble_gatts_is_connected()) gpio_set_level(INDICATOR_LED_GPIO, 1);
