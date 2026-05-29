@@ -383,16 +383,8 @@ class VoxTripleApp:
     def _handle_button_event(self, btn_id: int, state: int):
         s = "PRESSED" if state == 1 else "RELEASED"
         self._last_event_text.set(f"Button {btn_id + 1} {s}")
-        if btn_id < 0 or btn_id > 3:
-            return
-        vk = self._btn[btn_id]["vk"].get()
-        if vk == 0:
-            return
-        mod = _build_modifier(self._btn[btn_id]["mod_vars"])
-        if state == 1:
-            keyboard_io.key_down(vk, mod)
-        else:
-            keyboard_io.key_up(vk, mod)
+        # Key input is now handled by ESP32 BLE HID directly.
+        # No need for Python to simulate keystrokes — avoids double input.
 
     def _on_status(self, hfp: int, audio: int):
         self.root.after(0, lambda: self._handle_status(hfp, audio))
