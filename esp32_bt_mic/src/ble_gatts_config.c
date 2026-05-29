@@ -99,6 +99,16 @@ static esp_ble_adv_params_t adv_params = {
 
 static void ble_init_adv_data(const char *name)
 {
+    /* BLE GAP device name — shorter for advertising budget */
+    char ble_name[16];
+    const uint8_t *mac = esp_bt_dev_get_address();
+    if (mac) {
+        snprintf(ble_name, sizeof(ble_name), "ESP32_KB_%02X", mac[5]);
+    } else {
+        snprintf(ble_name, sizeof(ble_name), "ESP32_KB");
+    }
+    esp_ble_gap_set_device_name(ble_name);
+
     /* BLE SMP — Secure Connections bonding, no I/O capability. */
     esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_BOND;
     esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;
