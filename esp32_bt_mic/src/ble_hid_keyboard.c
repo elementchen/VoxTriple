@@ -183,6 +183,27 @@ static const uint8_t s_vk_to_hid[256] = {
     [0xDE] = 0x34,  // VK_OEM_7    → ' and "
 };
 
+/* Map VK code itself to HID modifier bits (for standalone modifier keys).
+ * When a button is configured as "LCtrl" (VK=0xA2) with no extra modifiers,
+ * the VK code itself IS the modifier — we must set the corresponding bit. */
+static uint8_t vk_to_hid_modifier(uint8_t vk)
+{
+    switch (vk) {
+    case 0xA2: return 0x01;  // VK_LCONTROL
+    case 0xA3: return 0x10;  // VK_RCONTROL
+    case 0xA0: return 0x02;  // VK_LSHIFT
+    case 0xA1: return 0x20;  // VK_RSHIFT
+    case 0xA4: return 0x04;  // VK_LMENU (Left Alt)
+    case 0xA5: return 0x40;  // VK_RMENU (Right Alt)
+    case 0x5B: return 0x08;  // VK_LWIN
+    case 0x5C: return 0x80;  // VK_RWIN
+    case 0x10: return 0x02;  // VK_SHIFT   → left shift
+    case 0x11: return 0x01;  // VK_CONTROL → left control
+    case 0x12: return 0x04;  // VK_MENU    → left alt
+    default:   return 0x00;
+    }
+}
+
 /* Modifier bitmask helpers */
 static inline uint8_t vk_mod_to_hid(uint8_t mod_mask)
 {
@@ -279,7 +300,10 @@ void ble_hid_send_key(uint8_t vk_code, uint8_t modifier, bool pressed)
     uint8_t report[7] = {0};
 
     if (pressed) {
-        report[0] = vk_mod_to_hid(modifier);
+        /* Merge button-configured modifier bits + VK-implied modifier bits.
+         * E.g. "LCtrl+A": button mod=0x01(LCtrl), VK=0x41(A) → modifier=0x01, key=HID_A.
+         * E.g. "RCtrl alone": button mod=0x00, VK=0xA3(RCtrl) → modifier=0x10, key=0x00. */
+        report[0] = vk_mod_to_hid(modifier) | vk_to_hid_modifier(vk_code);
         report[2] = s_vk_to_hid[vk_code];
     }
     /* On release: send all-zero report (key up) */
