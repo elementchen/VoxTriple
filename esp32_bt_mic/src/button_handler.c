@@ -9,6 +9,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
+#include "driver/rtc_io.h"
+#include "esp_sleep.h"
 #include "esp_log.h"
 #include "button_handler.h"
 #include "ble_gatts_config.h"
@@ -26,6 +28,30 @@ static const char *TAG = "BTN_HANDLER";
 #define BUTTON_TASK_PRIORITY 3
 
 #define INDICATOR_LED_GPIO   GPIO_NUM_18
+#define INACTIVITY_MS        (30 * 60 * 1000)  /* 30 min deep sleep timeout */
+
+static TimerHandle_t s_inactivity_timer = NULL;
+
+/* Enter deep sleep — power down WiFi/BT/CPU. GPIO4 (RTC) will wake us. */
+static void inactivity_sleep_cb(TimerHandle_t xTimer)
+{
+    /* Don't sleep if any connection is still active */
+    if (bt_hfp_is_connected() || ble_hid_is_connected() ||
+        ble_gatts_is_connected()) {
+        xTimerStart(s_inactivity_timer, 0);
+        return;
+    }
+
+    ESP_LOGI(TAG, "30 min idle — entering deep sleep (press any key to wake)");
+
+    /* Keep GPIO4 pull-up during deep sleep so button press pulls it LOW */
+    rtc_gpio_pullup_en(GPIO_NUM_4);
+    rtc_gpio_pulldown_dis(GPIO_NUM_4);
+    esp_sleep_enable_ext1_wakeup(1ULL << GPIO_NUM_4, ESP_EXT1_WAKEUP_ALL_LOW);
+
+    vTaskDelay(pdMS_TO_TICKS(100));  /* let log flush */
+    esp_deep_sleep_start();
+}
 
 static const gpio_num_t s_button_pins[BUTTON_NUM] = {
     CONFIG_BUTTON_1_GPIO,
@@ -82,6 +108,9 @@ static void button_task_func(void *arg)
                     state[i] = BTN_STATE_PRESSED;
                     press_time[i] = now;
                     ESP_LOGI(TAG, "Button %d pressed", i + 1);
+
+                    /* Reset inactivity deep sleep timer */
+                    if (s_inactivity_timer) xTimerReset(s_inactivity_timer, 0);
 
                     /* Wake HFP ACL from sniff to reduce SCO open latency */
                     bt_hfp_hf_wake_acl();
@@ -167,6 +196,12 @@ void button_handler_init(void)
     s_btn_task_running = true;
     xTaskCreate(button_task_func, "BtnTask", BUTTON_TASK_STACK,
                 NULL, BUTTON_TASK_PRIORITY, &s_btn_task_handle);
+
+    /* Start inactivity deep sleep timer (30 min) */
+    s_inactivity_timer = xTimerCreate("inact_tmr",
+                                       pdMS_TO_TICKS(INACTIVITY_MS),
+                                       pdFALSE, NULL, inactivity_sleep_cb);
+    if (s_inactivity_timer) xTimerStart(s_inactivity_timer, 0);
 
     ESP_LOGI(TAG, "Button handler initialized");
 }
