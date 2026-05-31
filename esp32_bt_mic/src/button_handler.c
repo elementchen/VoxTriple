@@ -35,13 +35,6 @@ static TimerHandle_t s_inactivity_timer = NULL;
 /* Enter deep sleep — power down WiFi/BT/CPU. GPIO4 (RTC) will wake us. */
 static void inactivity_sleep_cb(TimerHandle_t xTimer)
 {
-    /* Don't sleep if any connection is still active */
-    if (bt_hfp_is_connected() || ble_hid_is_connected() ||
-        ble_gatts_is_connected()) {
-        xTimerStart(s_inactivity_timer, 0);
-        return;
-    }
-
     ESP_LOGI(TAG, "30 min idle — entering deep sleep (press any key to wake)");
 
     /* Keep GPIO4 pull-up during deep sleep so button press pulls it LOW */
