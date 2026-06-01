@@ -155,6 +155,14 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
 
         ESP_LOGI(TAG, "BT stack initialized, name: %s", g_bt_device_name);
+
+        /* Auto-connect HFP to last paired device after stack stabilizes */
+        vTaskDelay(pdMS_TO_TICKS(2000));
+        esp_bd_addr_t saved_addr = {0};
+        if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
+            ESP_LOGI(TAG, "Auto-connecting HFP to saved peer...");
+            esp_hf_client_connect(saved_addr);
+        }
         break;
     }
     default:
