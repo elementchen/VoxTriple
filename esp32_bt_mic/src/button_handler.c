@@ -108,14 +108,7 @@ static void button_task_func(void *arg)
                     /* Wake HFP ACL from sniff to reduce SCO open latency */
                     bt_hfp_hf_wake_acl();
 
-                    /* Connection wake-up: if HFP or HID is disconnected,
-                     * pressing any button triggers reconnection. */
-                    if (!bt_hfp_is_connected()) {
-                        esp_bd_addr_t saved_addr = {0};
-                        if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
-                            esp_hf_client_connect(saved_addr);
-                        }
-                    }
+                    /* Wake up BLE advertising if keyboard disconnected */
                     if (!ble_hid_is_connected()) {
                         ble_gatts_adv_start();
                     }
