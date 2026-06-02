@@ -248,29 +248,18 @@ class VoxTripleApp:
             self._status_text.set("Connection failed.")
 
     async def _auto_connect(self):
-        # Try direct connection by stored address first (no scan needed)
+        # Connect by stored address — the OS handles pairing, we just use it
         saved = self._cfg.get("device_address", "")
-        if saved:
-            ok = await self.ble.connect(saved)
-            if ok:
-                self._connected = True
-                self._status_text.set(f"Connected: {saved}")
-                await self._read_all_settings()
-                return
-
-        # Fall back to scanning
-        addr = await ble_client.BleClient.scan(5.0)
-        if addr:
-            ok = await self.ble.connect(addr)
-            if ok:
-                self._connected = True
-                self._cfg["ble_address"] = int(addr.replace(":", ""), 16)
-                self._cfg["device_address"] = addr
-                config_service.save(self._cfg)
-                self._status_text.set(f"Connected: {addr}")
-                await self._read_all_settings()
-                return
-        self._status_text.set("Device not found. Check power or pair via Windows Bluetooth first.")
+        if not saved:
+            self._status_text.set("Not paired. Pair via system Bluetooth settings first.")
+            return
+        ok = await self.ble.connect(saved)
+        if ok:
+            self._connected = True
+            self._status_text.set(f"Connected: {saved}")
+            await self._read_all_settings()
+        else:
+            self._status_text.set("Device not found. Is it powered on?")
 
     async def _read_all_settings(self):
         """Read all settings from device after connection."""
