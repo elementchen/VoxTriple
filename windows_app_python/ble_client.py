@@ -21,6 +21,7 @@ CHAR_DEV_STATUS  = "00002a05-0000-1000-8000-00805f9b34fb"
 CHAR_TX_POWER    = "00002a06-0000-1000-8000-00805f9b34fb"
 CHAR_SLEEP_MODE  = "00002a07-0000-1000-8000-00805f9b34fb"
 CHAR_BTN4_MAP    = "00002a08-0000-1000-8000-00805f9b34fb"
+CHAR_OTA         = "00002a09-0000-1000-8000-00805f9b34fb"
 
 
 class BleClient:
@@ -40,6 +41,7 @@ class BleClient:
         self._ch_status: BleakGATTCharacteristic | None = None
         self._ch_tx_power: BleakGATTCharacteristic | None = None
         self._ch_sleep_mode: BleakGATTCharacteristic | None = None
+        self._ch_ota: BleakGATTCharacteristic | None = None
 
     @property
     def is_connected(self) -> bool:
@@ -98,6 +100,8 @@ class BleClient:
                     self._ch_tx_power = c
                 elif c.uuid.lower() == CHAR_SLEEP_MODE:
                     self._ch_sleep_mode = c
+                elif c.uuid.lower() == CHAR_OTA:
+                    self._ch_ota = c
 
             log.info(f"Resolved: btn1={self._ch[0] is not None} btn2={self._ch[1] is not None} "
                      f"btn3={self._ch[2] is not None} evt={self._ch_event is not None} "
@@ -185,6 +189,16 @@ class BleClient:
             return True
         except Exception as e:
             log.error(f"Write sleep mode failed: {e}")
+            return False
+
+    async def write_ota_chunk(self, data: bytes) -> bool:
+        if not self._client or not self._ch_ota:
+            return False
+        try:
+            await self._client.write_gatt_char(self._ch_ota, data, response=True)
+            return True
+        except Exception as e:
+            log.error(f"OTA write failed: {e}")
             return False
 
     def _on_button_event(self, _sender, data: bytearray):

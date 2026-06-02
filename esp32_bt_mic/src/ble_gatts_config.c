@@ -18,6 +18,7 @@
 #include "esp_gatt_common_api.h"
 #include "esp_bt.h"
 #include "esp_hidd.h"
+#include "esp_ota_ops.h"
 #include "ble_gatts_config.h"
 #include "config_storage.h"
 #include "bt_init.h"
@@ -38,6 +39,9 @@ static const char *TAG = "BLE_GATTS";
 #define GATTS_CHAR_TX_POWER_UUID   0x2A06
 #define GATTS_CHAR_SLEEP_MODE_UUID 0x2A07
 #define GATTS_CHAR_BTN4_MAP_UUID   0x2A08
+#define GATTS_CHAR_OTA_UUID       0x2A09
+
+#define OTA_CHUNK_MAX  512
 
 #define GATTS_NUM_HANDLES    24
 #define GATTS_APP_ID         0x01
@@ -69,8 +73,16 @@ static uint16_t s_btn_event_handle = 0;
 static uint16_t s_dev_status_handle = 0;
 static uint16_t s_tx_power_handle = 0;
 static uint16_t s_sleep_mode_handle = 0;
+static uint16_t s_ota_handle = 0;
 static uint16_t s_btn_event_descr_handle = 0;
 static uint16_t s_dev_status_descr_handle = 0;
+
+/* OTA state */
+static esp_ota_handle_t s_ota_handle_ctx = 0;
+static uint32_t s_ota_total = 0;
+static uint32_t s_ota_received = 0;
+static bool s_ota_active = false;
+static const esp_partition_t *s_ota_part = NULL;
 
 /* Track the GATT interface */
 static esp_gatt_if_t s_gatts_if = ESP_GATT_IF_NONE;
@@ -418,8 +430,15 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                                    GATTS_CHAR_SLEEP_MODE_UUID, s_char_property,
                                    &s_sleep_mode, 1, NULL);
                 break;
-            case 8: /* Sleep Mode - all characteristics done, start service */
+            case 8: /* Sleep Mode - add OTA firmware upgrade characteristic */
                 s_sleep_mode_handle = param->add_char.attr_handle;
+                add_characteristic(s_service_handle, &s_ota_handle,
+                                   GATTS_CHAR_OTA_UUID,
+                                   ESP_GATT_CHAR_PROP_BIT_WRITE,
+                                   NULL, 0, NULL);
+                break;
+            case 9: /* OTA - all characteristics done, start service */
+                s_ota_handle = param->add_char.attr_handle;
                 {
                 esp_err_t ret = esp_ble_gatts_start_service(s_service_handle);
                 if (ret != ESP_OK) {
@@ -533,6 +552,43 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 s_btn4_map[1] = param->write.value[1];
                 config_storage_save_button(BUTTON_ID_4, s_btn4_map[0], s_btn4_map[1]);
                 ESP_LOGI(TAG, "Button 4 mapped to VK=0x%02X, MOD=0x%02X", s_btn4_map[0], s_btn4_map[1]);
+            }
+            /* Handle OTA firmware upgrade */
+            else if (param->write.handle == s_ota_handle) {
+                uint8_t *data = param->write.value;
+                uint16_t len = param->write.len;
+
+                if (!s_ota_active) {
+                    /* First write: 4 bytes = total firmware size (little-endian) */
+                    if (len >= 4) {
+                        s_ota_total = data[0] | (data[1]<<8) | (data[2]<<16) | (data[3]<<24);
+                        s_ota_received = 0;
+                        s_ota_part = esp_ota_get_next_update_partition(NULL);
+                        if (s_ota_part && esp_ota_begin(s_ota_part, s_ota_total, &s_ota_handle_ctx) == ESP_OK) {
+                            s_ota_active = true;
+                            ESP_LOGI(TAG, "OTA started, expecting %" PRIu32 " bytes", s_ota_total);
+                        } else {
+                            ESP_LOGE(TAG, "OTA begin failed");
+                        }
+                    }
+                } else {
+                    /* Subsequent writes: firmware data chunks */
+                    esp_err_t err = esp_ota_write(s_ota_handle_ctx, data, len);
+                    if (err == ESP_OK) {
+                        s_ota_received += len;
+                        if (s_ota_received >= s_ota_total) {
+                            esp_ota_end(s_ota_handle_ctx);
+                            s_ota_active = false;
+                            ESP_LOGI(TAG, "OTA complete (%" PRIu32 " bytes), rebooting...", s_ota_received);
+                            vTaskDelay(pdMS_TO_TICKS(500));
+                            esp_restart();
+                        }
+                    } else {
+                        ESP_LOGE(TAG, "OTA write failed: %s", esp_err_to_name(err));
+                        esp_ota_end(s_ota_handle_ctx);
+                        s_ota_active = false;
+                    }
+                }
             }
             /* Handle TX Power write (1 byte, 0-7) */
             else if (param->write.handle == s_tx_power_handle && param->write.len >= 1) {

@@ -160,6 +160,11 @@ class VoxTripleApp:
         ttk.Button(act_frame, text="Write to Keyboard / 写入到蓝牙键盘",
                    command=self._write_device).pack(side="left", padx=4, ipadx=20, ipady=4)
 
+        # OTA firmware upgrade
+        self._ota_btn = ttk.Button(act_frame, text="Firmware Upgrade / 固件升级",
+                                   command=self._start_ota)
+        self._ota_btn.pack(side="left", padx=16)
+
         # Info (simplified)
         info = ttk.LabelFrame(self.root, text="Info / 说明", padding=8)
         info.pack(fill="both", expand=True, padx=8, pady=4)
@@ -359,6 +364,53 @@ class VoxTripleApp:
             self._tx_power = 4
 
     # ── Close ───────────────────────────────────────────────────
+    # ── OTA firmware upgrade ──────────────────────────────────────
+    def _start_ota(self):
+        """Pick a .bin firmware file and send it via BLE OTA."""
+        if not self._connected:
+            self._status_text.set("BLE not connected. Connect first.")
+            return
+        from tkinter import filedialog
+        path = filedialog.askopenfilename(
+            title="Select firmware .bin file",
+            filetypes=[("Firmware", "*.bin"), ("All files", "*.*")])
+        if not path:
+            return
+        self._ota_btn.configure(text="Upgrading… / 升级中…", state="disabled")
+        self._status_text.set("OTA: starting…")
+        _run_async(self._do_ota(path))
+
+    async def _do_ota(self, path: str):
+        try:
+            size = os.path.getsize(path)
+            # Send total size (4 bytes LE)
+            header = bytes([size & 0xFF, (size>>8)&0xFF, (size>>16)&0xFF, (size>>24)&0xFF])
+            if not await self.ble.write_ota_chunk(header):
+                self._status_text.set("OTA: failed to send header.")
+                self._ota_btn.configure(text="Firmware Upgrade / 固件升级", state="normal")
+                return
+
+            with open(path, "rb") as f:
+                total = 0
+                while True:
+                    chunk = f.read(500)
+                    if not chunk:
+                        break
+                    if not await self.ble.write_ota_chunk(chunk):
+                        self._status_text.set(f"OTA: failed at {total}/{size}")
+                        self._ota_btn.configure(text="Firmware Upgrade / 固件升级", state="normal")
+                        return
+                    total += len(chunk)
+                    pct = total * 100 // size
+                    self._status_text.set(f"OTA: {total}/{size} ({pct}%)")
+                    await asyncio.sleep(0.02)  # let BLE stack breathe
+
+            self._status_text.set("OTA: done! ESP32 rebooting…")
+        except Exception as e:
+            self._status_text.set(f"OTA error: {e}")
+        finally:
+            self._ota_btn.configure(text="Firmware Upgrade / 固件升级", state="normal")
+
     def _on_close(self):
         keyboard_io.stop_key_capture()
         _run_async(self.ble.disconnect())
