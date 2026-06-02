@@ -647,6 +647,11 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         break;
 
     case ESP_GATTS_CONNECT_EVT: {
+        /* Restart advertising immediately so other BLE clients
+         * (e.g. Python config app) can discover us even when
+         * Windows has already connected as a HID keyboard. */
+        esp_ble_gap_start_advertising(&adv_params);
+
         /* Only handle events for our custom GATT app (not HID app) */
         if (gatts_if != s_gatts_if) break;
 
@@ -661,9 +666,6 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         conn_params.latency = 0;
         conn_params.timeout = 500;
         esp_ble_gap_update_conn_params(&conn_params);
-
-        /* Keep advertising so the Python config app can also connect */
-        esp_ble_gap_start_advertising(&adv_params);
 
         if (!bt_hfp_is_connected()) {
             esp_bd_addr_t saved_addr = {0};

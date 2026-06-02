@@ -248,28 +248,46 @@ class VoxTripleApp:
             self._status_text.set("Connection failed.")
 
     async def _auto_connect(self):
+        # Try direct connection by stored address first (no scan needed)
+        saved = self._cfg.get("device_address", "")
+        if saved:
+            ok = await self.ble.connect(saved)
+            if ok:
+                self._connected = True
+                self._status_text.set(f"Connected: {saved}")
+                await self._read_all_settings()
+                return
+
+        # Fall back to scanning
         addr = await ble_client.BleClient.scan(5.0)
         if addr:
             ok = await self.ble.connect(addr)
             if ok:
                 self._connected = True
+                self._cfg["ble_address"] = int(addr.replace(":", ""), 16)
+                self._cfg["device_address"] = addr
+                config_service.save(self._cfg)
                 self._status_text.set(f"Connected: {addr}")
-                for i in range(4):
-                    r = await self.ble.read_button_mapping(i)
-                    if r:
-                        self._btn[i]["vk"].set(r[0])
-                        for mk, mask in _MOD_MASKS.items():
-                            self._btn[i]["mod_vars"][mk].set(bool(r[1] & mask))
-                        self._update_display(i)
-                tx = await self.ble.read_tx_power()
-                if tx is not None:
-                    self._tx_power = tx
-                    self._tx_combo.current(tx)
-                sl = await self.ble.read_sleep_mode()
-                if sl is not None:
-                    self._sleep_mode.set(bool(sl))
+                await self._read_all_settings()
                 return
-        self._status_text.set("Device not found. Click 'Pair New' or check power.")
+        self._status_text.set("Device not found. Check power or pair via Windows Bluetooth first.")
+
+    async def _read_all_settings(self):
+        """Read all settings from device after connection."""
+        for i in range(4):
+            r = await self.ble.read_button_mapping(i)
+            if r:
+                self._btn[i]["vk"].set(r[0])
+                for mk, mask in _MOD_MASKS.items():
+                    self._btn[i]["mod_vars"][mk].set(bool(r[1] & mask))
+                self._update_display(i)
+        tx = await self.ble.read_tx_power()
+        if tx is not None:
+            self._tx_power = tx
+            self._tx_combo.current(tx)
+        sl = await self.ble.read_sleep_mode()
+        if sl is not None:
+            self._sleep_mode.set(bool(sl))
 
     def _disconnect(self):
         _run_async(self.ble.disconnect())
