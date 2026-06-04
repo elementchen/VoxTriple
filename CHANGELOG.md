@@ -1,240 +1,33 @@
-# Changelog
+# VoxTriple Changelog
 
-## v1.3-stable (2026-05-19)
+## master (稳定版)
 
-> GPIO pinout reworked for cleaner wiring and antenna interference avoidance. Dynamic device name. BLE-triggered HFP auto-reconnect retained.
+### v2.1 — 2026-06-01
+- BLE HID 键盘（不打开应用也能用按键）
+- 深度睡眠：30 分钟无操作 → ~5µA，GPIO4 唤醒
+- BLE 连接失败自动重试
+- 设备名：`ESP32_KB_XX` / `ESP32_MIC_XX`
+- 修饰键左右区分（VK→HID 修饰位映射）
+- Python UI 精简（移除断开/保存/加载/开机自启）
+- 麦克风引脚：BCK=21, WS=22, DATA=17
 
-### Firmware
-- **Dynamic device name**: `ESP32_BT_MIC_XX` where `XX` is the last byte of the Bluetooth MAC address
-  - Allows multiple boards to coexist with distinguishable names
-  - `g_bt_device_name` shared between Classic BT (`bt_init.c`) and BLE advertising (`ble_gatts_config.c`)
-- **GPIO pinout reworked** — sensitive I2S DATA moved to left side away from PCB antenna; clock/control on right
-  - Left (away from antenna): Button 1=GPIO 16, Button 3=GPIO 18, I2S DATA=GPIO 17
-  - Right: WS=GPIO 33, SCK=GPIO 25, LED=GPIO 26, Button 2=GPIO 14
-  - Eliminates RF interference from high-speed I2S data line near antenna
-- **Bluetooth TX power**: set to +3dBm (`ESP_PWR_LVL_P3`) for stable indoor range
-- **BLE-triggered HFP auto-reconnect**: on BLE connect, auto-reconnect Classic HFP to last paired Windows device
-  - `config_storage` NVS blob for HFP peer address persistence
-  - `bt_hfp_hf_wake_acl()` via internal `BTM_SetPowerMode()` API to exit sniff on button press
-- **Windows pairing note**: if audio stops working after pinout changes, delete the Bluetooth microphone device in Windows and re-pair
+### v2.0 — 2026-05-30
+- BLE HID 键盘稳定版，合并主线
 
-----
+### v1.7 — 2026-05-28
+- 4 按键全部右侧排，LED=GPIO18，TX Power + Sleep Mode BLE 控制
+- 3x 音频增益，WiFi 禁用
 
-## v1.2-stable (2026-05-15)
+### v1.1 — 2026-05-14
+- 初版：3 按键，BLE GATT 配置，Python 应用
 
-> Audio pipeline refactored: continuous operation across SCO cycles. Log output reduced. WS2812 removed (RMT/BT conflict). Sniff-mode mitigation via ACL wake on button press.
+---
 
-### Firmware
-- **Audio pipeline refactored**: starts on HFP SLC connect, runs continuously across SCO cycles
-  - No per-cycle ringbuf/task/timer create/delete — eliminates "invalid air mode: 255" corruption
-  - `outgoing_data_ready()` guarded by `bt_audio_is_active()` to prevent dead-SCO calls
-  - Ring buffer flush on SCO open prevents cross-session audio bleed
-- **Log suppression**: `esp_log_level_set("*", ESP_LOG_WARN)` after init — only WARN/ERROR on serial
-- **Sniff mitigation**: `CONFIG_BTDM_CTRL_MODEM_SLEEP=n` + `BTM_SetPowerMode(ACTIVE)` on button press
-  - Reduces SCO open latency; partial fix (sniff still enters after ~7s idle, ~500ms re-activation)
-- **WS2812 removed**: eliminated RMT/BT conflict causing `ws2812_anim` stack overflow & reboot
-- **BLE conn params fix**: `remote_bda` copied from `ESP_GATTS_CONNECT_EVT` into `conn_params`
+## ble-hid-keyboard (开发分支)
 
-### Known limitations
-- `invalid air mode: 255` appears once per SCO disconnect — benign Bluedroid race, does not affect function
-- HFP ACL still enters sniff after ~7s idle; button wake reduces but doesn't eliminate SCO latency
-- First ~2-3 characters may still be lost when speaking after long silence
-
-----
-
-## v1.1-stable (2026-05-13)
-
-> Simplified architecture: buttons only send BLE keyboard events, HFP audio fully managed by Windows AG. Zero task_wdt crashes.
-
-### Firmware
-- **Architecture simplified**: buttons no longer control SCO audio — only send BLE keyboard events
-  - HFP pipeline always ready, Windows AG manages audio start/stop
-  - Eliminates all BTU_TASK task_wdt deadlocks
-- **BTU_TASK fix**: audio pipeline work deferred to app task via `bt_app_work_dispatch`
-- **BLE fast connection**: request `conn_int=12-24` (15-30ms) for low-latency keyboard events
-- **WS2812 rainbow restored**: 4 LEDs on GPIO 15, Button 1 press=start, release=stop
-  - Hue limited to yellow-green-blue (60-240°), ping-pong gradient
-  - Safe to run alongside Bluetooth — no RMT/BT conflict
-- BLE connection interval forced to 15-30ms for low latency
-- Audio send task priority lowered from 22 to 5
-
-### Python App
-- Keyboard simulation: `keybd_event` (pure VK codes, stable in all apps)
-- BLE client: resolve characteristics by handle within service scope (fixes bleak UUID conflict)
-- Key capture: pynput win32_event_filter, dispatched to tkinter main thread
-- Single-file EXE: 11 MB PyInstaller output
-- Auto-start on boot + auto-connect BLE on launch
-
-### Docs
-- README: full bilingual (English + Chinese)
-- CHANGELOG.md: incremental version history
-- Multi-device switching spec archived in docs/
-
-### Windows C# App
-- Archived to `_Archive/windows_app_csharp/`
-
-----
-
-## v1.0-stable (2026-05-10)
-
-### Firmware
-- **Simplified architecture**: buttons only send BLE keyboard events, no SCO control
-  - HFP audio pipeline always ready, Windows AG manages SCO start/stop
-  - Eliminates task_wdt crashes caused by SCO teardown in BTU_TASK
-- **BTU_TASK starvation fix**: audio pipeline work deferred to app task via `bt_app_work_dispatch`
-- **BLE fast connection**: request `conn_int=12-24` (15-30ms) for low-latency keyboard events
-- **WS2812 rainbow restored**: 4 LEDs, Button 1 press=start, release=stop
-  - Rainbow task safe now — no longer conflicts with SCO (buttons don't touch audio)
-- Audio send task priority lowered from 22 to 5
-
-### Python App
-- **Keyboard simulation**: `keybd_event` (pure VK codes, no SCANCODE conflict)
-- Windows C# app archived to `_Archive/`
-- Python EXE rebuilt (11 MB)
-
-----
-
-## v1.0-stable (2026-05-10)
-
-> Stable single-device release. All core features working reliably.
-
-### Firmware
-- HFP HF Client + mSBC 16kHz — Windows native Bluetooth microphone
-- 3 buttons: configurable keyboard shortcuts via BLE GATT
-- WS2812 LED strip (4 LEDs): rainbow on Button 1 press
-- Legacy I2S driver for clean audio (INMP441)
-- BLE GATT service 0x1820 with 5 characteristics
-- BTDM dual-mode controller (SCO + BLE coexistence)
-- Audio DSP: high-pass filter + moving average
-
-### Windows App (C# WPF, archived)
-- BLE scan (BluetoothLEAdvertisementWatcher), connect, GATT R/W
-- Win32 key capture hook (bypasses IME, detects modifiers)
-- keybd_event keyboard simulation
-- Auto-start on boot, auto-connect BLE on launch
-
-### Python App
-- tkinter + bleak + pynput, independent alternative
-- 11 MB PyInstaller single-file EXE
-
-### Removed
-- Multi-device switching (Button 4) — rolled back, spec archived in docs/
-
-----
-
-## 2026-05-10
-
-### Multi-Device Switching & LED
-
-- **新增 Button 4** (GPIO 27)：设备切换 + 配对管理
-  - 短按 (<5s)：切换到下一个已配对设备，绿灯闪烁指示当前设备号
-  - 长按 (≥5s, 不松手即触发)：清除当前设备配对记录并进入配对模式
-  - 设备指示：1 次绿灯闪烁 = 设备 1 / 2 次 = 设备 2，各重复 3 轮
-- **配对模式重写**
-  - 蓝灯真正快闪（独立 FreeRTOS task），不再常亮
-  - 非阻塞状态机，配对中可短按 Button 4 取消
-  - 30s 超时蓝灯熄灭退出，不再亮红灯
-  - HFP 连接成功自动保存设备地址到 NVS
-- **PTT 增强**：BLE 未连接时按下 Button 1，红灯闪烁 3 次
-- 新增 `config_storage` 设备列表 CRUD 函数，支持 2 设备 NVS 存储
-
-### WS2812 LED
-
-- 新增 `ws2812_device_indicator(dev_idx)`：N 次绿灯闪烁表示设备号
-- 新增 `ws2812_blink_color()`：真正快闪（blink task）
-- 修复 `ws2812_solid_color()` 不自动熄灭的 bug
-
-----
-
-## 2026-05-09
-
-### Windows App — Key Capture & BLE Fixes
-
-- **按键捕获改用 Win32 WM_KEYDOWN 钩子**（绕过 IME）
-  - 捕获时临时关闭输入法，解决中文输入法 VK-E5 问题
-  - Right Shift 改用扫描码 (0x36) 区分左右
-  - Tab 键可捕获（`KeyboardNavigation.TabNavigation="None"` + `WM_GETDLGCODE`）
-- **键盘模拟改用 `keybd_event`**（WiFi 项目验证方案），替代 `SendInput`
-- **修饰键正确捕获**：左/右 Ctrl/Shift/Alt 自动区分（extended flag）
-- **BLE 连接修复**
-  - 扫描改用 `BluetoothLEAdvertisementWatcher` Active 模式
-  - 连接改用 `BluetoothLEDevice.FromBluetoothAddressAsync()` 直连 MAC 地址
-  - GATT 发现增加 3 次重试 + `BluetoothCacheMode.Uncached`
-  - 连接后等待 1.5s 等服务注册完成
-- **开机自动启动**：勾选框写入 Windows Startup 文件夹
-- **开机自动连接 BLE**：首次 Scan & Connect 后记住地址，下次启动自动连
-- **单文件 EXE 发布**：`dotnet publish -p:PublishSingleFile=true` → 25MB 单文件
-
-### ESP32 固件 — 音质 + BLE 修复
-
-- **I2S 驱动切换**：从新版 `i2s_std.h` 切换到旧版 `driver/i2s.h`
-  - `use_apll = false`、`I2S_COMM_FORMAT_STAND_I2S`、`i2s_zero_dma_buffer()`
-  - 音质大幅改善，消除电流噪音
-- **I2S DMA 保持活跃**：SCO 断开时不真正停 I2S，解决二次连接挂死
-- **BLE GATT 修复**
-  - 广播数据拆分：广告包 (name+flags ≤31B) + 扫描响应包 (128-bit UUID)
-  - 新增 `esp_ble_gatts_start_service()` 调用，修复服务不可见 bug
-  - `GATTS_NUM_HANDLES` 12 → 16
-  - Button Event 新增 CCCD 描述符
-  - 修复 `s_conn_id == 0` 误判无连接 bug
-
-### 音频降噪 DSP
-
-- **高通滤波 (80Hz cutoff, 1-pole IIR)**：去除低频风噪、电路哼声
-- **5-tap 滑动平均**：平滑高频数字毛刺
-- 噪声门（默认禁用）
-
-----
-
-## 2026-05-07 — 2026-05-08
-
-### HFP HF Client 重构
-
-- **从 HFP AG 切换到 HFP HF Client**：Windows 正确识别为蓝牙麦克风
-- BTDM SCO 致命配置修复：`CONFIG_BTDM_CTRL_BR_EDR_MAX_SYNC_CONN=1` 和 `SCO_DATA_PATH_HCI=y`
-- CoD 更新：`service=0x340, major=0x04(Audio/Video), minor=0x02(Hands-free)`
-- mSBC 16kHz 宽带语音编解码协商和音频管线
-- **PTT (Button 1)**：按住开 SCO 音频、松开关闭
-- I2S 音频路由优化：避免双重读取、ring buffer 9.6KB
-- 出站回调欠载时返回静音而非 0，解决"哒哒哒"爆音
-
-### Windows C# WPF 应用
-
-- .NET 8 WPF + CommunityToolkit.Mvvm
-- BLE GATT 客户端：扫描、连接、读写按钮映射
-- KeyboardSimulator (Win32 SendInput)
-- MVVM 架构 + JSON 配置持久化
-
-### BLE GATT 服务
-
-- 自定义服务 0x1820 + 5 个特征值
-- Button 1-3 Map、Button Event (Notify)、Device Status (Notify)
-- 广播数据 flags + 128-bit UUID + device name
-
-### WS2812 LED
-
-- GPIO 15, RMT 驱动, 15 颗灯珠
-- PTT 按下 + BLE 连接时七彩循环
-
-### Python tkinter 应用
-
-- `windows_app_python/` 独立 Python 版本
-- bleak BLE + pynput 按键捕获 + keybd_event 模拟
-- tkinter GUI，11MB PyInstaller 单文件 EXE
-
-### 文档
-
-- GitHub README 中英双语
-- MIT LICENSE
-- 项目架构文档 + BLE 协议规范 + 接线图
-
-----
-
-## 2026-05-06 及之前
-
-### 项目初始化
-
-- ESP32 PlatformIO + ESP-IDF 项目骨架
-- HFP AG 初始实现（后废弃）
-- Windows WPF 应用初始版本
-- 硬件接线文档
+### 当前开发中 (基于 v2.1)
+- **BLE OTA 固件升级**（0x2A09 特性，Python 应用无线刷固件）
+- **去除扫描逻辑**（系统蓝牙负责连接，应用只做配置）
+- **去除按键 HFP 重连**（避免 Windows 配对弹窗）
+- 尝试 Mac 跨平台 HFP 兼容 → 失败，已回退
+- 尝试去启动 HFP 自动连接 → 跨平台冲突 → 已回退
