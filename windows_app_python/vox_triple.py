@@ -76,8 +76,8 @@ class VoxTripleApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title(f"VoxTriple — ESP32 BT Mic Config {APP_VERSION}")
-        root.geometry("620x780")
-        root.minsize(580, 740)
+        root.geometry("620x810")
+        root.minsize(580, 770)
         root.resizable(True, True)
 
         self.ble = ble_client.BleClient()
@@ -164,13 +164,13 @@ class VoxTripleApp:
         ttk.Button(act_frame, text="Write to Keyboard / 写入到蓝牙键盘",
                    command=self._write_device).pack(side="left", padx=4, ipadx=20, ipady=4)
 
-        # OTA firmware upgrade (BLE)
-        self._ota_btn = ttk.Button(act_frame, text="FW Upgrade BLE / BLE 固件升级",
+        # OTA firmware upgrade row (separate from write button)
+        ota_frame = ttk.Frame(self.root)
+        ota_frame.pack(pady=4)
+        self._ota_btn = ttk.Button(ota_frame, text="FW Upgrade via BLE / BLE 固件升级",
                                    command=self._start_ota)
         self._ota_btn.pack(side="left", padx=4)
-
-        # OTA firmware upgrade (USB Serial)
-        self._serial_ota_btn = ttk.Button(act_frame, text="FW Upgrade USB / USB 固件升级",
+        self._serial_ota_btn = ttk.Button(ota_frame, text="FW Upgrade via USB / USB 固件升级",
                                           command=self._start_serial_ota)
         self._serial_ota_btn.pack(side="left", padx=4)
 
