@@ -2,10 +2,13 @@
 
 ## v2.2 (current, `ble-hid-keyboard` branch)
 
+### 2026-06-04 (4)
+- **OTA 按钮独立行**：BLE/USB 升级按钮移到单独一行，避免窗口宽度不足
+
 ### 2026-06-04 (3)
-- **USB 串口 OTA 固件升级** (`uart_ota.c/h`)：921600 bps 高速固件传输，1MB 约 12 秒（BLE OTA 需 3 分钟）
-  - 协议：`OTA:START:size` → `OK` → [binary stream @ 921600] → `OTA:END` → `DONE` → 重启
-  - Python 端新增 "FW Upgrade USB" 按钮，pyserial 串口通信
+- **USB 串口 OTA 固件升级** (`uart_ota.c/h`)：921600 bps 高速固件传输，1MB 约 12 秒
+- **版本显示**：App 标题栏 + Info 面板显示 App/FW 版本，ESP32 新增 0x2A0A 版本特性
+- **OTA 分区表修复**：添加 ota_0/ota_1（各 1.25MB），移除未使用的 SPIFFS 分区
 
 ### 2026-06-04 (2)
 - **OTA 分区表修复** (`partitions.csv`)：添加 ota_0/ota_1 分区（各 1.25MB），移除未使用的 SPIFFS storage 分区。
