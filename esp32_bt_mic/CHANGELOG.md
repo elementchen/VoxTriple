@@ -2,7 +2,13 @@
 
 ## v2.2 (current, `ble-hid-keyboard` branch)
 
-### 2026-06-04
+### 2026-06-04 (2)
+- **OTA 分区表修复** (`partitions.csv`)：添加 ota_0/ota_1 分区（各 1.25MB），移除未使用的 SPIFFS storage 分区。
+  之前 OTA 代码无分区支持会静默失败
+- **固件版本 BLE 特性** (`ble_gatts_config.c`)：新增 0x2A0A 只读特性，4 字节 [major,minor,patch,stable]
+- **应用版本显示** (`vox_triple.py`)：窗口标题和 Info 面板显示 App 版本 + 固件版本，连接后自动读取固件版本
+
+### 2026-06-04 (1)
 - **移除按键 HFP 重连** (`button_handler.c:111-117`)：按按钮不再调用 `esp_hf_client_connect()`，避免每次按键触
   发 Windows "添加新设备" 弹窗
 - **首次扫描存地址后永久直连** (`vox_triple.py:_auto_connect`)：新增逻辑——先试已保存地址直连，若无则扫一次并存
