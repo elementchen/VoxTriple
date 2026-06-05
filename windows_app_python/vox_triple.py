@@ -54,6 +54,9 @@ def stop_asyncio_loop():
 
 
 # ── Modifier helpers ────────────────────────────────────────────
+APP_VERSION = "2.2.0-dev"
+FW_VERSION_MIN = [2, 2, 0, 0]  # [major, minor, patch, 1=stable]
+
 _MOD_MASKS = {
     "lc": 0x01, "ls": 0x02, "la": 0x04, "lw": 0x08,
     "rc": 0x10, "rs": 0x20, "ra": 0x40, "rw": 0x80,
@@ -72,7 +75,7 @@ def _build_modifier(vars: dict) -> int:
 class VoxTripleApp:
     def __init__(self, root: tk.Tk):
         self.root = root
-        root.title("VoxTriple — ESP32 BT Mic Config (Python)")
+        root.title(f"VoxTriple — ESP32 BT Mic Config {APP_VERSION}")
         root.geometry("620x780")
         root.minsize(580, 740)
         root.resizable(True, True)
@@ -106,6 +109,7 @@ class VoxTripleApp:
         self._status_text = tk.StringVar(value="Searching for device...")
         self._last_event_text = tk.StringVar(value="None")
         self._connected = False
+        self._fw_ver = "unknown"
 
         self._build_ui()
 
@@ -168,9 +172,11 @@ class VoxTripleApp:
         # Info (simplified)
         info = ttk.LabelFrame(self.root, text="Info / 说明", padding=8)
         info.pack(fill="both", expand=True, padx=8, pady=4)
-        msg = ("Click 'Capture Key' then press a key to assign it.\n"
+        msg = (f"App: {APP_VERSION} | FW: {self._fw_ver}\n"
+               "Click 'Capture Key' then press a key to assign it.\n"
                "Modifier checkboxes apply on Write to Keyboard.\n"
                "The keyboard works without this app — open only to change settings.\n\n"
+               f"应用: {APP_VERSION} | 固件: {self._fw_ver}\n"
                "点击「Capture Key」然后按键来捕获。\n"
                "修饰键勾选框在「写入到蓝牙键盘」时生效。\n"
                "蓝牙键盘独立工作 — 此应用仅用于修改配置。")
@@ -288,6 +294,7 @@ class VoxTripleApp:
         sl = await self.ble.read_sleep_mode()
         if sl is not None:
             self._sleep_mode.set(bool(sl))
+        self._fw_ver = await self.ble.read_fw_version() or "unknown"
 
     def _disconnect(self):
         _run_async(self.ble.disconnect())

@@ -22,6 +22,7 @@ CHAR_TX_POWER    = "00002a06-0000-1000-8000-00805f9b34fb"
 CHAR_SLEEP_MODE  = "00002a07-0000-1000-8000-00805f9b34fb"
 CHAR_BTN4_MAP    = "00002a08-0000-1000-8000-00805f9b34fb"
 CHAR_OTA         = "00002a09-0000-1000-8000-00805f9b34fb"
+CHAR_FW_VER      = "00002a0a-0000-1000-8000-00805f9b34fb"
 
 
 class BleClient:
@@ -42,6 +43,7 @@ class BleClient:
         self._ch_tx_power: BleakGATTCharacteristic | None = None
         self._ch_sleep_mode: BleakGATTCharacteristic | None = None
         self._ch_ota: BleakGATTCharacteristic | None = None
+        self._ch_fw_ver: BleakGATTCharacteristic | None = None
 
     @property
     def is_connected(self) -> bool:
@@ -102,6 +104,8 @@ class BleClient:
                     self._ch_sleep_mode = c
                 elif c.uuid.lower() == CHAR_OTA:
                     self._ch_ota = c
+                elif c.uuid.lower() == CHAR_FW_VER:
+                    self._ch_fw_ver = c
 
             log.info(f"Resolved: btn1={self._ch[0] is not None} btn2={self._ch[1] is not None} "
                      f"btn3={self._ch[2] is not None} evt={self._ch_event is not None} "
@@ -190,6 +194,19 @@ class BleClient:
         except Exception as e:
             log.error(f"Write sleep mode failed: {e}")
             return False
+
+    async def read_fw_version(self) -> str | None:
+        """Read firmware version (4 bytes: major.minor.patch.build)."""
+        if not self._client or not self._ch_fw_ver:
+            return None
+        try:
+            data = await self._client.read_gatt_char(self._ch_fw_ver)
+            if len(data) >= 4:
+                stable = "stable" if data[3] else "dev"
+                return f"v{data[0]}.{data[1]}.{data[2]}-{stable}"
+        except Exception:
+            pass
+        return None
 
     async def write_ota_chunk(self, data: bytes) -> bool:
         if not self._client or not self._ch_ota:

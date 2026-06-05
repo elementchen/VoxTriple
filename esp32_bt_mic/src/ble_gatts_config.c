@@ -40,8 +40,12 @@ static const char *TAG = "BLE_GATTS";
 #define GATTS_CHAR_SLEEP_MODE_UUID 0x2A07
 #define GATTS_CHAR_BTN4_MAP_UUID   0x2A08
 #define GATTS_CHAR_OTA_UUID       0x2A09
+#define GATTS_CHAR_FW_VER_UUID    0x2A0A
 
 #define OTA_CHUNK_MAX  512
+
+/* Firmware version: 4 bytes [major, minor, patch, 1=stable] */
+static const uint8_t s_fw_version[4] = {2, 2, 0, 0};  /* v2.2.0-dev */
 
 #define GATTS_NUM_HANDLES    24
 #define GATTS_APP_ID         0x01
@@ -74,6 +78,7 @@ static uint16_t s_dev_status_handle = 0;
 static uint16_t s_tx_power_handle = 0;
 static uint16_t s_sleep_mode_handle = 0;
 static uint16_t s_ota_handle = 0;
+static uint16_t s_fw_ver_handle = 0;
 static uint16_t s_btn_event_descr_handle = 0;
 static uint16_t s_dev_status_descr_handle = 0;
 
@@ -437,8 +442,15 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                                    ESP_GATT_CHAR_PROP_BIT_WRITE,
                                    NULL, 0, NULL);
                 break;
-            case 9: /* OTA - all characteristics done, start service */
+            case 9: /* OTA - add FW Version characteristic */
                 s_ota_handle = param->add_char.attr_handle;
+                add_characteristic(s_service_handle, &s_fw_ver_handle,
+                                   GATTS_CHAR_FW_VER_UUID,
+                                   ESP_GATT_CHAR_PROP_BIT_READ,
+                                   (uint8_t *)s_fw_version, 4, NULL);
+                break;
+            case 10: /* FW Version - all characteristics done, start service */
+                s_fw_ver_handle = param->add_char.attr_handle;
                 {
                 esp_err_t ret = esp_ble_gatts_start_service(s_service_handle);
                 if (ret != ESP_OK) {
@@ -510,6 +522,9 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         } else if (param->read.handle == s_sleep_mode_handle) {
             rsp.attr_value.len = 1;
             rsp.attr_value.value[0] = s_sleep_mode;
+        } else if (param->read.handle == s_fw_ver_handle) {
+            rsp.attr_value.len = 4;
+            memcpy(rsp.attr_value.value, s_fw_version, 4);
         }
 
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
