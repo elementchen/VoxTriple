@@ -21,6 +21,7 @@
 #include "button_handler.h"
 #include "config_storage.h"
 #include "ble_hid_keyboard.h"
+#include "uart_ota.h"
 
 static const char *TAG = "MAIN";
 
@@ -85,8 +86,12 @@ void app_main(void)
     ESP_LOGI(TAG, "Step 5b: Initializing BLE GATT server...");
     ble_gatts_init();
 
-    /* Step 6: Initialize button handler */
-    ESP_LOGI(TAG, "Step 6: Initializing button handler...");
+    /* Step 6: Initialize UART OTA listener */
+    ESP_LOGI(TAG, "Step 6: Initializing UART OTA listener...");
+    uart_ota_init();
+
+    /* Step 7: Initialize button handler */
+    ESP_LOGI(TAG, "Step 7: Initializing button handler...");
     button_handler_init();
 
     ESP_LOGI(TAG, "============================================");

@@ -164,10 +164,15 @@ class VoxTripleApp:
         ttk.Button(act_frame, text="Write to Keyboard / 写入到蓝牙键盘",
                    command=self._write_device).pack(side="left", padx=4, ipadx=20, ipady=4)
 
-        # OTA firmware upgrade
-        self._ota_btn = ttk.Button(act_frame, text="Firmware Upgrade / 固件升级",
+        # OTA firmware upgrade (BLE)
+        self._ota_btn = ttk.Button(act_frame, text="FW Upgrade BLE / BLE 固件升级",
                                    command=self._start_ota)
-        self._ota_btn.pack(side="left", padx=16)
+        self._ota_btn.pack(side="left", padx=4)
+
+        # OTA firmware upgrade (USB Serial)
+        self._serial_ota_btn = ttk.Button(act_frame, text="FW Upgrade USB / USB 固件升级",
+                                          command=self._start_serial_ota)
+        self._serial_ota_btn.pack(side="left", padx=4)
 
         # Info (simplified)
         info = ttk.LabelFrame(self.root, text="Info / 说明", padding=8)
@@ -435,6 +440,77 @@ class VoxTripleApp:
             self._status_text.set(f"OTA error: {e}")
         finally:
             self._ota_btn.configure(text="Firmware Upgrade / 固件升级", state="normal")
+
+    # ── USB Serial OTA ────────────────────────────────────────────
+    def _start_serial_ota(self):
+        from tkinter import filedialog
+        path = filedialog.askopenfilename(
+            title="Select firmware .bin file",
+            filetypes=[("Firmware", "*.bin"), ("All files", "*.*")])
+        if not path:
+            return
+
+        # Pick COM port
+        import serial.tools.list_ports
+        ports = [p.device for p in serial.tools.list_ports.comports()]
+        if not ports:
+            self._status_text.set("No COM ports found.")
+            return
+        # Use first available port (or let user pick later)
+        port = ports[0] if len(ports) == 1 else None
+        if port is None:
+            self._status_text.set(f"Ports: {', '.join(ports)}. Using {ports[0]}")
+            port = ports[0]
+
+        self._serial_ota_btn.configure(text="Uploading… / 上传中…", state="disabled")
+        self._status_text.set(f"Serial OTA: starting on {port}…")
+        _run_async(self._do_serial_ota(path, port))
+
+    async def _do_serial_ota(self, path: str, port: str):
+        import serial
+        try:
+            size = os.path.getsize(path)
+            # Open at normal baud, send start command
+            ser = serial.Serial(port, 115200, timeout=5)
+            ser.write(f"OTA:START:{size}\n".encode())
+            resp = ser.readline().decode().strip()
+            if resp != "OTA:OK":
+                self._status_text.set(f"Serial OTA: unexpected response '{resp}'")
+                ser.close()
+                self._serial_ota_btn.configure(text="FW Upgrade USB / USB 固件升级", state="normal")
+                return
+
+            # Wait for ESP32 to switch baud, then switch ourselves
+            await asyncio.sleep(0.5)
+            ser.baudrate = 921600
+            await asyncio.sleep(0.1)
+
+            # Send binary data
+            with open(path, "rb") as f:
+                total = 0
+                while True:
+                    chunk = f.read(4096)
+                    if not chunk:
+                        break
+                    ser.write(chunk)
+                    total += len(chunk)
+                    pct = total * 100 // size
+                    self._status_text.set(f"Serial OTA: {total}/{size} ({pct}%)")
+
+            # Switch back to normal baud for handshake
+            ser.baudrate = 115200
+            await asyncio.sleep(0.5)
+            ser.write(b"OTA:END\n")
+            resp = ser.readline().decode().strip()
+            if resp == "OTA:DONE":
+                self._status_text.set("Serial OTA: done! ESP32 rebooting…")
+            else:
+                self._status_text.set(f"Serial OTA: error '{resp}'")
+            ser.close()
+        except Exception as e:
+            self._status_text.set(f"Serial OTA error: {e}")
+        finally:
+            self._serial_ota_btn.configure(text="FW Upgrade USB / USB 固件升级", state="normal")
 
     def _on_close(self):
         keyboard_io.stop_key_capture()
