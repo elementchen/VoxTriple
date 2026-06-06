@@ -1,41 +1,40 @@
-VoxTriple v1.5 — 全部引脚右侧排 接线图
-============================================
+VoxTriple v2.2 引脚接线图
+======================
 
-INMP441 → ESP32 (全部右侧排):
+全部功能引脚集中在 ESP32 NodeMCU-32S 右侧排 (J2)
+
+INMP441 → ESP32:
   VDD  → 3V3          左侧排 Pin 1（唯一左侧引线）
   GND  → GND          右侧排 Pin 1/7/19
-  L/R  → GND          左侧声道
+  L/R  → GND          左声道
   SD   → GPIO 17      右侧排 Pin 11 (I2S DATA)
   WS   → GPIO 22      右侧排 Pin 3  (I2S WS / LRCLK)
   SCK  → GPIO 21      右侧排 Pin 6  (I2S BCK / BCLK)
 
-Button 1 → GPIO 4     右侧排 Pin 13 (快捷键)
-Button 2 → GPIO 16    右侧排 Pin 12 (快捷键)
-Button 3 → GPIO 19    右侧排 Pin 8  (快捷键)
-Button 4 → GPIO 23    右侧排 Pin 2  (快捷键)
+按键:
+  Button 1 → GPIO 4     右侧排 Pin 13 (深睡唤醒引脚)
+  Button 2 → GPIO 16    右侧排 Pin 12
+  Button 3 → GPIO 19    右侧排 Pin 8
+  Button 4 → GPIO 23    右侧排 Pin 2
 
 LED 指示灯:
   GPIO18 → R1(220Ω) → LED阳极(A) → LED阴极(K) → GND
-  右侧排 Pin 2
-
-电源:
-  3V3  → INMP441 VDD  (唯一左侧引线，其他全部右侧)
-  GND  → 所有模块共地  (右侧排 Pin 1/7/19)
+  右侧排 Pin 9
 
 ESP32 NodeMCU-32S 右侧排 (J2) 全貌:
   Pin 1  GND         ← 接地
   Pin 2  GPIO23      ← Button 4
-  Pin 3  GPIO22      ← I2S WS (字选)
+  Pin 3  GPIO22      ← I2S WS
   Pin 4  TXD/GPIO1   (保留)
   Pin 5  RXD/GPIO3   (保留)
-  Pin 6  GPIO21      ← I2S BCK (位时钟)
+  Pin 6  GPIO21      ← I2S BCK
   Pin 7  GND         ← 接地
   Pin 8  GPIO19      ← Button 3
   Pin 9  GPIO18      ← LED 指示灯
   Pin 10 GPIO5       (保留)
-  Pin 11 GPIO17      ← I2S DATA (数据)
+  Pin 11 GPIO17      ← I2S DATA
   Pin 12 GPIO16      ← Button 2
-  Pin 13 GPIO4       ← Button 1
+  Pin 13 GPIO4       ← Button 1 (RTC GPIO, 深睡唤醒)
   Pin 14 GPIO0       (BOOT引脚，不使用)
   Pin 15 GPIO2       (保留)
   Pin 16 GPIO15      (保留)
@@ -49,3 +48,4 @@ ESP32 NodeMCU-32S 右侧排 (J2) 全貌:
   - GPIO0 是 BOOT 引脚，不能用作低电平按钮
   - 按键低电平有效（按下短路到GND），使用ESP32内部上拉
   - 所有模块共地
+  - 深度睡眠仅 GPIO4 (RTC GPIO) 可唤醒
