@@ -109,18 +109,25 @@ static esp_ble_adv_params_t adv_params = {
     .adv_int_min        = 0x060,  /* 60 ms */
     .adv_int_max        = 0x060,
     .adv_type           = ADV_TYPE_IND,
-    .own_addr_type      = BLE_ADDR_TYPE_PUBLIC,
+    .own_addr_type      = BLE_ADDR_TYPE_RANDOM,
     .channel_map        = ADV_CHNL_ALL,
     .adv_filter_policy  = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
 };
 
 static void ble_init_adv_data(const char *name)
 {
+    /* BLE static random address from public MAC — keeps BLE & Classic BT
+     * at different addresses so Windows 11 BT 5.x sees two devices. */
+    const uint8_t *pub = esp_bt_dev_get_address();
+    esp_bd_addr_t ble_addr;
+    ble_addr[0] = 0xC0;  /* static random marker */
+    memcpy(&ble_addr[1], pub ? &pub[1] : (uint8_t[]){0,0,0,0,0}, 5);
+    esp_ble_gap_set_rand_addr(ble_addr);
+
     /* BLE GAP device name — shorter for advertising budget */
     char ble_name[16];
-    const uint8_t *mac = esp_bt_dev_get_address();
-    if (mac) {
-        snprintf(ble_name, sizeof(ble_name), "ESP32_KB_%02X", mac[5]);
+    if (pub) {
+        snprintf(ble_name, sizeof(ble_name), "ESP32_KB_%02X", pub[5]);
     } else {
         snprintf(ble_name, sizeof(ble_name), "ESP32_KB");
     }
