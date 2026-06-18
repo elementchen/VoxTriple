@@ -10,44 +10,15 @@
 #include <stdbool.h>
 #include "esp_err.h"
 
-/**
- * @brief Initialize NVS flash storage
- * @return ESP_OK on success
- */
-esp_err_t bt_nvs_init(void);
+extern char g_bt_device_name[];
 
-/**
- * @brief Initialize Bluetooth controller and Bluedroid stack (dual mode)
- * @return ESP_OK on success
- */
+esp_err_t bt_nvs_init(void);
 esp_err_t bt_stack_init(void);
 
-/**
- * @brief Get current HFP connection state
- * @return true if HFP AG is connected to a peer
- */
 bool bt_hfp_is_connected(void);
-
-/**
- * @brief Get current audio connection state
- * @return true if audio SCO channel is active
- */
 bool bt_audio_is_active(void);
-
-/**
- * @brief Set HFP connection state (called from HFP callback)
- */
 void bt_hfp_set_connected(bool connected);
-
-/**
- * @brief Set audio active state (called from HFP callback)
- */
 void bt_audio_set_active(bool active);
-
-/**
- * @brief Force HFP ACL out of sniff mode to reduce SCO open latency.
- *        Should be called on button press (before Windows opens SCO).
- */
 void bt_hfp_hf_wake_acl(void);
 
 #endif /* __BT_INIT_H__ */

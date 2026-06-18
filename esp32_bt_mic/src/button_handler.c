@@ -17,7 +17,7 @@
 #include "ble_hid_keyboard.h"
 #include "config_storage.h"
 #include "bt_init.h"
-#include "esp_hf_client_api.h"
+// NimBLE: no Classic BT
 
 static const char *TAG = "BTN_HANDLER";
 
@@ -105,17 +105,7 @@ static void button_task_func(void *arg)
                     /* Reset inactivity deep sleep timer */
                     if (s_inactivity_timer) xTimerReset(s_inactivity_timer, 0);
 
-                    /* Wake HFP ACL from sniff to reduce SCO open latency */
-                    bt_hfp_hf_wake_acl();
-
-                    /* Connection wake-up: if HFP or HID is disconnected,
-                     * pressing any button triggers reconnection. */
-                    if (!bt_hfp_is_connected()) {
-                        esp_bd_addr_t saved_addr = {0};
-                        if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
-                            esp_hf_client_connect(saved_addr);
-                        }
-                    }
+                    /* Restart BLE advertising if HID disconnected */
                     if (!ble_hid_is_connected()) {
                         ble_gatts_adv_start();
                     }

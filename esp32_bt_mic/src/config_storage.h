@@ -9,8 +9,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "esp_bt_defs.h"
 #include "esp_err.h"
+
+#define ESP_BD_ADDR_LEN 6
+typedef uint8_t esp_bd_addr_t[ESP_BD_ADDR_LEN];
 
 #define NVS_NAMESPACE  "bt_mic_cfg"
 #define BUTTON_NUM     4

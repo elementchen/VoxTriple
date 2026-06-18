@@ -17,10 +17,11 @@
 
 #include "bt_init.h"
 #include "ble_gatts_config.h"
-#include "audio_capture.h"
 #include "button_handler.h"
 #include "config_storage.h"
 #include "ble_hid_keyboard.h"
+
+void app_ble_gap_init(void);  /* in nimble_gap.c */
 
 static const char *TAG = "MAIN";
 
@@ -38,8 +39,7 @@ void app_main(void)
     gpio_set_level(GPIO_NUM_18, 0);
 
     ESP_LOGI(TAG, "============================================");
-    ESP_LOGI(TAG, "  ESP32 Bluetooth Microphone - PTT Mode");
-    ESP_LOGI(TAG, "  HFP HF Client + BLE GATT Server");
+    ESP_LOGI(TAG, "  ESP32 BLE HID Keyboard — BLE-Only Diagnostic");
     ESP_LOGI(TAG, "============================================");
 
     /* Step 1: Initialize NVS */
@@ -50,12 +50,8 @@ void app_main(void)
     ESP_LOGI(TAG, "Step 2: Loading configuration...");
     config_storage_init();
 
-    /* Step 3: Initialize I2S microphone driver */
-    ESP_LOGI(TAG, "Step 3: Initializing I2S microphone...");
-    ESP_ERROR_CHECK(audio_capture_init());
-
-    /* Step 4: Initialize Bluetooth stack (dual mode: BTDM) */
-    ESP_LOGI(TAG, "Step 4: Initializing Bluetooth stack...");
+    /* Step 3: Initialize Bluetooth stack (BLE-only mode) */
+    ESP_LOGI(TAG, "Step 3: Initializing Bluetooth stack (BLE only)...");
     ESP_ERROR_CHECK(bt_stack_init());
 
     /* Load and apply saved BT sleep mode setting.
@@ -76,17 +72,22 @@ void app_main(void)
         ESP_LOGI(TAG, "WiFi disabled for power saving");
     }
 
-    /* Step 5a: Initialize BLE HID Keyboard first (registers its GATT callback) */
-    ESP_LOGI(TAG, "Step 5a: Initializing BLE HID Keyboard...");
+    /* Check bond status after BT stack init (NimBLE handles via ble_store) */
+    ESP_LOGI(TAG, "BLE stack initialized");
+
+    /* Step 4a: Initialize BLE HID Keyboard */
+    ESP_LOGI(TAG, "Step 4a: Initializing BLE HID Keyboard...");
     ESP_ERROR_CHECK(ble_hid_keyboard_init());
 
-    /* Step 5b: Initialize BLE GATT server (overwrites callback with unified
-     * handler that dispatches to HID handler internally) */
-    ESP_LOGI(TAG, "Step 5b: Initializing BLE GATT server...");
-    ble_gatts_init();
+    /* Let NimBLE HID service registration complete before advertising */
+    vTaskDelay(pdMS_TO_TICKS(500));
 
-    /* Step 6: Initialize button handler */
-    ESP_LOGI(TAG, "Step 6: Initializing button handler...");
+    /* Step 4b: Initialize BLE GATT server */
+    ESP_LOGI(TAG, "Step 4b: Initializing BLE GATT server...");
+    app_ble_gap_init();  /* NimBLE GAP init (replaces Bluedroid ble_gatts_init) */
+
+    /* Step 5: Initialize button handler */
+    ESP_LOGI(TAG, "Step 5: Initializing button handler...");
     button_handler_init();
 
     ESP_LOGI(TAG, "============================================");
@@ -97,6 +98,7 @@ void app_main(void)
     /* Suppress all INFO logs to reduce serial traffic and CPU load.
      * Only WARN/ERROR will appear. Comment this line to restore debug logs. */
     esp_log_level_set("*", ESP_LOG_WARN);
+    esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_level_set("BTN_HANDLER", ESP_LOG_DEBUG);
     esp_log_level_set("BLE_GATTS", ESP_LOG_DEBUG);
 

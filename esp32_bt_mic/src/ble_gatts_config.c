@@ -10,6 +10,7 @@
 #include <inttypes.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_random.h"
 #include "esp_log.h"
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
@@ -21,7 +22,7 @@
 #include "ble_gatts_config.h"
 #include "config_storage.h"
 #include "bt_init.h"
-#include "esp_hf_client_api.h"
+// NimBLE: no Classic BT
 
 static const char *TAG = "BLE_GATTS";
 
@@ -99,7 +100,7 @@ static esp_ble_adv_params_t adv_params = {
 
 static void ble_init_adv_data(const char *name)
 {
-    /* BLE GAP device name — shorter for advertising budget */
+    /* BLE GAP device name */
     char ble_name[16];
     const uint8_t *mac = esp_bt_dev_get_address();
     if (mac) {
@@ -109,11 +110,20 @@ static void ble_init_adv_data(const char *name)
     }
     esp_ble_gap_set_device_name(ble_name);
 
-    /* BLE SMP — Secure Connections bonding, no I/O capability. */
+    /* BLE — SC bonding with IRK exchange for RPA resolution.
+     * BT 5.3 Windows changes MAC each reconnect via RPA;
+     * ESP_BLE_ID_KEY_MASK lets ESP32 resolve new address → find stored LTK. */
     esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_BOND;
     esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;
+    uint8_t key_size = 16;
+    uint8_t init_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
+    uint8_t rsp_key  = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
+
     esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, 1);
     esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap, 1);
+    esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, 1);
+    esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, 1);
+    esp_ble_gap_set_security_param(ESP_BLE_SM_MIN_KEY_SIZE, &key_size, 1);
 
     /* 128-bit HID service UUID for advertising */
     const uint8_t hid_uuid128[] = {
@@ -608,16 +618,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
 
         /* Keep advertising so the Python config app can also connect */
         esp_ble_gap_start_advertising(&adv_params);
-
-        if (!bt_hfp_is_connected()) {
-            esp_bd_addr_t saved_addr = {0};
-            if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
-                ESP_LOGI(TAG, "Triggering HFP reconnect to %02x:%02x:%02x:%02x:%02x:%02x",
-                         saved_addr[0], saved_addr[1], saved_addr[2],
-                         saved_addr[3], saved_addr[4], saved_addr[5]);
-                esp_hf_client_connect(saved_addr);
-            }
-        }
+        /* HFP reconnect removed — BT 5.3 BTDM conflict */
         break;
     }
 
@@ -632,7 +633,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
          * If it fails again quickly (BTDM conflict), back off to 3s. */
         static uint32_t last_disc_ms = 0;
         uint32_t now_ms = xTaskGetTickCount() * portTICK_PERIOD_MS;
-        uint32_t delay_ms = (now_ms - last_disc_ms < 30000) ? 3000 : 0;
+        uint32_t delay_ms = (now_ms - last_disc_ms < 30000) ? 3000 : portTICK_PERIOD_MS;
         last_disc_ms = now_ms;
 
         TimerHandle_t t = xTimerCreate("adv_retry", pdMS_TO_TICKS(delay_ms),

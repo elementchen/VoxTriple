@@ -12,9 +12,11 @@
 #include "freertos/FreeRTOS.h"
 #include "esp_log.h"
 #include "esp_bt.h"
+#if CONFIG_BT_BLUEDROID_ENABLED
 #include "esp_bt_main.h"
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
+#endif
 #include "esp_hidd.h"
 #include "esp_hid_common.h"
 #include "ble_hid_keyboard.h"
@@ -267,15 +269,8 @@ esp_err_t ble_hid_keyboard_init(void)
     hid_config.report_maps     = report_maps;
     hid_config.report_maps_len = 1;
 
-    /* HID registers its own GATT callback; our unified handler in
-     * ble_gatts_config.c will dispatch to esp_hidd_gatts_event_handler. */
-    esp_err_t ret = esp_ble_gatts_register_callback(esp_hidd_gatts_event_handler);
-    if (ret) {
-        ESP_LOGE(TAG, "HID GATTS register failed: %d", ret);
-        return ret;
-    }
-
-    ret = esp_hidd_dev_init(&hid_config, ESP_HID_TRANSPORT_BLE,
+    /* NimBLE: HID GATT registration is handled internally by esp_hidd */
+    esp_err_t ret = esp_hidd_dev_init(&hid_config, ESP_HID_TRANSPORT_BLE,
                             hid_event_cb, &s_hid_dev);
     if (ret) {
         ESP_LOGE(TAG, "HID dev init failed: %d", ret);
