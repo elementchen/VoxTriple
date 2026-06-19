@@ -177,24 +177,6 @@ void app_main(void)
     esp_wifi_stop();
     esp_wifi_deinit();
 
-    /*
-     * Register NimBLE store callbacks BEFORE esp_nimble_enable().
-     * These hooks intercept all NVS bond key reads/writes for debugging.
-     * NOTE: Do NOT call ble_store_config_init() here — it must be called
-     * inside nimble_on_sync() after the host is ready, otherwise the NVS
-     * namespace handle is invalid and LTKs won't survive reboot.
-     */
-    ble_hs_cfg.store_read_cb   = my_store_read_cb;
-    ble_hs_cfg.store_write_cb  = my_store_write_cb;
-    ble_hs_cfg.store_delete_cb = my_store_delete_cb;
-    ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
-
-    /*
-     * Register on_sync callback — this is called when NimBLE host is ready.
-     * Bond store init and first advertising are done inside nimble_on_sync().
-     */
-    ble_hs_cfg.sync_cb = nimble_on_sync;
-
     ESP_LOGI(TAG, "Step 3: Initializing NimBLE GAP...");
     esp_hid_gap_init(HID_DEV_MODE);
 
@@ -208,6 +190,16 @@ void app_main(void)
     /* NOTE: adv_init sets security params in ble_hs_cfg but does NOT start advertising.
      * Advertising is now started inside nimble_on_sync() after host is ready. */
     esp_hid_ble_gap_adv_init(ESP_HID_APPEARANCE_KEYBOARD, dev_name);
+
+    /*
+     * Register NimBLE store callbacks & sync callback AFTER NimBLE initialization
+     * to prevent them from being overwritten during esp_nimble_init().
+     */
+    ble_hs_cfg.store_read_cb   = my_store_read_cb;
+    ble_hs_cfg.store_write_cb  = my_store_write_cb;
+    ble_hs_cfg.store_delete_cb = my_store_delete_cb;
+    ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
+    ble_hs_cfg.sync_cb         = nimble_on_sync;
 
     ESP_LOGI(TAG, "Step 5: Initializing HID Keyboard...");
     ble_hid_keyboard_init();
