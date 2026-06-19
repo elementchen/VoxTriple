@@ -39,6 +39,15 @@ static const char *TAG = "MAIN";
 
 void ble_store_config_init(void);
 
+static ble_hs_sync_fn *s_orig_sync_cb;
+
+static void nimble_on_sync(void)
+{
+    int rc = ble_hs_util_ensure_addr(0);
+    ESP_LOGI(TAG, "NimBLE synced (rc=%d), starting advertising", rc);
+    esp_hid_ble_gap_adv_start();
+}
+
 /* Stub — encryption complete, our button_handler sends HID reports directly */
 void ble_hid_task_start_up(void)
 {
@@ -53,31 +62,6 @@ static void nimble_host_task(void *param)
     nimble_port_freertos_deinit();
 }
 
-/*
- * on_sync: called by NimBLE host when the host<->controller link is ready.
- * This is the CORRECT place to call ble_store_config_init() — at this point
- * the NimBLE NVS store backend is fully initialised and can read/write bonds.
- * Calling it before (e.g. in app_main before esp_nimble_enable) causes the
- * LTK to not be properly restored from NVS, leading to status=7 on Windows
- * reconnect.
- */
-static void nimble_on_sync(void)
-{
-    ESP_LOGI(TAG, "NimBLE host synced — initialising bond store");
-
-    /* Initialise the NVS-backed bond store NOW (host is ready). */
-    ble_store_config_init();
-
-    /* Restore address — use public address from efuse */
-    int rc = ble_hs_util_ensure_addr(0);
-    if (rc != 0) {
-        ESP_LOGE(TAG, "ble_hs_util_ensure_addr failed: %d", rc);
-    }
-
-    ESP_LOGI(TAG, "NimBLE store ready, starting advertising");
-    esp_hid_ble_gap_adv_start();
-}
-
 /* HID device event callback */
 static void hid_event_cb(void *handler_args, esp_event_base_t base,
                          int32_t id, void *event_data)
@@ -86,69 +70,19 @@ static void hid_event_cb(void *handler_args, esp_event_base_t base,
 
     switch (id) {
     case ESP_HIDD_START_EVENT:
-        /* Advertising is already started by nimble_on_sync(); do NOT call
-         * esp_hid_ble_gap_adv_start() here or NimBLE will report
-         * "advertising already started" and may reset the adv state. */
-        ESP_LOGI(TAG, "HID device started (advertising managed by on_sync)");
+        esp_hid_ble_gap_adv_start();
         break;
     case ESP_HIDD_CONNECT_EVENT:
         ESP_LOGI(TAG, "HID connected");
         break;
     case ESP_HIDD_DISCONNECT_EVENT:
-        ESP_LOGI(TAG, "HID disconnected — restarting advertising");
-        /* Restart advertising so Windows can reconnect */
-        esp_hid_ble_gap_adv_start();
+        ESP_LOGI(TAG, "HID disconnected");
         break;
     case ESP_HIDD_OUTPUT_EVENT:
         break;
     default:
         break;
     }
-}
-
-static int my_store_read_cb(int obj_type, const union ble_store_key *key, union ble_store_value *val)
-{
-    ESP_LOGI(TAG, "NVS Read: obj_type=%d", obj_type);
-    if (obj_type == BLE_STORE_OBJ_TYPE_OUR_SEC || obj_type == BLE_STORE_OBJ_TYPE_PEER_SEC) {
-        ESP_LOGI(TAG, "  Key Query: peer_addr=%02X:%02X:%02X:%02X:%02X:%02X",
-                 key->sec.peer_addr.val[5], key->sec.peer_addr.val[4], key->sec.peer_addr.val[3],
-                 key->sec.peer_addr.val[2], key->sec.peer_addr.val[1], key->sec.peer_addr.val[0]);
-    }
-    extern int ble_store_config_read(int obj_type, const union ble_store_key *key, union ble_store_value *val);
-    int rc = ble_store_config_read(obj_type, key, val);
-    ESP_LOGI(TAG, "NVS Read Result: rc=%d", rc);
-    if (rc == 0 && (obj_type == BLE_STORE_OBJ_TYPE_OUR_SEC || obj_type == BLE_STORE_OBJ_TYPE_PEER_SEC)) {
-        ESP_LOGI(TAG, "  Found Sec: ediv=%u, rand=%" PRIu64 ", sc=%d, key_size=%d, LTK[0..3]=%02X%02X%02X%02X",
-                 val->sec.ediv, val->sec.rand_num, val->sec.sc, val->sec.key_size,
-                 val->sec.ltk[0], val->sec.ltk[1], val->sec.ltk[2], val->sec.ltk[3]);
-    }
-    return rc;
-}
-
-static int my_store_write_cb(int obj_type, const union ble_store_value *val)
-{
-    ESP_LOGI(TAG, "NVS Write: obj_type=%d", obj_type);
-    if (obj_type == BLE_STORE_OBJ_TYPE_OUR_SEC || obj_type == BLE_STORE_OBJ_TYPE_PEER_SEC) {
-        ESP_LOGI(TAG, "  Writing Sec: peer_addr=%02X:%02X:%02X:%02X:%02X:%02X, ediv=%u, rand=%" PRIu64 ", sc=%d, key_size=%d, LTK[0..3]=%02X%02X%02X%02X",
-                 val->sec.peer_addr.val[5], val->sec.peer_addr.val[4], val->sec.peer_addr.val[3],
-                 val->sec.peer_addr.val[2], val->sec.peer_addr.val[1], val->sec.peer_addr.val[0],
-                 val->sec.ediv, val->sec.rand_num, val->sec.sc, val->sec.key_size,
-                 val->sec.ltk[0], val->sec.ltk[1], val->sec.ltk[2], val->sec.ltk[3]);
-    }
-    extern int ble_store_config_write(int obj_type, const union ble_store_value *val);
-    int rc = ble_store_config_write(obj_type, val);
-    ESP_LOGI(TAG, "NVS Write Result: rc=%d", rc);
-    return rc;
-}
-
-
-static int my_store_delete_cb(int obj_type, const union ble_store_key *key)
-{
-    ESP_LOGI(TAG, "NVS Delete: obj_type=%d", obj_type);
-    extern int ble_store_config_delete(int obj_type, const union ble_store_key *key);
-    int rc = ble_store_config_delete(obj_type, key);
-    ESP_LOGI(TAG, "NVS Delete Result: rc=%d", rc);
-    return rc;
 }
 
 void app_main(void)
@@ -164,7 +98,7 @@ void app_main(void)
     gpio_set_level(GPIO_NUM_18, 0);
 
     ESP_LOGI(TAG, "============================================");
-    ESP_LOGI(TAG, "  ESP32 BLE HID Keyboard — NimBLE (v7-force-store)");
+    ESP_LOGI(TAG, "  ESP32 BLE HID Keyboard — NimBLE");
     ESP_LOGI(TAG, "============================================");
 
     ESP_LOGI(TAG, "Step 1: Initializing NVS...");
@@ -187,29 +121,28 @@ void app_main(void)
     snprintf(dev_name, sizeof(dev_name), "ESP32_KB2_%02X", mac[5]);
 
     ESP_LOGI(TAG, "Step 4: Configuring advertising + security...");
-    /* NOTE: adv_init sets security params in ble_hs_cfg but does NOT start advertising.
-     * Advertising is now started inside nimble_on_sync() after host is ready. */
     esp_hid_ble_gap_adv_init(ESP_HID_APPEARANCE_KEYBOARD, dev_name);
 
-    /*
-     * Register NimBLE store callbacks & sync callback AFTER NimBLE initialization
-     * to prevent them from being overwritten during esp_nimble_init().
-     */
-    ble_hs_cfg.store_read_cb   = my_store_read_cb;
-    ble_hs_cfg.store_write_cb  = my_store_write_cb;
-    ble_hs_cfg.store_delete_cb = my_store_delete_cb;
-    ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
-    ble_hs_cfg.sync_cb         = nimble_on_sync;
+    /* Set GAP service name + appearance so Windows shows correct name + keyboard icon */
+    ble_svc_gap_device_name_set(dev_name);
+    ble_svc_gap_device_appearance_set(ESP_HID_APPEARANCE_KEYBOARD);
+
+    /* Override key distribution: Windows requires ENC key in Key Distribution
+     * to persist bonding in system registry across reboots. */
+    ble_hs_cfg.sm_our_key_dist = BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID;
+    ble_hs_cfg.sm_their_key_dist = BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID;
 
     ESP_LOGI(TAG, "Step 5: Initializing HID Keyboard...");
     ble_hid_keyboard_init();
 
     ESP_LOGI(TAG, "Step 6: Enabling NimBLE host...");
+    ble_store_config_init();
+    ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
+    ble_hs_cfg.sync_cb = nimble_on_sync;
     esp_nimble_enable(nimble_host_task);
 
     ESP_LOGI(TAG, "Step 7: Initializing button handler...");
     button_handler_init();
-
 
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  System initialized — waiting for HID start");

@@ -19,6 +19,8 @@
 #endif
 #include "esp_hidd.h"
 #include "esp_hid_common.h"
+#include "esp_hid_gap.h"
+#include "services/gap/ble_svc_gap.h"
 #include "ble_hid_keyboard.h"
 
 static const char *TAG = "BLE_HID_KBD";
