@@ -297,7 +297,7 @@ class Api:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=4.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                tag = data.get("tag_name", "v1.0.16").strip()
+                tag = data.get("tag_name", "v1.0.17").strip()
                 if tag.startswith("v"):
                     tag = tag[1:]
                 self._github_version = tag

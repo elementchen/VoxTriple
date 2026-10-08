@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.17 (2026-10-08)
+
+> 蓝牙配对与重置机制稳健化版本。彻底解决跨系统换机时 Link Key 残留导致的连接超时问题，实现 Windows / macOS 免密直连，并修复静置休眠栈溢出隐患。
+
+### 核心优化与修复
+- **配对清理彻底化 (Robust BT Pairing Reset)**：在执行上位机 `reset_bt_pairing` 时，显式物理擦除 NVS 命名空间 `bt_config.conf`，彻底销毁 Bluedroid 协议栈底层的旧主机 Link Key，根除跨平台（macOS / Windows）切换后旧主机握手残留引发的无响应与鉴权失败。
+- **移除硬件误触组合键**：全面移除 Button 3 + Button 4 保持 10 秒触发解绑的按键逻辑，配对清除动作仅由上位机客户端软件明确发送指令执行。
+- **Just Works 免密直连 (No PIN)**：在经典蓝牙初始化中显式声明 `ESP_BT_IO_CAP_NONE`，彻底规避 Windows 将复合设备误判为需输入 PIN 码导致的 21 秒鉴权超时。
+- **休眠防崩溃优化**：将定时器回调中的繁重蓝牙注销流程解耦至独立的 `SleepTask`（4KB 堆栈）执行，彻底解决 FreeRTOS `Tmr Svc` 栈溢出（Stack Overflow）导致的设备猝死重启。
+
+---
+
 ## v2.4-dual-mode-reconnect-fix (2026-06-19)
 
 > 双模共存（经典蓝牙 HFP 麦克风 + BLE 键盘）完美自动重连版本。设计了双本端 MAC 真假隔离方案，并通过将 BLE 配对参数调整为 Legacy Pairing（禁用 CTKD），成功消除了在对端 MAC 重合时引起的 NVS 绑定密钥覆盖与畸变 Bug。

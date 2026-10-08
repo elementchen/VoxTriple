@@ -14,6 +14,8 @@
 #include "esp_log.h"
 #include "esp_gap_bt_api.h"
 #include "esp_hidd_api.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 #include "button_handler.h"
 #include "classic_hidd.h"
 #include "config_storage.h"
@@ -75,8 +77,8 @@ static bool is_rtc_gpio(gpio_num_t gpio)
     }
 }
 
-/* Enter sleep — adaptive selection of Deep Sleep or Light Sleep based on RTC IO capability. */
-static void inactivity_sleep_cb(TimerHandle_t xTimer)
+/* Dedicated task for entering sleep to avoid Tmr Svc task stack overflow */
+static void enter_sleep_task(void *pvParameters)
 {
     gpio_num_t wakeup_pin = s_button_pins[0];
     bool can_deep_sleep = is_rtc_gpio(wakeup_pin);
@@ -102,7 +104,7 @@ static void inactivity_sleep_cb(TimerHandle_t xTimer)
         vTaskDelay(pdMS_TO_TICKS(100));  /* let log flush */
         esp_deep_sleep_start();
     } else {
-        /* If configured pin doesn't support RTC (like GPIO16), fall back to Light Sleep to prevent Crash and keep logic closed */
+        /* If configured pin doesn't support RTC (like GPIO16), fall back to Light Sleep */
         ESP_LOGW(TAG, "Wakeup pin GPIO %d lacks RTC support! Entering LIGHT SLEEP instead...", wakeup_pin);
 
         /* Disable Bluetooth RF scan to lower Light Sleep power usage */
@@ -134,6 +136,13 @@ static void inactivity_sleep_cb(TimerHandle_t xTimer)
         /* Reset the idle timer */
         if (s_inactivity_timer) xTimerReset(s_inactivity_timer, 0);
     }
+    vTaskDelete(NULL);
+}
+
+/* Enter sleep — adaptive selection of Deep Sleep or Light Sleep based on RTC IO capability. */
+static void inactivity_sleep_cb(TimerHandle_t xTimer)
+{
+    xTaskCreate(enter_sleep_task, "SleepTask", 4096, NULL, 5, NULL);
 }
 
 static void get_button_mapping(uint8_t button_id, uint8_t *vk_code, uint8_t *modifier)
@@ -168,7 +177,7 @@ void system_reset_bt_pairing(void)
     }
     gpio_set_level(s_indicator_led_gpio, 1);
 
-    // 2. Remove pairing bond info from Bluedroid stack
+    // 2. Remove pairing bond info from Bluedroid stack API
     int dev_num = esp_bt_gap_get_bond_device_num();
     if (dev_num > 0) {
         esp_bd_addr_t *dev_list = (esp_bd_addr_t *)malloc(sizeof(esp_bd_addr_t) * dev_num);
@@ -186,10 +195,19 @@ void system_reset_bt_pairing(void)
         esp_bt_gap_remove_bond_device(saved_addr);
     }
 
-    // 3. Clear ONLY the target HFP host address in NVS (preserving key mappings, board profile, sleep timeout, etc.)
+    // 3. Physically erase Bluedroid pairing link keys from NVS ("bt_config.conf" namespace)
+    nvs_handle_t bt_cfg_handle;
+    if (nvs_open("bt_config.conf", NVS_READWRITE, &bt_cfg_handle) == ESP_OK) {
+        ESP_LOGI(TAG, "Physically erasing bt_config.conf NVS namespace...");
+        nvs_erase_all(bt_cfg_handle);
+        nvs_commit(bt_cfg_handle);
+        nvs_close(bt_cfg_handle);
+    }
+
+    // 4. Clear ONLY the target HFP host address in NVS (preserving key mappings, board profile, sleep timeout, etc.)
     config_storage_clear_hfp_addr();
 
-    // 4. Restart
+    // 5. Restart
     ESP_LOGW(TAG, "BT pairings cleared. Restarting now...");
     vTaskDelay(pdMS_TO_TICKS(200));
     esp_restart();
@@ -237,8 +255,6 @@ static void button_task_func(void *arg)
                     /* Reset inactivity deep sleep timer */
                     if (s_inactivity_timer) xTimerReset(s_inactivity_timer, 0);
 
-                    /* Connection wake-up: if BLE is not connected, trigger advertising to connect keyboard.
-                     * If BLE is already connected, activate Classic BT HFP (on key press) to connect microphone. */
                     /* Connection wake-up & HFP SCO activation */
                     if (classic_hidd_is_connected()) {
                         uint8_t vk = 0, mod = 0;
@@ -274,22 +290,6 @@ static void button_task_func(void *arg)
                 }
                 break;
             }
-        }
-
-        /* Check combo press: Button 3 (i=2) and Button 4 (i=3) held together for 10 seconds */
-        static uint32_t s_combo_start_time = 0;
-        static bool s_combo_triggered = false;
-        if (state[2] == BTN_STATE_PRESSED && state[3] == BTN_STATE_PRESSED) {
-            if (s_combo_start_time == 0) {
-                s_combo_start_time = now;
-            } else if (!s_combo_triggered && (now - s_combo_start_time) >= 10000) {
-                s_combo_triggered = true;
-                ESP_LOGW(TAG, "Combo: Button 3 + Button 4 held for 10 seconds! Triggering BT pairing reset...");
-                system_reset_bt_pairing();
-            }
-        } else {
-            s_combo_start_time = 0;
-            s_combo_triggered = false;
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));  /* 10ms polling */

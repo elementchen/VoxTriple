@@ -163,7 +163,12 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
             ESP_LOGI(TAG, "HFP Client initialization skipped (Keyboard Only Mode)");
         }
 
-        /* Set pairing PIN */
+        /* Set default IO capability to NONE (Just Works / No PIN required for Windows/macOS) */
+        esp_bt_sp_param_t param_type = ESP_BT_SP_IOCAP_MODE;
+        esp_bt_io_cap_t iocap = ESP_BT_IO_CAP_NONE;
+        esp_bt_gap_set_security_param(param_type, &iocap, sizeof(uint8_t));
+
+        /* Set fallback pairing PIN for legacy devices */
         esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_VARIABLE;
         esp_bt_pin_code_t pin_code;
         pin_code[0] = '0';
