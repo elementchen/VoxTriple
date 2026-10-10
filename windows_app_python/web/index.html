@@ -79,8 +79,8 @@
             <section class="panel keymap-panel">
                 <div class="keymap-split-three">
 
-                    <!-- ============ 左栏：节能与硬件设置（竖向排列，视觉打通） ============ -->
-                    <div class="settings-panel">
+                    <!-- ============ 左栏：节能与硬件设置（未连接时隐藏） ============ -->
+                    <div class="settings-panel" id="settings-panel" style="display: none;">
                         <div class="panel-header">
                             <h2 class="panel-title">SETTINGS</h2>
                             <span class="panel-subtitle">Hardware</span>
@@ -152,12 +152,12 @@
                         </div>
                     </div>
 
-                    <!-- ============ 中栏：1:1铝合金竖向真实ESP32键盘机身（空间开阔，正方形键帽） ============ -->
-                    <div class="device-panel">
+                    <!-- ============ 中栏：1:1铝合金竖向真实ESP32键盘机身 + 正下方写入按钮 ============ -->
+                    <div class="device-panel" id="device-panel">
                         <!-- 铝合金竖向仿真机身 -->
                         <div class="vertical-device-wrapper">
                             <div class="virtual-device-body-vertical" id="virtualKeyboard">
-                                <!-- 顶部麦克风区域（占约一个按键高度，透明占位，支持点击联动麦克风开关） -->
+                                <!-- 顶部麦克风区域（透明占位，与铝合金同底色，支持点击联动） -->
                                 <div class="virtual-mic-slot-vertical" id="virtualMicSlot" onclick="toggleMicFromDevice()" title="点击切换麦克风开启/关闭状态">
                                     <div class="mic-glyph-wrap">
                                         <svg class="mic-slot-icon" viewBox="0 0 24 24" width="22" height="22">
@@ -169,16 +169,16 @@
                                     <span class="mic-status-text" id="mic-status-text">MIC</span>
                                 </div>
 
-                                <!-- 下凹按键槽与 4 个紧凑正方形纯白键帽（KEY 1 ~ KEY 4） -->
+                                <!-- 下凹按键槽与 4 个紧凑正方形纯白键帽（1 ~ 4） -->
                                 <div class="device-keys-column">
                                     <!-- Key 1 -->
-                                    <div class="virtual-keycap active" data-idx="0" id="key-cap-0" onclick="selectKey(0)">
+                                    <div class="virtual-keycap" data-idx="0" id="key-cap-0" onclick="selectKey(0)">
                                         <div class="keycap-inner">
                                             <div class="keycap-top-row">
-                                                <span class="keycap-num">KEY 1</span>
+                                                <span class="keycap-num">1</span>
                                                 <span class="keycap-mods" id="cap-mods-0"></span>
                                             </div>
-                                            <span class="keycap-value" id="cap-val-0">--</span>
+                                            <span class="keycap-value" id="cap-val-0"></span>
                                         </div>
                                     </div>
 
@@ -186,10 +186,10 @@
                                     <div class="virtual-keycap" data-idx="1" id="key-cap-1" onclick="selectKey(1)">
                                         <div class="keycap-inner">
                                             <div class="keycap-top-row">
-                                                <span class="keycap-num">KEY 2</span>
+                                                <span class="keycap-num">2</span>
                                                 <span class="keycap-mods" id="cap-mods-1"></span>
                                             </div>
-                                            <span class="keycap-value" id="cap-val-1">--</span>
+                                            <span class="keycap-value" id="cap-val-1"></span>
                                         </div>
                                     </div>
 
@@ -197,10 +197,10 @@
                                     <div class="virtual-keycap" data-idx="2" id="key-cap-2" onclick="selectKey(2)">
                                         <div class="keycap-inner">
                                             <div class="keycap-top-row">
-                                                <span class="keycap-num">KEY 3</span>
+                                                <span class="keycap-num">3</span>
                                                 <span class="keycap-mods" id="cap-mods-2"></span>
                                             </div>
-                                            <span class="keycap-value" id="cap-val-2">--</span>
+                                            <span class="keycap-value" id="cap-val-2"></span>
                                         </div>
                                     </div>
 
@@ -208,19 +208,29 @@
                                     <div class="virtual-keycap" data-idx="3" id="key-cap-3" onclick="selectKey(3)">
                                         <div class="keycap-inner">
                                             <div class="keycap-top-row">
-                                                <span class="keycap-num">KEY 4</span>
+                                                <span class="keycap-num">4</span>
                                                 <span class="keycap-mods" id="cap-mods-3"></span>
                                             </div>
-                                            <span class="keycap-value" id="cap-val-3">--</span>
+                                            <span class="keycap-value" id="cap-val-3"></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 产品示意图正下方的保存按钮（连接后显示） -->
+                        <div class="device-bottom-action">
+                            <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled style="display: none;">
+                                <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
+                                    <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
+                                </svg>
+                                <span>WRITE TO ESP32</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- ============ 右栏：按键捕获配置 + 右下角写入硬件大按钮 ============ -->
-                    <div class="config-panel">
+                    <!-- ============ 右栏：按键捕获配置（未选中按键时隐藏） ============ -->
+                    <div class="config-panel" id="config-panel" style="display: none;">
                         <div class="config-top-content">
                             <div class="panel-header">
                                 <div class="panel-title-wrapper">
@@ -230,7 +240,7 @@
                                         <span class="os-badge-text" id="os-badge-text">--</span>
                                     </div>
                                 </div>
-                                <span class="panel-subtitle" id="mapping-tips">Click Capture · press key</span>
+                                <span class="panel-subtitle" id="mapping-tips">Listening · Press key</span>
                             </div>
 
                             <!-- 焦点捕获卡片 -->
@@ -257,16 +267,6 @@
                                     <div class="mod-pill" data-mask="0x80">R·Win</div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 右下角：保存写入硬件大按钮 -->
-                        <div class="config-bottom-action">
-                            <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
-                                <svg class="save-icon" viewBox="0 0 24 24" width="16" height="16">
-                                    <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
-                                </svg>
-                                <span>WRITE TO ESP32</span>
-                            </button>
                         </div>
                     </div>
 

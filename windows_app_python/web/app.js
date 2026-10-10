@@ -91,8 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 初始化按键 0 选中态
-    selectKey(0);
+    // 初始化为未连接重置态（隐藏左右面板、按键显示空白）
+    resetConfigUi();
 
     // 轮询串口设备 (每 3 秒)
     setInterval(pollPorts, 3000);
@@ -189,8 +189,15 @@ async function onConnectClick() {
             btn.classList.add("connected-state");
             if (textEl) textEl.textContent = "CONNECTED";
             
-            // 启用保存按钮
-            if (btnWrite) btnWrite.disabled = false;
+            // 展示左侧设置面板
+            const settingsPanel = document.getElementById("settings-panel");
+            if (settingsPanel) settingsPanel.style.display = "flex";
+
+            // 展示产品正下方的保存按钮并启用
+            if (btnWrite) {
+                btnWrite.style.display = "inline-flex";
+                btnWrite.disabled = false;
+            }
             
             // 读取设备配置
             const config = await window.pywebview.api.fetch_config();
@@ -221,8 +228,11 @@ async function onConnectClick() {
         if (textEl) textEl.textContent = "CONNECT";
         document.getElementById("firmware-ver").textContent = "v--";
         
-        // 禁用保存按钮
-        if (btnWrite) btnWrite.disabled = true;
+        // 隐藏并禁用产品正下方的保存按钮
+        if (btnWrite) {
+            btnWrite.style.display = "none";
+            btnWrite.disabled = true;
+        }
         
         // 隐藏升级触发按钮与状态
         const btnUpdate = document.getElementById("btn-update-trigger");
@@ -329,10 +339,14 @@ function renderConfig(config) {
 
 // ── Key Selection & Switch ───────────────────────────────────────────────
 function selectKey(idx) {
+    if (!isConnected) {
+        alert("请先连接硬件设备后再配置按键！");
+        return;
+    }
     if (idx < 0 || idx > 3) return;
     selectedKeyIdx = idx;
 
-    // 更新右侧键帽选中样式
+    // 更新 4 个键帽高亮内发光样式
     for (let i = 0; i < 4; i++) {
         const cap = document.getElementById(`key-cap-${i}`);
         if (cap) {
@@ -344,14 +358,23 @@ function selectKey(idx) {
         }
     }
 
-    // 更新左侧面板按键序号
+    // 显示右侧 KEY MAPPING 面板
+    const configPanel = document.getElementById("config-panel");
+    if (configPanel) {
+        configPanel.style.display = "flex";
+    }
+
+    // 更新按键序号
     const keyIndexEl = document.getElementById("currentKeyIndex");
     if (keyIndexEl) {
         keyIndexEl.textContent = `KEY ${idx + 1}`;
     }
 
-    // 刷新左侧编辑内容
+    // 刷新右侧编辑内容
     refreshCurrentKeyEditor();
+
+    // ★ 点击按键后自动进入 Capture 状态，无需再次点击小小的 capture 按钮
+    triggerCurrentKeyCapture();
 }
 
 function refreshCurrentKeyEditor() {
@@ -389,6 +412,13 @@ function updateKeyCapVisual(idx) {
 
     const valEl = document.getElementById(`cap-val-${idx}`);
     const modsEl = document.getElementById(`cap-mods-${idx}`);
+
+    if (!isConnected) {
+        // 未连接时：按键表面完全洁白平整空白
+        if (valEl) valEl.textContent = "";
+        if (modsEl) modsEl.textContent = "";
+        return;
+    }
 
     if (valEl) {
         valEl.textContent = config.vk === 0 ? "--" : getFriendlyKeyName(config.vk);
@@ -464,13 +494,30 @@ function getFriendlyKeyName(vk) {
 }
 
 function resetConfigUi() {
+    selectedKeyIdx = -1;
+    capturingIdx = -1;
+    document.removeEventListener("keydown", onCapturedKeydown);
+
     for (let i = 0; i < 4; i++) {
         currentConfigs[i] = { vk: 0, mod: 0 };
-        updateKeyCapVisual(i);
+        const cap = document.getElementById(`key-cap-${i}`);
+        if (cap) cap.classList.remove("active");
+        const valEl = document.getElementById(`cap-val-${i}`);
+        if (valEl) valEl.textContent = "";
+        const modsEl = document.getElementById(`cap-mods-${i}`);
+        if (modsEl) modsEl.textContent = "";
     }
-    refreshCurrentKeyEditor();
+
+    // 隐藏左侧与右侧面板
+    const settingsPanel = document.getElementById("settings-panel");
+    if (settingsPanel) settingsPanel.style.display = "none";
+    const configPanel = document.getElementById("config-panel");
+    if (configPanel) configPanel.style.display = "none";
+
     const micToggle = document.getElementById("mic-toggle");
     if (micToggle) micToggle.checked = false;
+    onMicToggle();
+
     const sleepToggle = document.getElementById("sleep-toggle");
     if (sleepToggle) sleepToggle.checked = false;
     setTxPowerUi(0);

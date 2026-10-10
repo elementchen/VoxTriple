@@ -217,34 +217,40 @@ button {
     transform: rotate(90deg);
 }
 
-/* USB 连接状态按钮（全色：未连全红白字，已连全绿白字，断开悬停全红） */
+/* USB 连接状态按钮（固定宽度 126px 防止挤压右侧 HOST，未连全黑，已连全绿，断开悬停全红） */
 .btn-connect {
+    width: 126px;
+    min-width: 126px;
+    max-width: 126px;
     height: 32px;
-    padding: 0 16px;
     border-radius: var(--r-control);
-    background-color: #ef4444; /* 未连接：全红 */
+    background-color: #18181b; /* 未连接：深黑色 */
     color: #ffffff;            /* 纯白字 */
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.05em;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 7px;
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
-    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.18s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    cursor: pointer;
+    border: none;
 }
 
 .btn-status-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #ffffff;
-    box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+    background-color: #71717a;
+    transition: background-color 0.18s ease;
 }
 
 .btn-connect:hover {
-    background-color: #dc2626;
-    transform: translateY(-0.5px);
+    background-color: #27272a;
 }
 
 /* 已连接状态：全绿色白字 */
@@ -261,8 +267,8 @@ button {
 
 /* 已连接悬停：提示可点击断开，呈现全红警示 */
 .btn-connect.connected-state:hover {
-    background-color: #ef4444;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+    background-color: #dc2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
 }
 
 /* 双设备切换 HOST Pills */
@@ -367,12 +373,14 @@ button {
     overflow: hidden;
 }
 
-/* 视觉完全打通：无割裂线，左 210px，中 1fr（空间留给产品），右 255px */
+/* 视觉完全打通：弹性盒居中对齐，未连时只有中栏居中，连后左右展开 */
 .keymap-split-three {
-    display: grid;
-    grid-template-columns: 210px 1fr 255px;
-    gap: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 28px;
     min-height: 480px;
+    width: 100%;
 }
 
 /* 通用面板标题 */
@@ -411,9 +419,11 @@ button {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   【左栏】：节能与硬件设置面板 (settings-panel) - 视觉打通
+   【左栏】：节能与硬件设置面板 (settings-panel) - 未连接时隐藏，连接后居中
    ────────────────────────────────────────────────────────────────────────── */
 .settings-panel {
+    width: 215px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -557,13 +567,14 @@ button {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   【中栏】：1:1 真实铝合金阳极氧化机身 (device-panel) - 空间充足、正方形键帽
+   【中栏】：1:1 真实铝合金阳极氧化机身 (device-panel) - 键隙对称、正下方保存按钮
    ────────────────────────────────────────────────────────────────────────── */
 .device-panel {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .vertical-device-wrapper {
@@ -571,15 +582,14 @@ button {
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 4px 0;
 }
 
-/* 拟物化铝合金竖向外壳（浅灰阳极氧化铝质感、微倒角、侧键，加宽10%左右） */
+/* 拟物化铝合金竖向外壳（按键周围与外壳四周间隔完全一致） */
 .virtual-device-body-vertical {
-    width: 118px;
+    width: 106px;
     background: linear-gradient(170deg, #eaecef 0%, #d8dce2 50%, #c6ccd5 100%);
-    border-radius: 24px;
-    padding: 12px 14px 14px;
+    border-radius: 20px;
+    padding: 10px 8px 8px;
     border: 1px solid #b4b9c2;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
     display: flex;
@@ -589,12 +599,12 @@ button {
     user-select: none;
 }
 
-/* 右侧物理小侧键凸起（还原 3D 渲染图铝合金侧键） */
+/* 右侧物理小侧键凸起 */
 .virtual-device-body-vertical::after {
     content: "";
     position: absolute;
     right: -4px;
-    top: 52px;
+    top: 50px;
     width: 4px;
     height: 18px;
     background: #b0b5be;
@@ -602,17 +612,17 @@ button {
     box-shadow: 1px 0 2px rgba(0, 0, 0, 0.25);
 }
 
-/* 顶部麦克风区域（约占一个按键高度 70px，透明占位与铝合金同底色，支持点击交互） */
+/* 顶部麦克风区域（约占一个按键高度，透明占位，与外壳同色） */
 .virtual-mic-slot-vertical {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    height: 70px;
+    height: 68px;
     width: 90px;
     border-radius: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 7px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     background: transparent;
@@ -658,28 +668,28 @@ button {
     transition: all 0.2s ease;
 }
 
-/* 下凹按键槽（Button Well） */
+/* 下凹按键槽（Button Well）：四周留白与按键间距皆为 7px，完美协调一致 */
 .device-keys-column {
-    width: 86px;
+    width: 90px;
     background: #25282c;
     border-radius: 10px;
-    padding: 3.5px;
+    padding: 7px;
     box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 -1px 2px rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 7px;
 }
 
-/* 纯白方块 3D 拟物键帽（正方形 78px × 78px！） */
+/* 纯白方块 3D 拟物键帽（正方形 76px × 76px） */
 .virtual-keycap {
-    width: 79px;
-    height: 79px;
+    width: 76px;
+    height: 76px;
     background: linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%);
     border-radius: 6px;
-    padding: 7px 8px;
+    padding: 6px 7px;
     cursor: pointer;
-    border: 1px solid #e1e3e8;
-    box-shadow: var(--shadow-keycap);
+    border: 1px solid #dcdfe6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex;
     flex-direction: column;
@@ -689,13 +699,13 @@ button {
 
 .virtual-keycap:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
-    border-color: #cbd0d8;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
+/* 选中高亮状态：绝美内发光！不改变外边框！ */
 .virtual-keycap.active {
-    box-shadow: var(--shadow-keycap-active);
-    border-color: var(--accent-orange);
+    border-color: #d1d5db;
+    box-shadow: inset 0 0 0 2px var(--accent-orange), inset 0 0 8px rgba(249, 115, 22, 0.38);
     background: #ffffff;
 }
 
@@ -719,36 +729,80 @@ button {
     align-items: center;
 }
 
+/* 左上角数字标号（1、2、3、4） */
 .keycap-num {
-    font-size: 8.5px;
-    font-weight: 800;
-    color: #8e94a0;
-    letter-spacing: 0.4px;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #9ca3af;
+    line-height: 1;
 }
 
 .keycap-mods {
     font-size: 8px;
     font-weight: 700;
     color: var(--accent-orange);
+    line-height: 1;
 }
 
+/* 按键映射文字：不用粗体，字体小一号（14px, 500字重） */
 .keycap-value {
     text-align: center;
-    font-size: 19px;
-    font-weight: 800;
-    color: #1a1c20;
-    letter-spacing: -0.4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2937;
+    letter-spacing: 0;
     margin: auto 0;
+    word-break: break-all;
 }
 
 .virtual-keycap.active .keycap-value {
     color: var(--accent-orange);
 }
 
+/* 产品示意图正下方的保存按钮 */
+.device-bottom-action {
+    margin-top: 14px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.device-bottom-action .save-action-btn {
+    width: 140px;
+    height: 38px;
+    border-radius: var(--r-control);
+    background: #18181b;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.device-bottom-action .save-action-btn:not([disabled]):hover {
+    background: var(--accent-orange);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+    transform: translateY(-1px);
+}
+
+.device-bottom-action .save-action-btn[disabled] {
+    background: #e4e4e8;
+    color: #9c9ca3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 /* ──────────────────────────────────────────────────────────────────────────
-   【右栏】：按键映射具体设置面板 + 右下角写入硬件大按钮 (config-panel)
+   【右栏】：按键映射具体设置面板 (config-panel)
    ────────────────────────────────────────────────────────────────────────── */
 .config-panel {
+    width: 255px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
