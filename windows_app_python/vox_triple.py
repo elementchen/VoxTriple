@@ -91,21 +91,8 @@ class Api:
         if not cfg:
             return None
             
-        local_host_os = 1 if sys.platform == "darwin" else 2
         query_os = cfg.get("query_os", 0)
         target_slot = cfg.get("query_slot", 0)
-
-        # 若当前槽位尚未记录系统类型，上位机自动将当前系统类型同步保存至 ESP32
-        if query_os == 0 and self._connected:
-            try:
-                run_coro(self.spp.write_host_os(target_slot, local_host_os))
-                query_os = local_host_os
-                if target_slot == 0:
-                    cfg["slot0_os"] = local_host_os
-                else:
-                    cfg["slot1_os"] = local_host_os
-            except Exception:
-                pass
 
         # Format mapping list to JSON compatible
         config = {
@@ -362,9 +349,9 @@ def main():
         title="VoxTriple Config Client", 
         url=index_path, 
         js_api=api,
-        width=860,
-        height=890,
-        min_size=(830, 850),
+        width=980,
+        height=840,
+        min_size=(920, 750),
         resizable=True,
         frameless=False
     )

@@ -92,14 +92,13 @@ class Api:
             
         # Format mapping list to JSON compatible
         config = {
-            "version": self.spp._config_cache.get("version", "1.0.18"),
+            "version": self.spp._config_cache.get("version", "1.0.17"),
             "tx_power": self.spp._config_cache.get("tx_power", 4),
             "sleep_mode": self.spp._config_cache.get("sleep_mode", 1),
             "mic_enabled": self.spp._config_cache.get("mic_enabled", 1),
             "board_model": self.spp._config_cache.get("board_model", 0),
             "board_name": self.spp._config_cache.get("board_name", "WEMOS 18650"),
             "sleep_timeout_min": self.spp._config_cache.get("sleep_timeout_min", 5),
-            "active_slot": self.spp._config_cache.get("active_slot", 0),
             "mappings": []
         }
         for i in range(4):
@@ -109,30 +108,15 @@ class Api:
             
         return config
 
-    def write_config(self, mappings: list, tx: int, sleep: int, mic: int, sleep_timeout: int = 5) -> bool:
-        """Write all parameters to board Flash at once (Unified Sync)."""
+    def write_config(self, mappings: list, tx: int, sleep: int, mic: int) -> bool:
+        """Write all parameters to board Flash at once."""
         if not self._connected:
             return False
             
-        log.info(f"Sync all parameters: mapping={mappings}, tx={tx}, sleep={sleep}, mic={mic}, sleep_timeout={sleep_timeout}")
-        future = run_coro(self.spp.set_config(mappings, tx, sleep, mic, sleep_timeout))
-        ok = future.result(timeout=6.0)
+        log.info(f"Save parameters: mapping={mappings}, tx={tx}, sleep={sleep}, mic={mic}")
+        future = run_coro(self.spp.set_config(mappings, tx, sleep, mic))
+        ok = future.result(timeout=5.0)
         return ok
-
-    def switch_host_slot(self, slot: int = None) -> dict:
-        """Switch active host slot (0: PC 1, 1: PC 2) via SPP."""
-        if not self._connected:
-            return {"status": "error", "message": "Not connected"}
-        log.info(f"Requesting host switch to slot: {slot}")
-        future = run_coro(self.spp.switch_host_slot(slot))
-        try:
-            ok = future.result(timeout=4.0)
-            if ok:
-                new_slot = self.spp._config_cache.get("active_slot", 0)
-                return {"status": "ok", "active_slot": new_slot}
-            return {"status": "error", "message": "Failed to switch host"}
-        except Exception as e:
-            return {"status": "error", "message": str(e)}
 
     def set_board_model(self, model: int) -> dict:
         """Set board hardware model on device and trigger restart."""
@@ -144,7 +128,7 @@ class Api:
         return {"success": ok, "message": "ok" if ok else "write failed"}
 
     def set_sleep_timeout_min(self, minutes: int) -> dict:
-        """Set inactivity sleep timeout (minutes) on device dynamically."""
+        """Set inactivity sleep timeout (minutes) on device and trigger restart."""
         if not self._connected:
             return {"success": False, "message": "Not connected"}
         log.info(f"Set sleep timeout: {minutes} min")
@@ -215,7 +199,7 @@ class Api:
             log.warning(f"check_update network request failed/timeout: {e}")
             
         if self._github_version:
-            curr = self.spp._config_cache.get("version", "1.0.15")
+            curr = self.spp._config_cache.get("version", "1.0.17")
             has_new = self._github_version > curr
             return {
                 "ok": True,
@@ -316,7 +300,7 @@ class Api:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=4.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                tag = data.get("tag_name", "v1.0.15").strip()
+                tag = data.get("tag_name", "v1.0.17").strip()
                 if tag.startswith("v"):
                     tag = tag[1:]
                 self._github_version = tag
@@ -348,9 +332,9 @@ def main():
         title="VoxTriple Config Client macOS", 
         url=index_path, 
         js_api=api,
-        width=860,
-        height=890,
-        min_size=(830, 850),
+        width=960,
+        height=800,
+        min_size=(900, 720),
         resizable=True,
         frameless=False
     )
