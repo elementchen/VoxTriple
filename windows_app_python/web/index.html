@@ -53,18 +53,18 @@
                 <div class="host-switch-section" id="host-switch-section" style="display: none;">
                     <span class="control-label">HOST</span>
                     <div class="host-switch-pills">
-                        <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="电脑一 (绿色:已配对, 橙色:未配对)" tabindex="-1">
-                            <span class="host-status-dot empty" id="host-dot-0"></span>电脑一
+                        <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="Host 1 (Green: Paired, Orange: Unpaired)" tabindex="-1">
+                            <span class="host-status-dot empty" id="host-dot-0"></span>Host 1
                         </button>
-                        <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="电脑二 (绿色:已配对, 橙色:未配对)" tabindex="-1">
-                            <span class="host-status-dot empty" id="host-dot-1"></span>电脑二
+                        <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="Host 2 (Green: Paired, Orange: Unpaired)" tabindex="-1">
+                            <span class="host-status-dot empty" id="host-dot-1"></span>Host 2
                         </button>
                     </div>
                 </div>
 
                 <!-- 遗忘蓝牙连接按钮（连接后显示） -->
                 <div class="reset-bt-wrapper" id="reset-bt-section" style="display: none;">
-                    <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="遗忘蓝牙配对：清空当前槽位配对并重启" tabindex="-1">
+                    <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="Forget Bluetooth pairing: clear slot and reboot" tabindex="-1">
                         <svg viewBox="0 0 24 24" width="11" height="11">
                             <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
                         </svg>
@@ -119,15 +119,15 @@
                                 </div>
                                 <div class="select-wrapper sleep-select-full">
                                     <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
-                                        <option value="1">1 min (分钟)</option>
-                                        <option value="2">2 min (分钟)</option>
-                                        <option value="3">3 min (分钟)</option>
-                                        <option value="5" selected>5 min (分钟)</option>
-                                        <option value="10">10 min (分钟)</option>
-                                        <option value="15">15 min (分钟)</option>
-                                        <option value="20">20 min (分钟)</option>
-                                        <option value="30">30 min (分钟)</option>
-                                        <option value="60">60 min (分钟)</option>
+                                        <option value="1">1 min</option>
+                                        <option value="2">2 min</option>
+                                        <option value="3">3 min</option>
+                                        <option value="5" selected>5 min</option>
+                                        <option value="10">10 min</option>
+                                        <option value="15">15 min</option>
+                                        <option value="20">20 min</option>
+                                        <option value="30">30 min</option>
+                                        <option value="60">60 min</option>
                                     </select>
                                 </div>
                             </div>
@@ -157,7 +157,7 @@
                                 <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
                                     <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
                                 </svg>
-                                <span>WRITE TO ESP32</span>
+                                <span>SAVE TO ESP32</span>
                             </button>
                         </div>
                     </div>
@@ -282,8 +282,8 @@
                         </svg>
                         <h2 class="ota-title">FIRMWARE UPGRADE (OTA)</h2>
                         
-                        <!-- ESP32 硬件固件版本专属展示徽章 -->
-                        <div class="firmware-badge" id="firmware-section" style="display: none;">
+                        <!-- ESP32 硬件固件版本专属展示徽章（固定占位隐藏） -->
+                        <div class="firmware-badge panel-hidden" id="firmware-section">
                             <span class="control-label">BOARD FW</span>
                             <span class="firmware-ver" id="firmware-ver">v--</span>
                             <span class="firmware-status-label" id="firmware-status-label"></span>

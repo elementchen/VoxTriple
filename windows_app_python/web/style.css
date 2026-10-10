@@ -56,7 +56,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     user-select: none;
     overflow: hidden; /* 彻底禁止滚动条，尺寸固定自适应 */
-    padding: 14px 20px 16px; /* 紧凑缓冲，杜绝撑出窗口 */
+    padding: 12px 18px 12px; /* 紧凑缓冲，适配窗口高度缩减 */
 }
 
 .app-container {
@@ -64,7 +64,7 @@ body {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 9px;
 }
 
 button {
@@ -381,7 +381,7 @@ button {
 }
 
 .keymap-panel {
-    padding: 20px 24px;
+    padding: 16px 22px;
     overflow: hidden;
 }
 
@@ -398,8 +398,8 @@ button {
     grid-template-columns: 240px 1fr 240px;
     align-items: center; /* 左右和中间各自在其占位区域上下居中对齐 */
     justify-items: center;
-    gap: 18px;
-    min-height: 520px; /* 适度舒展，保证 OTA 板块完全露出且绝无滚动条 */
+    gap: 16px;
+    min-height: 485px; /* 适度舒展且紧凑，杜绝窗口下方空旷 */
     width: 100%;
 }
 
@@ -457,11 +457,11 @@ button {
     gap: 10px;
 }
 
-/* Settings 区块底部的保存配置按钮 */
+/* Settings 区块底部的保存配置按钮（与上方TX Power拉开显著间距，更显眼独立） */
 .settings-bottom-action {
     display: flex;
     width: 100%;
-    margin-top: 4px;
+    margin-top: 18px;
 }
 
 .settings-bottom-action .save-action-btn {
@@ -1055,22 +1055,33 @@ button {
 
 /* ==========================================================================
    3. 下半区：OTA 固件升级面板（ESP32 固件版本展示与刷写）
+   高度与内部所有元素尺寸彻底固定，杜绝动态内容撑高
    ========================================================================== */
 .ota-panel {
-    padding: 14px 20px 16px;
+    padding: 12px 20px 14px;
+    height: 106px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .ota-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
 }
 
 .ota-title-wrapper {
     display: flex;
     align-items: center;
     gap: 10px;
+    height: 28px;
 }
 
 .ota-icon {
@@ -1084,7 +1095,7 @@ button {
     letter-spacing: 0.6px;
 }
 
-/* ESP32 固件版本专属胶囊徽章（位于 OTA 标题旁） */
+/* ESP32 固件版本专属胶囊徽章（位于 OTA 标题旁，尺寸锁定，固定占位隐藏） */
 .firmware-badge {
     display: inline-flex;
     align-items: center;
@@ -1092,8 +1103,10 @@ button {
     background: var(--container-bg);
     border: 1px solid var(--border-soft);
     border-radius: var(--r-control);
-    padding: 2px 9px;
-    height: 25px;
+    padding: 0 9px;
+    height: 24px;
+    box-sizing: border-box;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .firmware-ver {
@@ -1106,6 +1119,8 @@ button {
     font-size: 10px;
     font-weight: 700;
     color: var(--status-green);
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .ota-subtitle {
@@ -1118,6 +1133,7 @@ button {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     align-items: center;
+    height: 38px;
 }
 
 .ota-actions-grid {
@@ -1150,14 +1166,17 @@ button {
     transform: translateY(-0.5px);
 }
 
+/* Cloud Update 按钮：改为低调典雅的灰色，不再刺眼 */
 .btn-ota-cloud {
-    background: var(--accent-orange);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+    background: var(--container-bg);
+    color: var(--fg-strong);
+    border: 1px solid var(--border-color);
+    box-shadow: none;
 }
 
 .btn-ota-cloud:hover {
-    background: var(--accent-orange-hover);
+    background: #e9e9ee;
+    border-color: #c8c8cf;
     transform: translateY(-0.5px);
 }
 

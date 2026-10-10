@@ -402,13 +402,13 @@ def main():
 
     api = Api()
     
-    # 固定窗口大小为 980x905（高度增加 65 像素以完整展示 OTA 板块），禁止最大化与拉伸
+    # 固定窗口大小为 980x845（高度减少 60 像素，布局紧凑饱满，杜绝下方多余空白），禁止最大化与拉伸
     window = webview.create_window(
         title="VoxTriple Config Client", 
         url=index_path, 
         js_api=api,
         width=980,
-        height=905,
+        height=845,
         resizable=False,
         frameless=False
     )

@@ -242,9 +242,9 @@ async function onConnectClick() {
                 renderConfig(config);
             }
             
-            // 展示固件版本信息区块（位于底部 OTA 面板中）
+            // 展示固件版本信息区块（位于底部 OTA 面板中，固定占位）
             const fwSection = document.getElementById("firmware-section");
-            if (fwSection) fwSection.style.display = "inline-flex";
+            if (fwSection) fwSection.classList.remove("panel-hidden");
 
             // 显示多设备配对切换与重置按钮
             const hostSection = document.getElementById("host-switch-section");
@@ -256,7 +256,7 @@ async function onConnectClick() {
             postConnectUpdateCheck();
         } else {
             if (textEl) textEl.textContent = "CONNECT";
-            alert("连接失败，请检查串口是否已被占用或设备未插好！");
+            alert("Connection failed. Please check device serial port or cable connection!");
         }
     } else {
         await window.pywebview.api.disconnect_device();
@@ -279,9 +279,9 @@ async function onConnectClick() {
         const labelStatus = document.getElementById("firmware-status-label");
         if (labelStatus) labelStatus.textContent = "";
         
-        // 隐藏设备信息胶囊
+        // 隐藏设备信息胶囊（保持占位隐藏）
         const fwSection = document.getElementById("firmware-section");
-        if (fwSection) fwSection.style.display = "none";
+        if (fwSection) fwSection.classList.add("panel-hidden");
         const hostSection = document.getElementById("host-switch-section");
         if (hostSection) hostSection.style.display = "none";
         const resetBtSection = document.getElementById("reset-bt-section");
@@ -333,10 +333,10 @@ function renderConfig(config) {
     if (dot0 && pill0) {
         if (config.slot0_paired === 1) {
             dot0.className = "host-status-dot paired";
-            pill0.title = `电脑一 (已配对${os0Name})`;
+            pill0.title = `Host 1 (Paired${os0Name})`;
         } else {
             dot0.className = "host-status-dot empty";
-            pill0.title = "电脑一 (未配对/空槽)";
+            pill0.title = "Host 1 (Unpaired / Empty)";
         }
     }
 
@@ -346,10 +346,10 @@ function renderConfig(config) {
     if (dot1 && pill1) {
         if (config.slot1_paired === 1) {
             dot1.className = "host-status-dot paired";
-            pill1.title = `电脑二 (已配对${os1Name})`;
+            pill1.title = `Host 2 (Paired${os1Name})`;
         } else {
             dot1.className = "host-status-dot empty";
-            pill1.title = "电脑二 (未配对/空槽)";
+            pill1.title = "Host 2 (Unpaired / Empty)";
         }
     }
 
@@ -626,11 +626,11 @@ function onSleepTimeoutChange() {
 async function saveAllConfigsToDevice() {
     if (!isConnected || !window.pywebview || !window.pywebview.api) return;
     
-    const hostName = (currentActiveSlot === 0) ? "电脑一" : "电脑二";
+    const hostName = (currentActiveSlot === 0) ? "Host 1" : "Host 2";
     const btnWrite = document.getElementById("btn-write-config");
     const origHtml = btnWrite.innerHTML;
     btnWrite.disabled = true;
-    btnWrite.innerHTML = "<span>WRITING & REBOOTING...</span>";
+    btnWrite.innerHTML = "<span>SAVING & REBOOTING...</span>";
     
     const mic = document.getElementById("mic-toggle").checked ? 1 : 0;
     const sleep = document.getElementById("sleep-toggle").checked ? 1 : 0;
@@ -656,17 +656,17 @@ async function saveAllConfigsToDevice() {
         
         if (ok) {
             currentSleepTimeoutMin = sleepTimeout;
-            alert(`所有按键与设置已成功写入【${hostName}】！\n设备正在自动重启以彻底应用新配置与蓝牙参数。`);
+            alert(`Configurations successfully saved to [${hostName}]!\nDevice is rebooting to apply new parameters.`);
             if (isConnected) {
                 onConnectClick();
             }
         } else {
-            alert("配置写入失败，请检查串口连接状态！");
+            alert("Failed to save configuration. Please check serial connection!");
         }
     } catch (e) {
         btnWrite.disabled = false;
         btnWrite.innerHTML = origHtml;
-        alert("写入配置发生异常: " + e.message);
+        alert("Exception saving configuration: " + e.message);
     }
 }
 
@@ -741,19 +741,19 @@ function clearPhysicalPressedStates() {
 // ── 双设备快速切换 (电脑一 / 电脑二) ─────────────────────────────────────────
 async function switchHostSlot(targetSlot) {
     if (!isConnected || !window.pywebview || !window.pywebview.api) {
-        alert("请先建立设备连接！");
+        alert("Please connect the device first!");
         return;
     }
     if (targetSlot === currentActiveSlot) {
         return;
     }
-    const hostName = (targetSlot === 0) ? "电脑一 (Host 1)" : "电脑二 (Host 2)";
+    const hostName = (targetSlot === 0) ? "Host 1" : "Host 2";
     const confirmed = confirm(
-        `确定要切换配对设备至【${hostName}】吗？\n\n` +
-        `• 稳妥保障：保存目标设备槽位并自动重启开发板，彻底重置蓝牙协议栈；\n` +
-        `• 自动连接：重启后自动连接【${hostName}】（若未配对则进入广播等待配对）；\n` +
-        `• 物理反馈：指示灯闪烁确认（电脑一单闪3次，电脑二双闪3次）。\n\n` +
-        `点击【确定】立即执行设备切换。`
+        `Switch active pairing slot to [${hostName}]?\n\n` +
+        `• Safe & Reliable: Target slot saved and device auto-reboots to reinitialize Bluetooth stack;\n` +
+        `• Auto Connect: Automatically connects to [${hostName}] upon reboot (enters discoverable mode if unpaired);\n` +
+        `• Physical Feedback: LED confirms (Host 1 blinks 3x single, Host 2 blinks 3x double).\n\n` +
+        `Click [OK] to proceed with slot switching.`
     );
     if (!confirmed) return;
 
@@ -764,16 +764,16 @@ async function switchHostSlot(targetSlot) {
         if (res && res.status === "ok") {
             currentActiveSlot = (res.active_slot !== undefined) ? res.active_slot : targetSlot;
             updateHostSlotUi(currentActiveSlot);
-            alert(`已成功切换至【${hostName}】！\n设备正在重启以重置蓝牙协议栈并连接目标电脑。`);
+            alert(`Switched to [${hostName}] successfully!\nDevice is rebooting to apply Bluetooth parameters.`);
             if (isConnected) {
                 onConnectClick();
             }
         } else {
-            alert("切换失败: " + (res ? res.message : "未知错误"));
+            alert("Switch failed: " + (res ? res.message : "Unknown error"));
             updateHostSlotUi(currentActiveSlot);
         }
     } catch (e) {
-        alert("执行切换异常: " + e.message);
+        alert("Switch exception: " + e.message);
         updateHostSlotUi(currentActiveSlot);
     }
 }
@@ -795,16 +795,15 @@ function updateHostSlotUi(slot) {
 // ── 遗忘蓝牙连接重置交互 ─────────────────────────────────────────────────────
 async function confirmResetBtPairing() {
     if (!isConnected) {
-        alert("设备未连接，请先连接设备。");
+        alert("Device is not connected. Please connect first.");
         return;
     }
-    const hostName = (currentActiveSlot === 0) ? "电脑一" : "电脑二";
+    const hostName = (currentActiveSlot === 0) ? "Host 1" : "Host 2";
     const confirmed = confirm(
-        `确定要遗忘【${hostName}】的蓝牙配对吗？\n\n` +
-        `• 独立隔离：仅清空【${hostName}】的蓝牙配对记录，另一台电脑的配对与配置绝对保留不受影响！\n` +
-        `• 适用场景：需要更换新电脑配对，或遇到蓝牙重连异常。\n` +
-        `• 安全保护：按键键位映射、休眠时间等均完整保留！\n\n` +
-        `点击【确定】立即遗忘【${hostName}】并重启设备。`
+        `Forget Bluetooth pairing record for [${hostName}]?\n\n` +
+        `• Slot Isolation: Only clears pairing for [${hostName}], the other host remains unaffected!\n` +
+        `• Key mappings and sleep settings are fully preserved!\n\n` +
+        `Click [OK] to forget [${hostName}] and reboot.`
     );
     if (!confirmed) return;
 
@@ -817,15 +816,15 @@ async function confirmResetBtPairing() {
     try {
         const res = await window.pywebview.api.reset_bt_pairing(currentActiveSlot);
         if (res && res.status === "ok") {
-            alert(`【${hostName}】的蓝牙配对记录已成功清空！\n设备正在重启进入可配对状态，现在你可以在新电脑蓝牙中重新搜索配对。`);
+            alert(`Pairing for [${hostName}] cleared successfully!\nDevice is rebooting in pairing mode.`);
             if (isConnected) {
                 onConnectClick();
             }
         } else {
-            alert("重置配对失败: " + (res ? res.message : "未知错误"));
+            alert("Reset pairing failed: " + (res ? res.message : "Unknown error"));
         }
     } catch (e) {
-        alert("执行重置发生异常: " + e.message);
+        alert("Reset exception: " + e.message);
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -913,7 +912,7 @@ async function postConnectUpdateCheck() {
     const btnUpdate = document.getElementById("btn-update-trigger");
     
     if (labelStatus) {
-        labelStatus.textContent = " (检测中...)";
+        labelStatus.textContent = "(Checking...)";
         labelStatus.style.color = "var(--fg-muted)";
     }
     
@@ -922,7 +921,7 @@ async function postConnectUpdateCheck() {
     if (res && res.ok) {
         if (res.has_new) {
             if (labelStatus) {
-                labelStatus.textContent = ` (有更新: v${res.latest})`;
+                labelStatus.textContent = `(New: v${res.latest})`;
                 labelStatus.style.color = "var(--accent-orange)";
             }
             if (btnUpdate) {
@@ -932,7 +931,7 @@ async function postConnectUpdateCheck() {
             }
         } else {
             if (labelStatus) {
-                labelStatus.textContent = " (已是最新版本)";
+                labelStatus.textContent = "(Latest)";
                 labelStatus.style.color = "var(--status-green)";
             }
             if (btnUpdate) btnUpdate.style.display = "none";
@@ -948,7 +947,7 @@ async function postConnectUpdateCheck() {
 async function triggerSmartUpdate() {
     if (!window.pywebview || !window.pywebview.api) return;
     
-    if (!confirm("确定要立即从 GitHub 自动下载并刷写最新固件吗？\n(升级期间请保持有线连接且不要断电)")) {
+    if (!confirm("Download and flash the latest official firmware from GitHub?\n(Keep device connected and do not power off)")) {
         return;
     }
     
@@ -965,7 +964,7 @@ async function triggerSmartUpdate() {
     
     const ok = await window.pywebview.api.start_smart_update();
     if (!ok) {
-        alert("启动在线升级失败，请检查网络或串口连接！");
+        alert("Failed to start online update. Please check network and serial connection!");
         if (btnUpdate) {
             btnUpdate.disabled = false;
             btnUpdate.textContent = "UPDATE";
@@ -987,11 +986,11 @@ function onSmartUpdateComplete(success) {
     if (progressFill) progressFill.style.width = "100%";
     if (progressPct) progressPct.textContent = "100% Completed";
     if (labelStatus) {
-        labelStatus.textContent = "(最新)";
+        labelStatus.textContent = "(Latest)";
         labelStatus.style.color = "var(--status-green)";
     }
     
-    alert("固件在线升级成功！开发板正在重启生效，请等待片刻后重新连接。");
+    alert("Firmware upgraded successfully! The device is rebooting, please reconnect shortly.");
     if (isConnected) onConnectClick();
 }
 
@@ -1001,7 +1000,7 @@ function onSmartUpdateError(reason) {
         btnUpdate.disabled = false;
         btnUpdate.textContent = "UPDATE";
     }
-    alert(`在线固件升级失败！\n原因: ${reason}`);
+    alert(`Firmware upgrade failed!\nReason: ${reason}`);
 }
 
 function onOtaProgress(written, total, type) {
