@@ -402,15 +402,14 @@ def main():
 
     api = Api()
     
-    # Enable window stretching and provide proper content padding
+    # 固定窗口大小为 980x905（高度增加 65 像素以完整展示 OTA 板块），禁止最大化与拉伸
     window = webview.create_window(
         title="VoxTriple Config Client", 
         url=index_path, 
         js_api=api,
         width=980,
-        height=840,
-        min_size=(920, 750),
-        resizable=True,
+        height=905,
+        resizable=False,
         frameless=False
     )
     api.set_window(window)
