@@ -445,6 +445,44 @@ button {
     gap: 10px;
 }
 
+/* Settings 区块底部的保存配置按钮 */
+.settings-bottom-action {
+    display: flex;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.settings-bottom-action .save-action-btn {
+    width: 100%;
+    height: 38px;
+    border-radius: var(--r-control);
+    background: #18181b;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    cursor: pointer;
+}
+
+.settings-bottom-action .save-action-btn:not([disabled]):hover {
+    background: var(--accent-orange);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+    transform: translateY(-1px);
+}
+
+.settings-bottom-action .save-action-btn[disabled] {
+    background: #e4e4e8;
+    color: #9c9ca3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .setting-item-card {
     background: #fafafc;
     border: 1px solid var(--border-soft);
@@ -583,6 +621,7 @@ button {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
     height: 100%;
     flex-shrink: 0;
 }
@@ -725,11 +764,17 @@ button {
     transform: translateY(-1px);
 }
 
-/* 物理按键下沉按下动画 */
+/* 物理按键下沉按下动画（如实反应真实的 press 持续按压与 release 释放） */
 .virtual-keycap.physical-pressed {
-    transform: translateY(2px) scale(0.97);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.12);
-    background: #e6e7eb;
+    transform: translateY(2px) scale(0.97) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.12) !important;
+    background: #e6e7eb !important;
+}
+
+.virtual-keycap.active.physical-pressed {
+    transform: translateY(2px) scale(0.97) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%) !important;
 }
 
 .keycap-inner {
@@ -785,44 +830,7 @@ button {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-/* 产品示意图正下方的保存按钮（在机身底部到板块边缘的留白空间内上下垂直居中） */
-.device-bottom-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 76px; /* 充足垂直空间，按钮在其中完全上下居中 */
-}
 
-.device-bottom-action .save-action-btn {
-    width: 140px;
-    height: 38px;
-    border-radius: var(--r-control);
-    background: #18181b;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.device-bottom-action .save-action-btn:not([disabled]):hover {
-    background: var(--accent-orange);
-    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
-    transform: translateY(-1px);
-}
-
-.device-bottom-action .save-action-btn[disabled] {
-    background: #e4e4e8;
-    color: #9c9ca3;
-    cursor: not-allowed;
-    box-shadow: none;
-}
 
 /* ──────────────────────────────────────────────────────────────────────────
    【右栏】：按键映射具体设置面板 (config-panel) - 固定 240px 占位居中
@@ -867,7 +875,7 @@ button {
     border: 1px solid rgba(0, 120, 215, 0.2);
 }
 
-/* 焦点捕获卡片 */
+/* 焦点捕获卡片（整块虚线区域可点击触发录制） */
 .capture-view {
     background: #fafafc;
     border-radius: var(--r-panel);
@@ -879,12 +887,25 @@ button {
     border: 1.5px dashed var(--border-color);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
     transition: all 0.22s ease;
+    cursor: pointer;
+}
+
+.capture-view:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+    transform: translateY(-1px);
 }
 
 .capture-view.listening {
     border-color: var(--accent-orange);
     background: var(--accent-soft);
     box-shadow: 0 4px 16px rgba(249, 115, 22, 0.14);
+}
+
+.capture-view.listening:hover {
+    border-color: var(--accent-orange);
+    background: var(--accent-soft);
+    transform: none;
 }
 
 .capture-header {
@@ -899,28 +920,6 @@ button {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-}
-
-.btn-capture {
-    padding: 5px 12px;
-    background: #18181b;
-    color: #ffffff;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.6px;
-    transition: all 0.15s ease;
-}
-
-.btn-capture:hover {
-    background: #27272a;
-    transform: translateY(-0.5px);
-}
-
-.btn-capture.active,
-.capture-view.listening .btn-capture {
-    background: var(--accent-orange);
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
 }
 
 /* 按键映射大字主显示（恢复之前饱满大气的原生无衬线粗体字体） */

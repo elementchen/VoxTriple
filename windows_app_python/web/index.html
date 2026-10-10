@@ -36,7 +36,7 @@
                             <option value="">No Devices</option>
                         </select>
                     </div>
-                    <button class="btn-refresh" id="btn-refresh" onclick="pollPorts()" title="Refresh Port List">
+                    <button class="btn-refresh" id="btn-refresh" onclick="pollPorts()" title="Refresh Port List" tabindex="-1">
                         <svg viewBox="0 0 24 24" width="12" height="12">
                             <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.07 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                         </svg>
@@ -44,7 +44,7 @@
                 </div>
 
                 <!-- 整合连接状态与操作的纯色高对比度按钮（全红断开 / 全绿连接） -->
-                <button class="btn-connect" id="btn-connect">
+                <button class="btn-connect" id="btn-connect" tabindex="-1">
                     <span class="btn-status-dot" id="btn-status-dot"></span>
                     <span class="btn-connect-text" id="btn-connect-text">CONNECT</span>
                 </button>
@@ -53,10 +53,10 @@
                 <div class="host-switch-section" id="host-switch-section" style="display: none;">
                     <span class="control-label">HOST</span>
                     <div class="host-switch-pills">
-                        <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="电脑一 (绿色:已配对, 橙色:未配对)">
+                        <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="电脑一 (绿色:已配对, 橙色:未配对)" tabindex="-1">
                             <span class="host-status-dot empty" id="host-dot-0"></span>电脑一
                         </button>
-                        <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="电脑二 (绿色:已配对, 橙色:未配对)">
+                        <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="电脑二 (绿色:已配对, 橙色:未配对)" tabindex="-1">
                             <span class="host-status-dot empty" id="host-dot-1"></span>电脑二
                         </button>
                     </div>
@@ -64,7 +64,7 @@
 
                 <!-- 遗忘蓝牙连接按钮（连接后显示） -->
                 <div class="reset-bt-wrapper" id="reset-bt-section" style="display: none;">
-                    <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="遗忘蓝牙配对：清空当前槽位配对并重启">
+                    <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="遗忘蓝牙配对：清空当前槽位配对并重启" tabindex="-1">
                         <svg viewBox="0 0 24 24" width="11" height="11">
                             <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
                         </svg>
@@ -150,9 +150,19 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 移至 Settings 区块最底部的保存配置按钮 -->
+                        <div class="settings-bottom-action">
+                            <button class="save-action-btn panel-hidden" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled tabindex="-1">
+                                <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
+                                    <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
+                                </svg>
+                                <span>WRITE TO ESP32</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- ============ 中栏：1:1铝合金竖向真实ESP32键盘机身 + 正下方写入按钮 ============ -->
+                    <!-- ============ 中栏：1:1铝合金竖向真实ESP32键盘机身（在大区块中上下完全居中） ============ -->
                     <div class="device-panel" id="device-panel">
                         <!-- 铝合金竖向仿真机身 -->
                         <div class="vertical-device-wrapper">
@@ -217,16 +227,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- 产品示意图正下方的保存按钮（连接后显示，未连时保持占位） -->
-                        <div class="device-bottom-action">
-                            <button class="save-action-btn panel-hidden" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
-                                <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
-                                    <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
-                                </svg>
-                                <span>WRITE TO ESP32</span>
-                            </button>
-                        </div>
                     </div>
 
                     <!-- ============ 右栏：按键捕获配置（未选中按键时通过 panel-hidden 隐藏但固定占位） ============ -->
@@ -243,14 +243,13 @@
                                 <span class="panel-subtitle" id="mapping-tips">Listening · Press key</span>
                             </div>
 
-                            <!-- 焦点捕获卡片 -->
-                            <div class="capture-view" id="captureView">
+                            <!-- 焦点捕获卡片（点击虚线框整块区域均可触发录制） -->
+                            <div class="capture-view" id="captureView" onclick="triggerCurrentKeyCapture()" title="点击区域录制按键">
                                 <div class="capture-header">
                                     <span class="capture-key-index" id="currentKeyIndex">KEY 1</span>
-                                    <button class="btn-capture" id="btnCapture" onclick="triggerCurrentKeyCapture()">CAPTURE</button>
                                 </div>
                                 <div class="capture-key-display" id="keyDisplay">--</div>
-                                <div class="capture-hint" id="captureSub">Press any physical key on keyboard</div>
+                                <div class="capture-hint" id="captureSub">Click box to record · Press key</div>
                             </div>
 
                             <!-- 2x4 修饰键胶囊网格 -->

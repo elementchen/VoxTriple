@@ -94,6 +94,43 @@ document.addEventListener("DOMContentLoaded", () => {
     // 初始化为未连接重置态（隐藏左右面板、按键显示空白）
     resetConfigUi();
 
+    // ── 焦点与键盘输入保护机制 ──────────────────────────────────────────
+    // 1. 鼠标点击任何按钮后立即移除焦点，防止焦点停留
+    document.addEventListener("click", () => {
+        if (document.activeElement && document.activeElement.tagName === "BUTTON") {
+            document.activeElement.blur();
+        }
+    });
+    document.addEventListener("mouseup", () => {
+        if (document.activeElement && document.activeElement.tagName === "BUTTON") {
+            document.activeElement.blur();
+        }
+    });
+
+    // 2. 全局捕获阶段拦截键盘事件：
+    //    当不在按键录入状态时，ESP32（或物理键盘）发送的 Enter/Space 绝不会触发聚焦在按钮上的意外点击！
+    document.addEventListener("keydown", (e) => {
+        if (capturingIdx !== -1) return; // 正在录制按键时，交给 onCapturedKeydown 处理
+
+        const active = document.activeElement;
+        const isEditable = active && (
+            active.tagName === "INPUT" || 
+            active.tagName === "TEXTAREA" || 
+            active.isContentEditable
+        );
+
+        if (!isEditable && (e.key === "Enter" || e.code === "Enter" || e.key === " " || e.code === "Space")) {
+            if (active && typeof active.blur === "function") {
+                active.blur();
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    // 3. 窗口失焦时清理物理按键按下态，防止极端通信丢包导致卡住
+    window.addEventListener("blur", clearPhysicalPressedStates);
+
     // 轮询串口设备 (每 3 秒)
     setInterval(pollPorts, 3000);
     pollPorts();
@@ -228,11 +265,13 @@ async function onConnectClick() {
         if (textEl) textEl.textContent = "CONNECT";
         document.getElementById("firmware-ver").textContent = "v--";
         
-        // 隐藏并禁用产品正下方的保存按钮
+        // 隐藏并禁用设置底部的保存按钮
         if (btnWrite) {
             btnWrite.classList.add("panel-hidden");
             btnWrite.disabled = true;
         }
+        
+        clearPhysicalPressedStates();
         
         // 隐藏升级触发按钮与状态
         const btnUpdate = document.getElementById("btn-update-trigger");
@@ -387,7 +426,7 @@ function refreshCurrentKeyEditor() {
         captureView.classList.remove("listening");
     }
     if (subEl) {
-        subEl.textContent = "Press any physical key on keyboard";
+        subEl.textContent = "Click box to record · Press key";
     }
 
     if (displayEl) {
@@ -497,6 +536,7 @@ function resetConfigUi() {
     selectedKeyIdx = -1;
     capturingIdx = -1;
     document.removeEventListener("keydown", onCapturedKeydown);
+    clearPhysicalPressedStates();
 
     for (let i = 0; i < 4; i++) {
         currentConfigs[i] = { vk: 0, mod: 0 };
@@ -679,15 +719,22 @@ function onCapturedKeydown(e) {
 }
 
 // ── Physical Button Event Hook ───────────────────────────────────────────
+// 如实响应硬件真实按下的 press (state=1) 与释放的 release (state=0)
 function onPhysicalButtonEvent(btnId, state) {
     const cap = document.getElementById(`key-cap-${btnId}`);
     if (!cap) return;
     
     if (state === 1) {
         cap.classList.add("physical-pressed");
-        setTimeout(() => {
-            cap.classList.remove("physical-pressed");
-        }, 220);
+    } else if (state === 0) {
+        cap.classList.remove("physical-pressed");
+    }
+}
+
+function clearPhysicalPressedStates() {
+    for (let i = 0; i < 4; i++) {
+        const cap = document.getElementById(`key-cap-${i}`);
+        if (cap) cap.classList.remove("physical-pressed");
     }
 }
 
