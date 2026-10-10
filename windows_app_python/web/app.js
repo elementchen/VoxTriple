@@ -219,6 +219,31 @@ function renderConfig(config) {
         currentActiveSlot = config.active_slot;
         updateHostSlotUi(currentActiveSlot);
     }
+
+    // 更新配对状态圆点指示灯 (绿色:已配对, 橙色:未配对)
+    const dot0 = document.getElementById("host-dot-0");
+    const pill0 = document.getElementById("host-pill-0");
+    if (dot0 && pill0) {
+        if (config.slot0_paired === 1) {
+            dot0.className = "host-status-dot paired";
+            pill0.title = "电脑一 (已配对)";
+        } else {
+            dot0.className = "host-status-dot empty";
+            pill0.title = "电脑一 (未配对/空槽)";
+        }
+    }
+    const dot1 = document.getElementById("host-dot-1");
+    const pill1 = document.getElementById("host-pill-1");
+    if (dot1 && pill1) {
+        if (config.slot1_paired === 1) {
+            dot1.className = "host-status-dot paired";
+            pill1.title = "电脑二 (已配对)";
+        } else {
+            dot1.className = "host-status-dot empty";
+            pill1.title = "电脑二 (未配对/空槽)";
+        }
+    }
+
     const hostDivider = document.getElementById("host-switch-divider");
     if (hostDivider) hostDivider.style.display = "block";
     const hostSection = document.getElementById("host-switch-section");
@@ -369,6 +394,7 @@ function onSleepToggle() {
 async function saveAllConfigsToDevice() {
     if (!isConnected || !window.pywebview || !window.pywebview.api) return;
     
+    const hostName = (currentActiveSlot === 0) ? "电脑一" : "电脑二";
     const btnWrite = document.getElementById("btn-write-config");
     const origHtml = btnWrite.innerHTML;
     btnWrite.disabled = true;
@@ -388,7 +414,8 @@ async function saveAllConfigsToDevice() {
         tx, 
         sleep, 
         mic,
-        sleepTimeout
+        sleepTimeout,
+        currentActiveSlot
     );
     
     btnWrite.disabled = false;
@@ -396,9 +423,12 @@ async function saveAllConfigsToDevice() {
     
     if (ok) {
         currentSleepTimeoutMin = sleepTimeout;
-        alert("所有设置（按键映射、麦克风、休眠开关、休眠时间、发射功率）已全部成功同步到 ESP32！\n同步成功！");
+        alert(`所有设置已成功同步保存至【${hostName}】！\n设备正在自动重启以彻底应用新配置与蓝牙基带参数。`);
+        if (isConnected) {
+            onConnectClick();
+        }
     } else {
-        alert("配置同步失败，请检查连接状态！");
+        alert("配置保存失败，请检查连接状态！");
     }
 }
 
@@ -721,12 +751,13 @@ async function confirmResetBtPairing() {
         alert("设备未连接，请先连接设备。");
         return;
     }
+    const hostName = (currentActiveSlot === 0) ? "电脑一" : "电脑二";
     const confirmed = confirm(
-        "确定要遗忘当前设备的蓝牙配对吗？\n\n" +
-        "• 操作效果：设备将清空所有蓝牙配对记录和历史连接缓存，并自动重启。\n" +
-        "• 适用场景：需要更换新电脑配对，或遇到蓝牙重连异常。\n" +
-        "• 安全保护：按键键位映射、开发板型号、休眠时间等均会完整保留！\n\n" +
-        "点击【确定】立即执行并重启设备。"
+        `确定要遗忘【${hostName}】的蓝牙配对吗？\n\n` +
+        `• 独立隔离：仅清空【${hostName}】的蓝牙配对记录，另一台电脑的配对与配置绝对保留不受影响！\n` +
+        `• 适用场景：需要更换新电脑配对，或遇到蓝牙重连异常。\n` +
+        `• 安全保护：按键键位映射、开发板型号、休眠时间等均完整保留！\n\n` +
+        `点击【确定】立即遗忘【${hostName}】并重启设备。`
     );
     if (!confirmed) return;
 
@@ -737,9 +768,9 @@ async function confirmResetBtPairing() {
     }
 
     try {
-        const res = await window.pywebview.api.reset_bt_pairing();
+        const res = await window.pywebview.api.reset_bt_pairing(currentActiveSlot);
         if (res && res.status === "ok") {
-            alert("蓝牙配对记录已成功清空！\n设备正在重启进入可配对状态，现在你可以在电脑或新设备的蓝牙设置中重新搜索配对。");
+            alert(`【${hostName}】的蓝牙配对记录已成功清空！\n设备正在重启进入可配对状态，现在你可以在新电脑蓝牙中重新搜索配对。`);
             if (isConnected) {
                 onConnectClick();
             }

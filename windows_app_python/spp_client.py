@@ -394,9 +394,12 @@ class SppClient:
             return True
         return False
 
-    async def reset_bt_pairing(self) -> bool:
-        """Send command to reset Bluetooth pairings on ESP32 (forget device & reboot)."""
-        resp = await self._send_cmd({"cmd": "reset_bt_pairing"})
+    async def reset_bt_pairing(self, slot: int = None) -> bool:
+        """Send command to reset Bluetooth pairings on ESP32 for target slot (forget device & reboot)."""
+        cmd = {"cmd": "reset_bt_pairing"}
+        if slot is not None:
+            cmd["slot"] = slot
+        resp = await self._send_cmd(cmd)
         return resp is not None and resp.get("status") == "ok"
 
     async def switch_host_slot(self, slot: int = None) -> bool:
@@ -413,48 +416,57 @@ class SppClient:
             return True
         return False
 
-    async def get_config(self) -> dict | None:
+    async def get_config(self, slot: int = None) -> dict | None:
         """Fetch and return full configuration dictionary formatted for UI client."""
-        ok = await self._fetch_config()
-        if ok:
-            cfg = {
-                "buttons": [
-                    {"vk": self._config_cache.get("btn1_vk", 0), "mod": self._config_cache.get("btn1_mod", 0)},
-                    {"vk": self._config_cache.get("btn2_vk", 0), "mod": self._config_cache.get("btn2_mod", 0)},
-                    {"vk": self._config_cache.get("btn3_vk", 0), "mod": self._config_cache.get("btn3_mod", 0)},
-                    {"vk": self._config_cache.get("btn4_vk", 0), "mod": self._config_cache.get("btn4_mod", 0)}
-                ],
-                "tx_power": self._config_cache.get("tx_power", 4),
-                "sleep": self._config_cache.get("sleep_mode", 1),
-                "mic_enabled": self._config_cache.get("mic_enabled", 1),
-                "version": self._config_cache.get("version", "1.0.0"),
-                "board_model": self._config_cache.get("board_model", 0),
-                "board_name": self._config_cache.get("board_name", "WEMOS 18650"),
-                "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5),
-                "active_slot": self._config_cache.get("active_slot", 0)
-            }
-            return cfg
-        return None
-
-    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1, sleep_timeout_min: int = 5) -> bool:
-        """Write all configurations at once into ESP32."""
-        for i in range(min(len(mapping), 4)):
-            ok = await self.write_button_mapping(i, mapping[i]["vk"], mapping[i]["mod"])
+        if slot is not None:
+            resp = await self._send_cmd({"cmd": "get_config", "slot": slot}, timeout=2.0)
+            if resp and resp.get("status") == "ok":
+                self._config_cache.update(resp)
+        else:
+            ok = await self._fetch_config()
             if not ok:
-                return False
-        ok = await self.write_tx_power(tx)
-        if not ok:
-            return False
-        ok = await self.write_sleep_mode(sleep)
-        if not ok:
-            return False
-        ok = await self.write_mic_enabled(mic_enabled)
-        if not ok:
-            return False
-        ok = await self.write_sleep_timeout_min(sleep_timeout_min)
-        if not ok:
-            return False
-        return True
+                return None
+        
+        cfg = {
+            "buttons": [
+                {"vk": self._config_cache.get("btn1_vk", 0), "mod": self._config_cache.get("btn1_mod", 0)},
+                {"vk": self._config_cache.get("btn2_vk", 0), "mod": self._config_cache.get("btn2_mod", 0)},
+                {"vk": self._config_cache.get("btn3_vk", 0), "mod": self._config_cache.get("btn3_mod", 0)},
+                {"vk": self._config_cache.get("btn4_vk", 0), "mod": self._config_cache.get("btn4_mod", 0)}
+            ],
+            "tx_power": self._config_cache.get("tx_power", 7),
+            "sleep": self._config_cache.get("sleep_mode", 1),
+            "mic_enabled": self._config_cache.get("mic_enabled", 1),
+            "version": self._config_cache.get("version", "1.0.18-beta1"),
+            "board_model": self._config_cache.get("board_model", 0),
+            "board_name": self._config_cache.get("board_name", "WEMOS 18650"),
+            "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5),
+            "active_slot": self._config_cache.get("active_slot", 0),
+            "query_slot": self._config_cache.get("query_slot", slot if slot is not None else self._config_cache.get("active_slot", 0)),
+            "slot0_paired": self._config_cache.get("slot0_paired", 0),
+            "slot1_paired": self._config_cache.get("slot1_paired", 0)
+        }
+        return cfg
+
+    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1, sleep_timeout_min: int = 5, slot: int = None) -> bool:
+        """Write all configurations at once into ESP32 via set_all_config single atomic command."""
+        cmd_dict = {
+            "cmd": "set_all_config",
+            "tx_power": tx,
+            "sleep_mode": sleep,
+            "mic_enabled": mic_enabled,
+            "sleep_timeout_min": sleep_timeout_min
+        }
+        if slot is not None:
+            cmd_dict["slot"] = slot
+        for i in range(min(len(mapping), 4)):
+            cmd_dict[f"btn{i+1}_vk"] = mapping[i]["vk"]
+            cmd_dict[f"btn{i+1}_mod"] = mapping[i]["mod"]
+            
+        resp = await self._send_cmd(cmd_dict, timeout=3.0)
+        if resp and resp.get("status") == "ok":
+            return True
+        return False
 
     async def read_firmware_version(self) -> str:
         """Get the current firmware version from cache."""

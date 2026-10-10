@@ -81,42 +81,40 @@ class Api:
         self._connected = False
         return True
 
-    def fetch_config(self) -> dict | None:
+    def fetch_config(self, slot: int = None) -> dict | None:
         """Fetch config cache from the device."""
         if not self._connected:
             return None
             
-        future = run_coro(self.spp._fetch_config())
-        ok = future.result(timeout=3.0)
-        if not ok:
+        future = run_coro(self.spp.get_config(slot))
+        cfg = future.result(timeout=3.0)
+        if not cfg:
             return None
             
         # Format mapping list to JSON compatible
         config = {
-            "version": self.spp._config_cache.get("version", "1.0.9"),
-            "tx_power": self.spp._config_cache.get("tx_power", 4),
-            "sleep_mode": self.spp._config_cache.get("sleep_mode", 1),
-            "mic_enabled": self.spp._config_cache.get("mic_enabled", 1),
-            "board_model": self.spp._config_cache.get("board_model", 0),
-            "board_name": self.spp._config_cache.get("board_name", "WEMOS 18650"),
-            "sleep_timeout_min": self.spp._config_cache.get("sleep_timeout_min", 5),
-            "active_slot": self.spp._config_cache.get("active_slot", 0),
-            "mappings": []
+            "version": cfg.get("version", "1.0.18-beta1"),
+            "tx_power": cfg.get("tx_power", 7),
+            "sleep_mode": cfg.get("sleep", 1),
+            "mic_enabled": cfg.get("mic_enabled", 1),
+            "board_model": cfg.get("board_model", 0),
+            "board_name": cfg.get("board_name", "WEMOS 18650"),
+            "sleep_timeout_min": cfg.get("sleep_timeout_min", 5),
+            "active_slot": cfg.get("active_slot", 0),
+            "query_slot": cfg.get("query_slot", 0),
+            "slot0_paired": cfg.get("slot0_paired", 0),
+            "slot1_paired": cfg.get("slot1_paired", 0),
+            "mappings": cfg.get("buttons", [])
         }
-        for i in range(4):
-            vk = self.spp._config_cache.get(f"btn{i+1}_vk", 0)
-            mod = self.spp._config_cache.get(f"btn{i+1}_mod", 0)
-            config["mappings"].append({"vk": vk, "mod": mod})
-            
         return config
 
-    def write_config(self, mappings: list, tx: int, sleep: int, mic: int, sleep_timeout: int = 5) -> bool:
+    def write_config(self, mappings: list, tx: int, sleep: int, mic: int, sleep_timeout: int = 5, slot: int = None) -> bool:
         """Write all parameters to board Flash at once (Unified Sync)."""
         if not self._connected:
             return False
             
-        log.info(f"Sync all parameters: mapping={mappings}, tx={tx}, sleep={sleep}, mic={mic}, sleep_timeout={sleep_timeout}")
-        future = run_coro(self.spp.set_config(mappings, tx, sleep, mic, sleep_timeout))
+        log.info(f"Sync all parameters: mapping={mappings}, tx={tx}, sleep={sleep}, mic={mic}, sleep_timeout={sleep_timeout}, slot={slot}")
+        future = run_coro(self.spp.set_config(mappings, tx, sleep, mic, sleep_timeout, slot))
         ok = future.result(timeout=6.0)
         return ok
 
@@ -153,11 +151,11 @@ class Api:
         ok = future.result(timeout=5.0)
         return {"success": ok, "message": "ok" if ok else "write failed"}
 
-    def reset_bt_pairing(self) -> dict:
+    def reset_bt_pairing(self, slot: int = None) -> dict:
         """Expose API to frontend to forget BT pairings on the device and reboot."""
         if not self.spp or not self.spp.is_connected:
             return {"status": "error", "message": "Device not connected"}
-        future = run_coro(self.spp.reset_bt_pairing())
+        future = run_coro(self.spp.reset_bt_pairing(slot))
         try:
             ok = future.result(timeout=4.0)
             if ok:

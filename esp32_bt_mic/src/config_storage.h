@@ -34,20 +34,22 @@
 void config_storage_init(void);
 
 /**
- * @brief Save button mapping to NVS
- * @param button_id  Button index (0-2)
- * @param vk_code    Windows virtual key code
- * @param modifier   Modifier bitmask
- * @return ESP_OK on success
+ * @brief Save button mapping for specific slot
+ */
+esp_err_t config_storage_save_slot_button(uint8_t slot, uint8_t button_id, uint8_t vk_code, uint8_t modifier);
+
+/**
+ * @brief Load button mapping for specific slot
+ */
+esp_err_t config_storage_load_slot_button(uint8_t slot, uint8_t button_id, uint8_t *vk_code, uint8_t *modifier);
+
+/**
+ * @brief Save button mapping to current active slot in NVS
  */
 esp_err_t config_storage_save_button(uint8_t button_id, uint8_t vk_code, uint8_t modifier);
 
 /**
- * @brief Load button mapping from NVS
- * @param button_id  Button index (0-2)
- * @param vk_code    Output: virtual key code
- * @param modifier   Output: modifier bitmask
- * @return ESP_OK on success, ESP_ERR_NVS_NOT_FOUND if not saved
+ * @brief Load button mapping from current active slot in NVS
  */
 esp_err_t config_storage_load_button(uint8_t button_id, uint8_t *vk_code, uint8_t *modifier);
 
@@ -76,6 +78,17 @@ esp_err_t config_storage_set_active_slot(uint8_t slot);
 esp_err_t config_storage_load_slot_hfp_addr(uint8_t slot, esp_bd_addr_t addr);
 esp_err_t config_storage_save_slot_hfp_addr(uint8_t slot, const esp_bd_addr_t addr);
 esp_err_t config_storage_clear_slot_hfp_addr(uint8_t slot);
+bool config_storage_is_slot_paired(uint8_t slot);
+
+/**
+ * @brief Slot-specific parameter functions
+ */
+esp_err_t config_storage_save_slot_sleep_mode(uint8_t slot, uint8_t enabled);
+esp_err_t config_storage_load_slot_sleep_mode(uint8_t slot, uint8_t *enabled);
+esp_err_t config_storage_save_slot_sleep_timeout(uint8_t slot, uint8_t minutes);
+esp_err_t config_storage_load_slot_sleep_timeout(uint8_t slot, uint8_t *minutes);
+esp_err_t config_storage_save_slot_mic_enabled(uint8_t slot, uint8_t enabled);
+esp_err_t config_storage_load_slot_mic_enabled(uint8_t slot, uint8_t *enabled);
 
 /**
  * @brief Save Classic BT TX power level to NVS

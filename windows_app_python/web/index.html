@@ -59,8 +59,12 @@
             <div class="host-switch-section" id="host-switch-section" style="display: none;">
                 <span class="control-label">HOST</span>
                 <div class="host-switch-pills">
-                    <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="切换至电脑一 (Host 1)">电脑一</button>
-                    <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="切换至电脑二 (Host 2)">电脑二</button>
+                    <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="电脑一 (绿色:已配对, 橙色:未配对)">
+                        <span class="host-status-dot empty" id="host-dot-0"></span>电脑一
+                    </button>
+                    <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="电脑二 (绿色:已配对, 橙色:未配对)">
+                        <span class="host-status-dot empty" id="host-dot-1"></span>电脑二
+                    </button>
                 </div>
             </div>
             

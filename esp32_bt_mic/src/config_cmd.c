@@ -13,6 +13,7 @@
 #include "freertos/task.h"
 #include "board_profile.h"
 #include "button_handler.h"
+#include "esp_gap_bt_api.h"
 #include "multi_host.h"
 
 #define TAG "CONFIG_CMD"
@@ -34,22 +35,30 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
         const char *cmd = cmd_item->valuestring;
         
         if (strcmp(cmd, "get_config") == 0) {
+            uint8_t active_slot = multi_host_get_current_slot();
+            uint8_t query_slot = active_slot;
+            cJSON *slot_item = cJSON_GetObjectItem(root, "slot");
+            if (slot_item && cJSON_IsNumber(slot_item) && slot_item->valueint <= 1) {
+                query_slot = slot_item->valueint;
+            }
+
             uint8_t vk1, mod1, vk2, mod2, vk3, mod3, vk4, mod4;
-            config_storage_load_button(0, &vk1, &mod1);
-            config_storage_load_button(1, &vk2, &mod2);
-            config_storage_load_button(2, &vk3, &mod3);
-            config_storage_load_button(3, &vk4, &mod4);
+            config_storage_load_slot_button(query_slot, 0, &vk1, &mod1);
+            config_storage_load_slot_button(query_slot, 1, &vk2, &mod2);
+            config_storage_load_slot_button(query_slot, 2, &vk3, &mod3);
+            config_storage_load_slot_button(query_slot, 3, &vk4, &mod4);
             
             uint8_t tx_power = 7;
             config_storage_load_tx_power(&tx_power);
             uint8_t sleep_mode = 0;
-            config_storage_load_sleep_mode(&sleep_mode);
+            config_storage_load_slot_sleep_mode(query_slot, &sleep_mode);
             uint8_t mic_enabled = 1;
-            config_storage_load_mic_enabled(&mic_enabled);
+            config_storage_load_slot_mic_enabled(query_slot, &mic_enabled);
             uint8_t sleep_timeout_min = 5;
-            config_storage_load_sleep_timeout(&sleep_timeout_min);
+            config_storage_load_slot_sleep_timeout(query_slot, &sleep_timeout_min);
             
-            uint8_t active_slot = multi_host_get_current_slot();
+            uint8_t slot0_paired = config_storage_is_slot_paired(0) ? 1 : 0;
+            uint8_t slot1_paired = config_storage_is_slot_paired(1) ? 1 : 0;
 
             const board_profile_t *profile = board_profile_get_current();
             uint8_t board_model = profile ? (uint8_t)profile->model : 0;
@@ -60,11 +69,64 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
             snprintf(resp, sizeof(resp), 
                      "{\"status\":\"ok\",\"version\":\"%s\",\"btn1_vk\":%d,\"btn1_mod\":%d,\"btn2_vk\":%d,\"btn2_mod\":%d,"
                      "\"btn3_vk\":%d,\"btn3_mod\":%d,\"btn4_vk\":%d,\"btn4_mod\":%d,\"tx_power\":%d,\"sleep_mode\":%d,\"mic_enabled\":%d,"
-                     "\"board_model\":%d,\"board_name\":\"%s\",\"sleep_timeout_min\":%d,\"active_slot\":%d}\n",
+                     "\"board_model\":%d,\"board_name\":\"%s\",\"sleep_timeout_min\":%d,\"active_slot\":%d,"
+                     "\"query_slot\":%d,\"slot0_paired\":%d,\"slot1_paired\":%d}\n",
                      app_desc->version, vk1, mod1, vk2, mod2, vk3, mod3, vk4, mod4, tx_power, sleep_mode, mic_enabled,
-                     board_model, board_name, sleep_timeout_min, active_slot);
+                     board_model, board_name, sleep_timeout_min, active_slot,
+                     query_slot, slot0_paired, slot1_paired);
             respond_cb(resp, strlen(resp));
             
+        } else if (strcmp(cmd, "set_all_config") == 0) {
+            uint8_t target_slot = multi_host_get_current_slot();
+            cJSON *slot_item = cJSON_GetObjectItem(root, "slot");
+            if (slot_item && cJSON_IsNumber(slot_item) && slot_item->valueint <= 1) {
+                target_slot = slot_item->valueint;
+            }
+
+            // 1. Buttons
+            cJSON *vk_items[4] = {
+                cJSON_GetObjectItem(root, "btn1_vk"), cJSON_GetObjectItem(root, "btn2_vk"),
+                cJSON_GetObjectItem(root, "btn3_vk"), cJSON_GetObjectItem(root, "btn4_vk")
+            };
+            cJSON *mod_items[4] = {
+                cJSON_GetObjectItem(root, "btn1_mod"), cJSON_GetObjectItem(root, "btn2_mod"),
+                cJSON_GetObjectItem(root, "btn3_mod"), cJSON_GetObjectItem(root, "btn4_mod")
+            };
+            for (int i = 0; i < 4; i++) {
+                if (vk_items[i] && mod_items[i] && cJSON_IsNumber(vk_items[i]) && cJSON_IsNumber(mod_items[i])) {
+                    config_storage_save_slot_button(target_slot, i, vk_items[i]->valueint, mod_items[i]->valueint);
+                }
+            }
+
+            // 2. TX Power
+            cJSON *tx_item = cJSON_GetObjectItem(root, "tx_power");
+            if (tx_item && cJSON_IsNumber(tx_item)) {
+                config_storage_save_tx_power(tx_item->valueint);
+            }
+
+            // 3. Sleep Mode & Timeout
+            cJSON *sleep_item = cJSON_GetObjectItem(root, "sleep_mode");
+            if (sleep_item && cJSON_IsNumber(sleep_item)) {
+                config_storage_save_slot_sleep_mode(target_slot, sleep_item->valueint);
+            }
+            cJSON *tmout_item = cJSON_GetObjectItem(root, "sleep_timeout_min");
+            if (tmout_item && cJSON_IsNumber(tmout_item)) {
+                config_storage_save_slot_sleep_timeout(target_slot, tmout_item->valueint);
+            }
+
+            // 4. Mic Enabled
+            cJSON *mic_item = cJSON_GetObjectItem(root, "mic_enabled");
+            if (mic_item && cJSON_IsNumber(mic_item)) {
+                config_storage_save_slot_mic_enabled(target_slot, mic_item->valueint);
+            }
+
+            const char *resp = "{\"status\":\"ok\",\"reboot\":1}\n";
+            respond_cb(resp, strlen(resp));
+
+            ESP_LOGW(TAG, "Full configuration saved for slot %d. Rebooting in 400ms...", target_slot);
+            vTaskDelay(pdMS_TO_TICKS(400));
+            esp_restart();
+
         } else if (strcmp(cmd, "set_btn") == 0) {
             cJSON *idx_item = cJSON_GetObjectItem(root, "idx");
             cJSON *vk_item = cJSON_GetObjectItem(root, "vk");
@@ -174,7 +236,6 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
                 config_storage_load_ota_ready(&ota_ready);
                 
                 if (ota_ready == 1) {
-                    // Already in pure OTA mode, start flash write immediately without rebooting
                     esp_err_t err = uart_console_ota_start(ota_size);
                     if (err == ESP_OK) {
                         const char *resp = "{\"status\":\"ok\"}\n";
@@ -185,7 +246,6 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
                         respond_cb(resp, strlen(resp));
                     }
                 } else {
-                    // Normal mode: write flag to NVS, respond OK, and reboot into clean mode!
                     config_storage_save_ota_ready(1);
                     const char *resp = "{\"status\":\"ok\",\"reboot\":1}\n";
                     respond_cb(resp, strlen(resp));
@@ -196,11 +256,24 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
                 }
             }
         } else if (strcmp(cmd, "reset_bt_pairing") == 0) {
+            uint8_t target_slot = multi_host_get_current_slot();
+            cJSON *slot_item = cJSON_GetObjectItem(root, "slot");
+            if (slot_item && cJSON_IsNumber(slot_item) && slot_item->valueint <= 1) {
+                target_slot = slot_item->valueint;
+            }
+
+            // 仅移除指定槽位的配对和 NVS 地址，保护另一台电脑配对
+            esp_bd_addr_t saved_addr;
+            if (config_storage_load_slot_hfp_addr(target_slot, saved_addr) == ESP_OK) {
+                esp_bt_gap_remove_bond_device(saved_addr);
+            }
+            config_storage_clear_slot_hfp_addr(target_slot);
+
             const char *resp = "{\"status\":\"ok\"}\n";
             respond_cb(resp, strlen(resp));
-            ESP_LOGW(TAG, "Resetting BT pairing via SPP command. Rebooting in 500ms...");
-            vTaskDelay(pdMS_TO_TICKS(500));
-            system_reset_bt_pairing();
+            ESP_LOGW(TAG, "Resetting BT pairing for slot %d via SPP. Rebooting in 400ms...", target_slot);
+            vTaskDelay(pdMS_TO_TICKS(400));
+            esp_restart();
         }
     }
     cJSON_Delete(root);
