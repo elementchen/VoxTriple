@@ -57,6 +57,8 @@ esp_err_t multi_host_init(void)
 {
     config_storage_get_active_slot(&s_active_slot);
     ESP_LOGI(TAG, "Multi-host initialized. Current Active Slot: %d", s_active_slot);
+    // 开机根据当前活跃槽位触发物理 LED 反馈 (槽位0: 单闪3次; 槽位1: 双闪3次)
+    multi_host_trigger_led_feedback(s_active_slot);
     return ESP_OK;
 }
 
@@ -79,46 +81,19 @@ esp_err_t multi_host_set_slot(uint8_t new_slot)
     }
 
     ESP_LOGW(TAG, "========================================");
-    ESP_LOGW(TAG, ">>> SWITCHING HOST: Slot %d -> Slot %d <<<", prev_slot, new_slot);
+    ESP_LOGW(TAG, ">>> SWITCHING HOST: Slot %d -> Slot %d (Restarting for clean baseband reset) <<<", prev_slot, new_slot);
     ESP_LOGW(TAG, "========================================");
 
-    // 1. 优雅断开当前主机的连接
-    if (classic_hidd_is_connected()) {
-        ESP_LOGI(TAG, "Disconnecting current HID link...");
-        esp_bt_hid_device_disconnect();
-    }
-
-    if (bt_hfp_is_connected()) {
-        esp_bd_addr_t prev_addr;
-        if (config_storage_load_slot_hfp_addr(prev_slot, prev_addr) == ESP_OK) {
-            ESP_LOGI(TAG, "Disconnecting current HFP link...");
-            esp_hf_client_disconnect(prev_addr);
-        }
-    }
-
-    // 短暂避让 80ms 确保断开报文安全发出
-    vTaskDelay(pdMS_TO_TICKS(80));
-
-    // 2. 更新活跃槽位至 NVS
+    // 1. 保存目标槽位至 NVS
     s_active_slot = new_slot;
     config_storage_set_active_slot(new_slot);
 
-    // 3. 触发 LED 闪烁反馈动画
+    // 2. 触发 LED 闪烁反馈
     multi_host_trigger_led_feedback(new_slot);
 
-    // 4. 主动重连目标槽位设备或开启广播等待配对
-    esp_bd_addr_t target_addr = {0};
-    if (config_storage_load_slot_hfp_addr(new_slot, target_addr) == ESP_OK) {
-        ESP_LOGI(TAG, "Saved target address found for Slot %d: %02x:%02x:%02x:%02x:%02x:%02x",
-                 new_slot, target_addr[0], target_addr[1], target_addr[2],
-                 target_addr[3], target_addr[4], target_addr[5]);
-        ESP_LOGI(TAG, "Initiating active reconnect to target host...");
-        esp_bt_hid_device_connect(target_addr);
-        esp_hf_client_connect(target_addr);
-    } else {
-        ESP_LOGW(TAG, "No saved host address in Slot %d. Enabling discovery mode for initial pairing...", new_slot);
-        esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
-    }
+    // 3. 延时 400ms 保证客户端回执和日志写完，随后整机干净重启重置 Bluedroid 协议栈！
+    vTaskDelay(pdMS_TO_TICKS(400));
+    esp_restart();
 
     return ESP_OK;
 }
@@ -127,4 +102,5 @@ esp_err_t multi_host_switch_slot(void)
 {
     return multi_host_set_slot((s_active_slot == 0) ? 1 : 0);
 }
+
 

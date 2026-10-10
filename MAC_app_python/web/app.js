@@ -672,9 +672,9 @@ async function switchHostSlot(targetSlot) {
     const hostName = (targetSlot === 0) ? "电脑一 (Host 1)" : "电脑二 (Host 2)";
     const confirmed = confirm(
         `确定要切换配对设备至【${hostName}】吗？\n\n` +
-        `• 切换动作：断开当前电脑的蓝牙，切换至目标槽位并主动发起重连或等待配对；\n` +
-        `• 硬件反馈：ESP32 板载指示灯将闪烁确认；\n` +
-        `• 配置保留：按键映射与各项设置完全保留。\n\n` +
+        `• 稳妥保障：保存目标设备槽位并自动重启开发板，彻底重置蓝牙协议栈；\n` +
+        `• 自动连接：重启后自动连接【${hostName}】（若未配对则进入蓝牙广播等待配对）；\n` +
+        `• 物理反馈：指示灯闪烁确认（电脑一单闪3次，电脑二双闪3次）。\n\n` +
         `点击【确定】立即执行设备切换。`
     );
     if (!confirmed) return;
@@ -686,7 +686,11 @@ async function switchHostSlot(targetSlot) {
         if (res && res.status === "ok") {
             currentActiveSlot = (res.active_slot !== undefined) ? res.active_slot : targetSlot;
             updateHostSlotUi(currentActiveSlot);
-            alert(`已成功向 ESP32 发出设备切换指令！\n目标设备：【${hostName}】\n设备指示灯正在进行切换反馈闪烁。`);
+            alert(`已成功切换至【${hostName}】！\n设备正在重启以重置蓝牙协议栈并连接目标电脑。`);
+            // 设备重启，同步将客户端连接状态复位
+            if (isConnected) {
+                onConnectClick();
+            }
         } else {
             alert("切换失败: " + (res ? res.message : "未知错误"));
             updateHostSlotUi(currentActiveSlot);
