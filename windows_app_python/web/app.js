@@ -333,10 +333,10 @@ function renderConfig(config) {
     if (dot0 && pill0) {
         if (config.slot0_paired === 1) {
             dot0.className = "host-status-dot paired";
-            pill0.title = `Host 1 (Paired${os0Name})`;
+            pill0.title = `Pair 1 (Paired${os0Name})`;
         } else {
             dot0.className = "host-status-dot empty";
-            pill0.title = "Host 1 (Unpaired / Empty)";
+            pill0.title = "Pair 1 (Unpaired / Empty)";
         }
     }
 
@@ -346,10 +346,10 @@ function renderConfig(config) {
     if (dot1 && pill1) {
         if (config.slot1_paired === 1) {
             dot1.className = "host-status-dot paired";
-            pill1.title = `Host 2 (Paired${os1Name})`;
+            pill1.title = `Pair 2 (Paired${os1Name})`;
         } else {
             dot1.className = "host-status-dot empty";
-            pill1.title = "Host 2 (Unpaired / Empty)";
+            pill1.title = "Pair 2 (Unpaired / Empty)";
         }
     }
 
@@ -626,7 +626,7 @@ function onSleepTimeoutChange() {
 async function saveAllConfigsToDevice() {
     if (!isConnected || !window.pywebview || !window.pywebview.api) return;
     
-    const hostName = (currentActiveSlot === 0) ? "Host 1" : "Host 2";
+    const hostName = (currentActiveSlot === 0) ? "Pair 1" : "Pair 2";
     const btnWrite = document.getElementById("btn-write-config");
     const origHtml = btnWrite.innerHTML;
     btnWrite.disabled = true;
@@ -747,12 +747,12 @@ async function switchHostSlot(targetSlot) {
     if (targetSlot === currentActiveSlot) {
         return;
     }
-    const hostName = (targetSlot === 0) ? "Host 1" : "Host 2";
+    const hostName = (targetSlot === 0) ? "Pair 1" : "Pair 2";
     const confirmed = confirm(
         `Switch active pairing slot to [${hostName}]?\n\n` +
         `• Safe & Reliable: Target slot saved and device auto-reboots to reinitialize Bluetooth stack;\n` +
         `• Auto Connect: Automatically connects to [${hostName}] upon reboot (enters discoverable mode if unpaired);\n` +
-        `• Physical Feedback: LED confirms (Host 1 blinks 3x single, Host 2 blinks 3x double).\n\n` +
+        `• Physical Feedback: LED confirms (Pair 1 blinks 3x single, Pair 2 blinks 3x double).\n\n` +
         `Click [OK] to proceed with slot switching.`
     );
     if (!confirmed) return;
@@ -792,43 +792,43 @@ function updateHostSlotUi(slot) {
     }
 }
 
-// ── 遗忘蓝牙连接重置交互 ─────────────────────────────────────────────────────
+// ── 取消蓝牙配对重置交互 ─────────────────────────────────────────────────────
 async function confirmResetBtPairing() {
     if (!isConnected) {
         alert("Device is not connected. Please connect first.");
         return;
     }
-    const hostName = (currentActiveSlot === 0) ? "Host 1" : "Host 2";
+    const hostName = (currentActiveSlot === 0) ? "Pair 1" : "Pair 2";
     const confirmed = confirm(
-        `Forget Bluetooth pairing record for [${hostName}]?\n\n` +
-        `• Slot Isolation: Only clears pairing for [${hostName}], the other host remains unaffected!\n` +
+        `Unpair and clear Bluetooth pairing for [${hostName}]?\n\n` +
+        `• Slot Isolation: Only clears pairing for [${hostName}], the other pair remains unaffected!\n` +
         `• Key mappings and sleep settings are fully preserved!\n\n` +
-        `Click [OK] to forget [${hostName}] and reboot.`
+        `Click [OK] to unpair [${hostName}] and restart device.`
     );
     if (!confirmed) return;
 
     const btn = document.getElementById("btn-reset-bt");
     if (btn) {
         btn.disabled = true;
-        btn.textContent = "RESETTING...";
+        btn.textContent = "UNPAIRING...";
     }
 
     try {
         const res = await window.pywebview.api.reset_bt_pairing(currentActiveSlot);
         if (res && res.status === "ok") {
-            alert(`Pairing for [${hostName}] cleared successfully!\nDevice is rebooting in pairing mode.`);
+            alert(`Pairing for [${hostName}] cleared successfully!\nDevice is rebooting in discoverable mode.`);
             if (isConnected) {
                 onConnectClick();
             }
         } else {
-            alert("Reset pairing failed: " + (res ? res.message : "Unknown error"));
+            alert("Unpair failed: " + (res ? res.message : "Unknown error"));
         }
     } catch (e) {
-        alert("Reset exception: " + e.message);
+        alert("Unpair exception: " + e.message);
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11"><path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg> FORGET BT`;
+            btn.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11"><path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg> UNPAIR`;
         }
     }
 }

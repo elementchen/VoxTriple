@@ -381,7 +381,7 @@ button {
 }
 
 .keymap-panel {
-    padding: 16px 22px;
+    padding: 20px 24px;
     overflow: hidden;
 }
 
@@ -399,7 +399,7 @@ button {
     align-items: center; /* 左右和中间各自在其占位区域上下居中对齐 */
     justify-items: center;
     gap: 16px;
-    min-height: 485px; /* 适度舒展且紧凑，杜绝窗口下方空旷 */
+    min-height: 545px; /* 增加 60 像素，赋予产品示意图充裕的呼吸空间并消除窗口底部多余空白 */
     width: 100%;
 }
 
@@ -457,7 +457,7 @@ button {
     gap: 10px;
 }
 
-/* Settings 区块底部的保存配置按钮（与上方TX Power拉开显著间距，更显眼独立） */
+/* Settings 区块底部的保存配置按钮（与上方拉开显著间距，醒目桔色高亮） */
 .settings-bottom-action {
     display: flex;
     width: 100%;
@@ -468,7 +468,7 @@ button {
     width: 100%;
     height: 38px;
     border-radius: var(--r-control);
-    background: #18181b;
+    background: var(--accent-orange); /* 鲜明充满质感的桔色！ */
     color: #ffffff;
     font-size: 11px;
     font-weight: 800;
@@ -477,14 +477,14 @@ button {
     align-items: center;
     justify-content: center;
     gap: 7px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 3px 10px rgba(249, 115, 22, 0.3);
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     cursor: pointer;
 }
 
 .settings-bottom-action .save-action-btn:not([disabled]):hover {
-    background: var(--accent-orange);
-    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+    background: var(--accent-orange-hover);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.45);
     transform: translateY(-1px);
 }
 
@@ -1085,7 +1085,7 @@ button {
 }
 
 .ota-icon {
-    color: var(--accent-orange);
+    color: #4b5563; /* 深灰色，低调沉稳，不再用桔色 */
 }
 
 .ota-title {
