@@ -13,6 +13,7 @@
 #include "freertos/task.h"
 #include "board_profile.h"
 #include "button_handler.h"
+#include "multi_host.h"
 
 #define TAG "CONFIG_CMD"
 
@@ -48,6 +49,8 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
             uint8_t sleep_timeout_min = 5;
             config_storage_load_sleep_timeout(&sleep_timeout_min);
             
+            uint8_t active_slot = multi_host_get_current_slot();
+
             const board_profile_t *profile = board_profile_get_current();
             uint8_t board_model = profile ? (uint8_t)profile->model : 0;
             const char *board_name = profile ? profile->model_name : "WEMOS 18650";
@@ -57,9 +60,9 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
             snprintf(resp, sizeof(resp), 
                      "{\"status\":\"ok\",\"version\":\"%s\",\"btn1_vk\":%d,\"btn1_mod\":%d,\"btn2_vk\":%d,\"btn2_mod\":%d,"
                      "\"btn3_vk\":%d,\"btn3_mod\":%d,\"btn4_vk\":%d,\"btn4_mod\":%d,\"tx_power\":%d,\"sleep_mode\":%d,\"mic_enabled\":%d,"
-                     "\"board_model\":%d,\"board_name\":\"%s\",\"sleep_timeout_min\":%d}\n",
+                     "\"board_model\":%d,\"board_name\":\"%s\",\"sleep_timeout_min\":%d,\"active_slot\":%d}\n",
                      app_desc->version, vk1, mod1, vk2, mod2, vk3, mod3, vk4, mod4, tx_power, sleep_mode, mic_enabled,
-                     board_model, board_name, sleep_timeout_min);
+                     board_model, board_name, sleep_timeout_min, active_slot);
             respond_cb(resp, strlen(resp));
             
         } else if (strcmp(cmd, "set_btn") == 0) {
@@ -132,15 +135,36 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
                 uint8_t minutes = (uint8_t)min_item->valueint;
                 if (minutes >= 1 && minutes <= 120) {
                     config_storage_save_sleep_timeout(minutes);
+                    button_handler_update_sleep_timeout(minutes);
                     const char *resp = "{\"status\":\"ok\"}\n";
                     respond_cb(resp, strlen(resp));
-                    ESP_LOGI(TAG, "Sleep timeout updated to %d min. Restarting...", minutes);
-                    vTaskDelay(pdMS_TO_TICKS(500));
-                    esp_restart();
+                    ESP_LOGI(TAG, "Sleep timeout updated dynamically to %d min without restart.", minutes);
                 } else {
                     const char *resp = "{\"status\":\"error\",\"reason\":\"out_of_range\"}\n";
                     respond_cb(resp, strlen(resp));
                 }
+            }
+        } else if (strcmp(cmd, "switch_host_slot") == 0) {
+            cJSON *slot_item = cJSON_GetObjectItem(root, "slot");
+            uint8_t current_slot = multi_host_get_current_slot();
+            if (slot_item && cJSON_IsNumber(slot_item)) {
+                uint8_t target_slot = slot_item->valueint;
+                const char *resp = "{\"status\":\"ok\"}\n";
+                respond_cb(resp, strlen(resp));
+                if (target_slot != current_slot) {
+                    ESP_LOGW(TAG, "Host switch requested via SPP: %d -> %d", current_slot, target_slot);
+                    vTaskDelay(pdMS_TO_TICKS(100));
+                    multi_host_set_slot(target_slot);
+                } else {
+                    ESP_LOGI(TAG, "Host slot %d already active.", target_slot);
+                }
+            } else {
+                const char *resp = "{\"status\":\"ok\"}\n";
+                respond_cb(resp, strlen(resp));
+                uint8_t target_slot = (current_slot == 0) ? 1 : 0;
+                ESP_LOGW(TAG, "Host switch toggle requested via SPP: %d -> %d", current_slot, target_slot);
+                vTaskDelay(pdMS_TO_TICKS(100));
+                multi_host_switch_slot();
             }
         } else if (strcmp(cmd, "ota_start") == 0) {
             cJSON *size_item = cJSON_GetObjectItem(root, "size");

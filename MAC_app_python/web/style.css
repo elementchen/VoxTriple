@@ -358,12 +358,51 @@ select:hover {
     justify-content: center;
 }
 
+/* ── 开发板型号选择与切换 ── */
+.board-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.board-control-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.board-select-wrapper select {
+    min-width: 124px;
+    padding: 4px 24px 4px 10px;
+    font-size: 11px;
+    height: 26px;
+    background: #f4f4f6;
+    border-radius: var(--border-radius-md);
+}
+
+.btn-board-switch {
+    background-color: var(--accent-orange);
+    color: #ffffff;
+    border-radius: 13px;
+    padding: 0 10px;
+    font-size: 10px;
+    font-weight: 800;
+    height: 24px;
+    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
+    transition: all 0.15s ease;
+}
+
+.btn-board-switch:hover {
+    opacity: 0.9;
+    transform: scale(0.98);
+}
+
 .btn-update-trigger:hover {
     opacity: 0.9;
     transform: scale(0.98);
 }
 
-/* ── 开发板型号选择与切换 ── */
 .board-section {
     display: flex;
     flex-direction: column;
@@ -382,8 +421,6 @@ select:hover {
     padding: 4px 26px 4px 10px;
     font-size: 11px;
     height: 28px;
-    background: #f4f4f6;
-    border-radius: var(--border-radius-md);
 }
 
 .btn-board-switch {
@@ -399,7 +436,6 @@ select:hover {
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
-    transition: all 0.15s ease;
 }
 
 .btn-board-switch:hover {
@@ -407,49 +443,64 @@ select:hover {
     transform: scale(0.96);
 }
 
-/* ── 休眠等待时间选择控件 ── */
-.sleep-timeout-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
-}
-
-.sleep-timeout-control-wrapper {
+/* ── 双设备切换 HOST SWITCH 胶囊切换器 ── */
+.host-switch-section {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+}
+
+.host-switch-pills {
+    display: flex;
+    align-items: center;
+    background: #f0f0f3;
+    padding: 3px;
+    border-radius: 16px;
+    gap: 2px;
+}
+
+.host-pill {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.host-pill:hover {
+    color: var(--text-primary);
+}
+
+.host-pill.active {
+    background: #ffffff;
+    color: var(--accent-orange);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* ── 节能板块休眠时间选择下拉框样式 ── */
+.power-row-timeout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sleep-timeout-select-wrapper select {
-    min-width: 86px;
-    padding: 4px 26px 4px 10px;
+    min-width: 120px;
+    padding: 5px 26px 5px 10px;
     font-size: 11px;
     height: 28px;
     background: #f4f4f6;
     border-radius: var(--border-radius-md);
+    font-weight: 600;
 }
 
-.btn-sleep-timeout-apply {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: 14px;
-    padding: 0 10px;
-    font-weight: 800;
-    font-size: 10px;
-    height: 28px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
-    transition: all 0.15s ease;
-}
-
-.btn-sleep-timeout-apply:hover {
-    opacity: 0.9;
-    transform: scale(0.96);
-}
 
 /* ── 遗忘蓝牙连接重置按钮 ── */
 .reset-bt-section {
@@ -646,33 +697,23 @@ select:hover {
 
 /* ── 下半区排版 ─────────────────────────────────────────────────────────── */
 .bottom-layout {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 340px 1fr;
     gap: 16px;
-    height: 270px;
-    width: 100%;
+    height: 290px;
 }
 
 /* 左半：硬件级设置控制面板 */
 .left-settings {
-    width: 320px;
-    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), flex-grow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* 当 OTA 隐藏时，左侧设置面板自动拉伸充满窗口 */
-.bottom-layout.ota-hidden .left-settings {
-    width: 100%;
-    flex-grow: 1;
+    gap: 12px;
 }
 
 .setting-card {
     background: var(--bg-card);
     border-radius: var(--border-radius-lg);
-    padding: 16px 20px;
+    padding: 14px 18px;
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(0, 0, 0, 0.01);
 }
@@ -681,7 +722,7 @@ select:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 70px;
+    height: 60px;
 }
 
 .setting-icon-desc {
@@ -717,7 +758,7 @@ select:hover {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 184px;
+    height: 200px;
 }
 
 .power-section-header {
@@ -826,21 +867,6 @@ input:checked + .switch-slider:before {
 /* ── 右半区: OTA升级 ────────────────────────────────────────────────────────── */
 .right-ota {
     flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    max-width: 800px;
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* 当 OTA 隐藏时，右侧卡片淡出并折叠 max-width 到 0 */
-.bottom-layout.ota-hidden .right-ota {
-    max-width: 0;
-    opacity: 0;
-    transform: scale(0.96);
-    pointer-events: none;
-    margin-left: -16px;
 }
 
 .ota-card {
@@ -853,84 +879,118 @@ input:checked + .switch-slider:before {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 100%;
 }
 
-.ota-buttons-grid {
+.ota-sub-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.upload-dropzone {
+    border: 1.5px dashed #d1d1d6;
+    background: #fafafb;
+    border-radius: var(--border-radius-md);
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin: 16px 0;
-}
-
-.btn-ota-action {
-    height: 48px;
-    border: none;
-    border-radius: var(--border-radius-md);
-    font-weight: 750;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 6px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-    width: 100%;
+    transition: all 0.2s ease;
+    height: 94px;
 }
 
-.btn-ota-local {
-    background-color: var(--btn-gray);
+.upload-dropzone:hover {
+    border-color: var(--accent-orange);
+    background: #fffcfb;
+}
+
+.upload-svg {
+    color: var(--text-inactive);
+    transition: color 0.2s;
+}
+
+.upload-dropzone:hover .upload-svg {
+    color: var(--accent-orange);
+}
+
+.upload-title {
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-.btn-ota-local:hover {
-    background-color: var(--btn-gray-hover);
-    transform: scale(0.99);
 }
 
-.btn-ota-cloud {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15);
-}
-.btn-ota-cloud:hover {
-    opacity: 0.9;
-    transform: scale(0.99);
-}
-
-.btn-ota-icon {
-    flex-shrink: 0;
+.upload-sub {
+    font-size: 10px;
+    color: var(--text-inactive);
+    font-weight: 500;
+    text-align: center;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .ota-progress-section {
-    margin-top: 10px;
+    margin-top: 4px;
 }
 
-.progress-bar-container {
-    height: 6px;
+.progress-texts {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.progress-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.progress-percent {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-inactive);
+}
+
+.progress-bar-bg {
+    height: 4px;
     background-color: #f0f0f2;
-    border-radius: 3px;
+    border-radius: 2px;
     overflow: hidden;
-    width: 100%;
 }
 
-.progress-fill {
+.progress-bar-fill {
     height: 100%;
     background-color: var(--accent-orange);
     width: 0%;
     transition: width 0.25s ease-out;
 }
 
-.progress-status-row {
-    margin-top: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.btn-flash {
+    width: 100%;
+    background-color: #f2f2f7;
+    color: var(--text-inactive);
+    border-radius: var(--border-radius-md);
+    font-weight: 700;
+    height: 38px;
+    letter-spacing: 0.5px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
 
-.progress-status-text {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
+.btn-flash:not([disabled]) {
+    background-color: var(--accent-orange);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15);
+}
+
+.btn-flash:not([disabled]):hover {
+    opacity: 0.9;
+    transform: scale(0.99);
 }

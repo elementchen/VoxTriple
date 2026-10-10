@@ -59,6 +59,7 @@ let selectedOtaPath = "";
 let isConnected = false;
 let capturingIdx = -1;
 let currentSleepTimeoutMin = 5;
+let currentActiveSlot = 0;
 
 // ── Dom Initialization ───────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -182,13 +183,11 @@ async function onConnectClick() {
         const fwSection = document.getElementById("firmware-section");
         if (fwSection) fwSection.style.display = "none";
         
-        // 隐藏休眠等待时间区块
-        const sleepDivider = document.getElementById("sleep-timeout-divider");
-        if (sleepDivider) sleepDivider.style.display = "none";
-        const sleepSection = document.getElementById("sleep-timeout-section");
-        if (sleepSection) sleepSection.style.display = "none";
-        const btnSleepApply = document.getElementById("btn-sleep-timeout-apply");
-        if (btnSleepApply) btnSleepApply.style.display = "none";
+        // 隐藏多设备切换区块
+        const hostDivider = document.getElementById("host-switch-divider");
+        if (hostDivider) hostDivider.style.display = "none";
+        const hostSection = document.getElementById("host-switch-section");
+        if (hostSection) hostSection.style.display = "none";
         
         // 隐藏重置蓝牙配对按钮
         const resetBtDivider = document.getElementById("reset-bt-divider");
@@ -206,7 +205,7 @@ function renderConfig(config) {
     document.getElementById("mic-toggle").checked = (config.mic_enabled === 1);
     document.getElementById("sleep-toggle").checked = (config.sleep_mode === 1);
     
-    // 更新休眠等待时间
+    // 更新休眠等待时间 (放入节能卡片中)
     if (config.sleep_timeout_min !== undefined) {
         currentSleepTimeoutMin = config.sleep_timeout_min;
         const sleepSelect = document.getElementById("sleep-timeout-select");
@@ -214,12 +213,16 @@ function renderConfig(config) {
             sleepSelect.value = String(config.sleep_timeout_min);
         }
     }
-    const sleepDivider = document.getElementById("sleep-timeout-divider");
-    if (sleepDivider) sleepDivider.style.display = "block";
-    const sleepSection = document.getElementById("sleep-timeout-section");
-    if (sleepSection) sleepSection.style.display = "flex";
-    const btnSleepApply = document.getElementById("btn-sleep-timeout-apply");
-    if (btnSleepApply) btnSleepApply.style.display = "none";
+
+    // 更新与展示多设备配对切换 (电脑一 / 电脑二)
+    if (config.active_slot !== undefined) {
+        currentActiveSlot = config.active_slot;
+        updateHostSlotUi(currentActiveSlot);
+    }
+    const hostDivider = document.getElementById("host-switch-divider");
+    if (hostDivider) hostDivider.style.display = "block";
+    const hostSection = document.getElementById("host-switch-section");
+    if (hostSection) hostSection.style.display = "flex";
 
     // 显示重置蓝牙配对按钮
     const resetBtDivider = document.getElementById("reset-bt-divider");
@@ -362,14 +365,14 @@ function onSleepToggle() {
     // Only local state change, written on Save Config click
 }
 
-// ── Write parameters to physical board flash (Save Config Button click) ──
+// ── Unified Sync: 同步所有参数至开发板 Flash (同步到设备) ──
 async function saveAllConfigsToDevice() {
     if (!isConnected || !window.pywebview || !window.pywebview.api) return;
     
     const btnWrite = document.getElementById("btn-write-config");
-    const origText = btnWrite.textContent;
+    const origHtml = btnWrite.innerHTML;
     btnWrite.disabled = true;
-    btnWrite.textContent = "WRITING...";
+    btnWrite.textContent = "SYNCING...";
     
     const mic = document.getElementById("mic-toggle").checked ? 1 : 0;
     const sleep = document.getElementById("sleep-toggle").checked ? 1 : 0;
@@ -377,20 +380,25 @@ async function saveAllConfigsToDevice() {
     const activeSegments = document.querySelectorAll("#tx-power-bar .power-segment.active");
     const tx = Math.max(0, activeSegments.length - 1);
     
+    const sleepSelect = document.getElementById("sleep-timeout-select");
+    const sleepTimeout = sleepSelect ? parseInt(sleepSelect.value) : 5;
+    
     const ok = await window.pywebview.api.write_config(
         currentConfigs, 
         tx, 
         sleep, 
-        mic
+        mic,
+        sleepTimeout
     );
     
     btnWrite.disabled = false;
-    btnWrite.textContent = origText;
+    btnWrite.innerHTML = origHtml;
     
     if (ok) {
-        alert("Configuration saved successfully to device flash!\n配置写入开发板成功！");
+        currentSleepTimeoutMin = sleepTimeout;
+        alert("所有设置（按键映射、麦克风、休眠开关、休眠时间、发射功率）已全部成功同步到 ESP32！\n同步成功！");
     } else {
-        alert("Configuration save failed, please check connection.\n配置写入失败，请检查连接状态！");
+        alert("配置同步失败，请检查连接状态！");
     }
 }
 
@@ -645,57 +653,61 @@ function onPhysicalButtonEvent(btnId, state) {
     }
 }
 
-// ── 休眠等待时间选择与应用 ─────────────────────────────────────────────────
+// ── 休眠等待时间选择联动 ─────────────────────────────────────────────────────
 function onSleepTimeoutChange() {
     const select = document.getElementById("sleep-timeout-select");
-    const btnApply = document.getElementById("btn-sleep-timeout-apply");
-    if (!select || !btnApply) return;
-    
-    const selectedMin = parseInt(select.value);
-    if (selectedMin !== currentSleepTimeoutMin) {
-        btnApply.style.display = "flex";
-    } else {
-        btnApply.style.display = "none";
+    if (!select) return;
+    currentSleepTimeoutMin = parseInt(select.value);
+}
+
+// ── 双设备快速切换 (电脑一 / 电脑二) ─────────────────────────────────────────
+async function switchHostSlot(targetSlot) {
+    if (!isConnected || !window.pywebview || !window.pywebview.api) {
+        alert("请先建立设备连接！");
+        return;
+    }
+    if (targetSlot === currentActiveSlot) {
+        return;
+    }
+    const hostName = (targetSlot === 0) ? "电脑一 (Host 1)" : "电脑二 (Host 2)";
+    const confirmed = confirm(
+        `确定要切换配对设备至【${hostName}】吗？\n\n` +
+        `• 切换动作：断开当前电脑的蓝牙，切换至目标槽位并主动发起重连或等待配对；\n` +
+        `• 硬件反馈：ESP32 板载指示灯将闪烁确认；\n` +
+        `• 配置保留：按键映射与各项设置完全保留。\n\n` +
+        `点击【确定】立即执行设备切换。`
+    );
+    if (!confirmed) return;
+
+    updateHostSlotUi(targetSlot);
+
+    try {
+        const res = await window.pywebview.api.switch_host_slot(targetSlot);
+        if (res && res.status === "ok") {
+            currentActiveSlot = (res.active_slot !== undefined) ? res.active_slot : targetSlot;
+            updateHostSlotUi(currentActiveSlot);
+            alert(`已成功向 ESP32 发出设备切换指令！\n目标设备：【${hostName}】\n设备指示灯正在进行切换反馈闪烁。`);
+        } else {
+            alert("切换失败: " + (res ? res.message : "未知错误"));
+            updateHostSlotUi(currentActiveSlot);
+        }
+    } catch (e) {
+        alert("执行切换异常: " + e.message);
+        updateHostSlotUi(currentActiveSlot);
     }
 }
 
-async function applySleepTimeout() {
-    if (!window.pywebview || !window.pywebview.api) return;
-    const select = document.getElementById("sleep-timeout-select");
-    const newMin = parseInt(select.value);
-    
-    const confirmed = confirm(`确认将深度休眠等待时间设置为 [${newMin} 分钟]？\n\n设备将写入配置并自动重启，生效后请重新点击 CONNECT 连接。`);
-    if (!confirmed) {
-        select.value = String(currentSleepTimeoutMin);
-        document.getElementById("btn-sleep-timeout-apply").style.display = "none";
-        return;
-    }
-    
-    const btnApply = document.getElementById("btn-sleep-timeout-apply");
-    btnApply.disabled = true;
-    btnApply.textContent = "SAVING...";
-    
-    try {
-        const res = await window.pywebview.api.set_sleep_timeout_min(newMin);
-        btnApply.disabled = false;
-        btnApply.textContent = "APPLY";
-        btnApply.style.display = "none";
-        
-        if (res && res.success) {
-            currentSleepTimeoutMin = newMin;
-            alert(`休眠等待时间已成功更新为 [${newMin} 分钟]！\n设备正在重启，请等待几秒后重新点击 CONNECT 连接。`);
-            if (isConnected) {
-                onConnectClick();
-            }
+function updateHostSlotUi(slot) {
+    const pill0 = document.getElementById("host-pill-0");
+    const pill1 = document.getElementById("host-pill-1");
+    if (pill0 && pill1) {
+        if (slot === 0) {
+            pill0.classList.add("active");
+            pill1.classList.remove("active");
         } else {
-            alert("设置失败: " + (res ? res.message : "未知错误"));
-            select.value = String(currentSleepTimeoutMin);
+            pill1.classList.add("active");
+            pill0.classList.remove("active");
         }
-    } catch (e) {
-        btnApply.disabled = false;
-        btnApply.textContent = "APPLY";
-        alert("执行设置发生异常: " + e.message);
-        select.value = String(currentSleepTimeoutMin);
     }
 }
 

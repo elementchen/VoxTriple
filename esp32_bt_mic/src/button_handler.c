@@ -216,7 +216,7 @@ void system_reset_bt_pairing(void)
 #include "multi_host.h"
 
 /**
- * @brief Button monitoring task with debounce & combo detection
+ * @brief Button monitoring task with debounce
  */
 static void button_task_func(void *arg)
 {
@@ -224,36 +224,13 @@ static void button_task_func(void *arg)
     uint32_t last_change[BUTTON_NUM] = {0};
     uint32_t press_time[BUTTON_NUM] = {0};
 
-    static uint32_t s_combo_press_start = 0;
-    static bool s_combo_triggered = false;
-    static bool s_suppress_btn[BUTTON_NUM] = {false};
-
     ESP_LOGI(TAG, "Button task started (GPIOs: %d, %d, %d, %d)",
              s_button_pins[0], s_button_pins[1], s_button_pins[2], s_button_pins[3]);
 
     while (s_btn_task_running) {
         uint32_t now = pdTICKS_TO_MS(xTaskGetTickCount());
 
-        /* 1. 检测 Button 3 + Button 4 (GPIO 23 + GPIO 18) 组合长按 1 秒切换多设备 */
-        bool b3_down = (gpio_get_level(s_button_pins[2]) == 0);
-        bool b4_down = (gpio_get_level(s_button_pins[3]) == 0);
-
-        if (b3_down && b4_down) {
-            if (s_combo_press_start == 0) {
-                s_combo_press_start = now;
-            } else if (!s_combo_triggered && (now - s_combo_press_start >= 1000)) {
-                s_combo_triggered = true;
-                s_suppress_btn[2] = true;
-                s_suppress_btn[3] = true;
-                ESP_LOGW(TAG, ">>> Button 3 + 4 held for 1000ms: Triggering Multi-Host Switch! <<<");
-                multi_host_switch_slot();
-            }
-        } else {
-            s_combo_press_start = 0;
-            s_combo_triggered = false;
-        }
-
-        /* 2. 单键消抖与按键处理 */
+        /* 单键消抖与按键处理 */
         for (int i = 0; i < BUTTON_NUM; i++) {
             /* Active-low with internal pull-up: 0 = pressed, 1 = released */
             bool pressed = (gpio_get_level(s_button_pins[i]) == 0);
@@ -281,21 +258,19 @@ static void button_task_func(void *arg)
                     /* Reset inactivity deep sleep timer */
                     if (s_inactivity_timer) xTimerReset(s_inactivity_timer, 0);
 
-                    /* Connection wake-up & HFP SCO activation (若处于组合切换中则抑制字符发送) */
-                    if (!s_suppress_btn[i]) {
-                        if (classic_hidd_is_connected()) {
-                            uint8_t vk = 0, mod = 0;
-                            get_button_mapping(i, &vk, &mod);
-                            classic_hidd_send_key(mod, vk);
-                        } else {
-                            // Only Button 1 triggers reconnect
-                            if (i == 0) {
-                                ESP_LOGW(TAG, "Classic BT HID not connected. Button 1 press triggers reconnect...");
-                                esp_bd_addr_t saved_addr;
-                                if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
-                                    ESP_LOGI(TAG, "Saved host address found. Initiating reconnect to Host...");
-                                    esp_bt_hid_device_connect(saved_addr);
-                                }
+                    /* Connection wake-up & HFP SCO activation */
+                    if (classic_hidd_is_connected()) {
+                        uint8_t vk = 0, mod = 0;
+                        get_button_mapping(i, &vk, &mod);
+                        classic_hidd_send_key(mod, vk);
+                    } else {
+                        // Only Button 1 triggers reconnect
+                        if (i == 0) {
+                            ESP_LOGW(TAG, "Classic BT HID not connected. Button 1 press triggers reconnect...");
+                            esp_bd_addr_t saved_addr;
+                            if (config_storage_load_hfp_addr(saved_addr) == ESP_OK) {
+                                ESP_LOGI(TAG, "Saved host address found. Initiating reconnect to Host...");
+                                esp_bt_hid_device_connect(saved_addr);
                             }
                         }
                     }
@@ -311,15 +286,9 @@ static void button_task_func(void *arg)
                         gpio_set_level(s_indicator_led_gpio, 1); // Turn LED OFF (Active Low) when Button 1 is released
                     }
 
-                    if (!s_suppress_btn[i]) {
-                        if (classic_hidd_is_connected()) {
-                            classic_hidd_release_key();
-                        }
-                    } else {
-                        // 释放后清除抑制标志
-                        s_suppress_btn[i] = false;
+                    if (classic_hidd_is_connected()) {
+                        classic_hidd_release_key();
                     }
-
                     state[i] = BTN_STATE_IDLE;
                 }
                 break;
@@ -412,3 +381,18 @@ void button_handler_deinit(void)
         s_btn_task_handle = NULL;
     }
 }
+
+void button_handler_update_sleep_timeout(uint8_t timeout_min)
+{
+    if (timeout_min < MIN_INACTIVITY_MIN || timeout_min > MAX_INACTIVITY_MIN) {
+        timeout_min = DEFAULT_INACTIVITY_MIN;
+    }
+    uint32_t inactivity_ms = (uint32_t)timeout_min * 60 * 1000;
+    if (s_inactivity_timer) {
+        xTimerChangePeriod(s_inactivity_timer, pdMS_TO_TICKS(inactivity_ms), 0);
+        xTimerReset(s_inactivity_timer, 0);
+    }
+    ESP_LOGI(TAG, "Inactivity sleep timeout updated dynamically to %d min (%lu ms)",
+             timeout_min, (unsigned long)inactivity_ms);
+}
+

@@ -399,6 +399,20 @@ class SppClient:
         resp = await self._send_cmd({"cmd": "reset_bt_pairing"})
         return resp is not None and resp.get("status") == "ok"
 
+    async def switch_host_slot(self, slot: int = None) -> bool:
+        """Switch active Bluetooth host slot (0: PC 1, 1: PC 2)."""
+        cmd_dict = {"cmd": "switch_host_slot"}
+        if slot is not None:
+            cmd_dict["slot"] = slot
+        resp = await self._send_cmd(cmd_dict)
+        if resp and resp.get("status") == "ok":
+            if slot is not None:
+                self._config_cache["active_slot"] = slot
+            else:
+                self._config_cache["active_slot"] = 1 if self._config_cache.get("active_slot", 0) == 0 else 0
+            return True
+        return False
+
     async def get_config(self) -> dict | None:
         """Fetch and return full configuration dictionary formatted for UI client."""
         ok = await self._fetch_config()
@@ -416,13 +430,14 @@ class SppClient:
                 "version": self._config_cache.get("version", "1.0.0"),
                 "board_model": self._config_cache.get("board_model", 0),
                 "board_name": self._config_cache.get("board_name", "WEMOS 18650"),
-                "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5)
+                "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5),
+                "active_slot": self._config_cache.get("active_slot", 0)
             }
             return cfg
         return None
 
-    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1) -> bool:
-        """macOS helper to write all configurations at once."""
+    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1, sleep_timeout_min: int = 5) -> bool:
+        """Write all configurations at once into ESP32."""
         for i in range(min(len(mapping), 4)):
             ok = await self.write_button_mapping(i, mapping[i]["vk"], mapping[i]["mod"])
             if not ok:
@@ -434,6 +449,9 @@ class SppClient:
         if not ok:
             return False
         ok = await self.write_mic_enabled(mic_enabled)
+        if not ok:
+            return False
+        ok = await self.write_sleep_timeout_min(sleep_timeout_min)
         if not ok:
             return False
         return True

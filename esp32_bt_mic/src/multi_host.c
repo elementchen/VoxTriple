@@ -65,10 +65,18 @@ uint8_t multi_host_get_current_slot(void)
     return s_active_slot;
 }
 
-esp_err_t multi_host_switch_slot(void)
+esp_err_t multi_host_set_slot(uint8_t new_slot)
 {
+    if (new_slot > 1) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
     uint8_t prev_slot = s_active_slot;
-    uint8_t new_slot = (prev_slot == 0) ? 1 : 0;
+    if (new_slot == prev_slot) {
+        ESP_LOGI(TAG, "Slot %d is already active. Retriggering LED feedback.", new_slot);
+        multi_host_trigger_led_feedback(new_slot);
+        return ESP_OK;
+    }
 
     ESP_LOGW(TAG, "========================================");
     ESP_LOGW(TAG, ">>> SWITCHING HOST: Slot %d -> Slot %d <<<", prev_slot, new_slot);
@@ -114,3 +122,9 @@ esp_err_t multi_host_switch_slot(void)
 
     return ESP_OK;
 }
+
+esp_err_t multi_host_switch_slot(void)
+{
+    return multi_host_set_slot((s_active_slot == 0) ? 1 : 0);
+}
+

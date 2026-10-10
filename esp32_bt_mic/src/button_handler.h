@@ -22,4 +22,9 @@ void button_handler_deinit(void);
  */
 void system_reset_bt_pairing(void);
 
+/**
+ * @brief Dynamically update inactivity sleep timeout without reboot
+ */
+void button_handler_update_sleep_timeout(uint8_t timeout_min);
+
 #endif /* __BUTTON_HANDLER_H__ */

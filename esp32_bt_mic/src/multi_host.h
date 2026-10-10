@@ -26,6 +26,11 @@ uint8_t multi_host_get_current_slot(void);
 esp_err_t multi_host_switch_slot(void);
 
 /**
+ * @brief Switch explicitly to target host slot (0 or 1)
+ */
+esp_err_t multi_host_set_slot(uint8_t slot);
+
+/**
  * @brief Trigger physical LED feedback pattern for the active slot
  *        Slot 0: 1 flash x 3 times
  *        Slot 1: 2 flashes x 3 times

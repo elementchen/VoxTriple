@@ -53,25 +53,14 @@
                 </div>
             </div>
 
-            <div class="divider" id="sleep-timeout-divider" style="display: none;"></div>
+            <div class="divider" id="host-switch-divider" style="display: none;"></div>
 
-            <div class="sleep-timeout-section" id="sleep-timeout-section" style="display: none;">
-                <span class="control-label">SLEEP</span>
-                <div class="sleep-timeout-control-wrapper">
-                    <div class="select-wrapper sleep-timeout-select-wrapper">
-                        <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
-                            <option value="1">1 min</option>
-                            <option value="2">2 min</option>
-                            <option value="3">3 min</option>
-                            <option value="5" selected>5 min</option>
-                            <option value="10">10 min</option>
-                            <option value="15">15 min</option>
-                            <option value="20">20 min</option>
-                            <option value="30">30 min</option>
-                            <option value="60">60 min</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-sleep-timeout-apply" id="btn-sleep-timeout-apply" onclick="applySleepTimeout()" style="display: none;" title="Save &amp; Apply Sleep Timeout">APPLY</button>
+            <!-- 双设备配对快速切换组件 (电脑一 / 电脑二) -->
+            <div class="host-switch-section" id="host-switch-section" style="display: none;">
+                <span class="control-label">HOST</span>
+                <div class="host-switch-pills">
+                    <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="切换至电脑一 (Host 1)">电脑一</button>
+                    <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="切换至电脑二 (Host 2)">电脑二</button>
                 </div>
             </div>
             
@@ -213,19 +202,40 @@
                         </label>
                     </div>
 
-                    <!-- 硬件省电与功率设置卡片 -->
+                    <!-- 硬件省电与功率设置卡片 (整合休眠模式与休眠时间) -->
                     <div class="setting-card power-card-main">
                         <div class="power-section-header">POWER SAVING</div>
                         
                         <div class="power-row">
                             <div class="setting-texts">
                                 <span class="setting-name">Sleep Mode</span>
-                                <span class="setting-sub">Auto sleep after 10 min</span>
+                                <span class="setting-sub">Auto deep sleep on inactivity</span>
                             </div>
                             <label class="switch-toggle">
                                 <input type="checkbox" id="sleep-toggle" onchange="onSleepToggle()">
                                 <span class="switch-slider"></span>
                             </label>
+                        </div>
+
+                        <!-- 休眠时间下拉选单（与休眠模式整合在一起） -->
+                        <div class="power-row power-row-timeout" id="sleep-timeout-row">
+                            <div class="setting-texts">
+                                <span class="setting-name">Sleep Timeout</span>
+                                <span class="setting-sub">Idle duration before sleep</span>
+                            </div>
+                            <div class="select-wrapper sleep-timeout-select-wrapper">
+                                <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
+                                    <option value="1">1 min (分钟)</option>
+                                    <option value="2">2 min (分钟)</option>
+                                    <option value="3">3 min (分钟)</option>
+                                    <option value="5" selected>5 min (分钟)</option>
+                                    <option value="10">10 min (分钟)</option>
+                                    <option value="15">15 min (分钟)</option>
+                                    <option value="20">20 min (分钟)</option>
+                                    <option value="30">30 min (分钟)</option>
+                                    <option value="60">60 min (分钟)</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="power-row-tx">
@@ -247,9 +257,13 @@
                         </div>
                     </div>
                     
-                    <!-- 一键保存配置到开发板的写入按钮板块 -->
+                    <!-- 全局统一同步按钮板块 -->
                     <div class="write-btn-wrapper">
-                        <button class="btn btn-write-config-large" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>WRITE TO ESP32</button>
+                        <button class="btn btn-write-config-large" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled title="一键同步所有按键配置、麦克风、休眠开关、休眠时间与发射功率到 ESP32">
+                            <svg viewBox="0 0 24 24" width="16" height="16" style="margin-right: 6px; vertical-align: -2px;">
+                                <path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                            </svg>SYNC TO ESP32 (同步到设备)
+                        </button>
                     </div>
                 </div>
 

@@ -443,46 +443,64 @@ select:hover {
     transform: scale(0.96);
 }
 
-/* ── 休眠等待时间选择控件 ── */
-.sleep-timeout-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
-}
-
-.sleep-timeout-control-wrapper {
+/* ── 双设备切换 HOST SWITCH 胶囊切换器 ── */
+.host-switch-section {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+}
+
+.host-switch-pills {
+    display: flex;
+    align-items: center;
+    background: #f0f0f3;
+    padding: 3px;
+    border-radius: 16px;
+    gap: 2px;
+}
+
+.host-pill {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.host-pill:hover {
+    color: var(--text-primary);
+}
+
+.host-pill.active {
+    background: #ffffff;
+    color: var(--accent-orange);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* ── 节能板块休眠时间选择下拉框样式 ── */
+.power-row-timeout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sleep-timeout-select-wrapper select {
-    min-width: 86px;
-    padding: 4px 26px 4px 10px;
+    min-width: 120px;
+    padding: 5px 26px 5px 10px;
     font-size: 11px;
     height: 28px;
+    background: #f4f4f6;
+    border-radius: var(--border-radius-md);
+    font-weight: 600;
 }
 
-.btn-sleep-timeout-apply {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: 14px;
-    padding: 0 10px;
-    font-weight: 800;
-    font-size: 10px;
-    height: 28px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
-}
-
-.btn-sleep-timeout-apply:hover {
-    opacity: 0.9;
-    transform: scale(0.96);
-}
 
 /* ── 遗忘蓝牙连接重置按钮 ── */
 .reset-bt-section {
@@ -680,22 +698,22 @@ select:hover {
 /* ── 下半区排版 ─────────────────────────────────────────────────────────── */
 .bottom-layout {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 340px 1fr;
     gap: 16px;
-    height: 270px;
+    height: 290px;
 }
 
 /* 左半：硬件级设置控制面板 */
 .left-settings {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .setting-card {
     background: var(--bg-card);
     border-radius: var(--border-radius-lg);
-    padding: 16px 20px;
+    padding: 14px 18px;
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(0, 0, 0, 0.01);
 }
@@ -704,7 +722,7 @@ select:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 70px;
+    height: 60px;
 }
 
 .setting-icon-desc {
@@ -740,7 +758,7 @@ select:hover {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 184px;
+    height: 200px;
 }
 
 .power-section-header {
