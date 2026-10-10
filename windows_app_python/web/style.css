@@ -55,9 +55,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     user-select: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding: 20px 22px 36px;
+    overflow: hidden; /* 彻底禁止滚动条，尺寸固定自适应 */
+    padding: 14px 20px 16px; /* 紧凑缓冲，杜绝撑出窗口 */
 }
 
 .app-container {
@@ -65,7 +64,7 @@ body {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 button {
@@ -155,7 +154,7 @@ button {
     transform: scale(1.08);
 }
 
-/* 状态与控制条 */
+/* 状态与控制条（严禁换行 flex-wrap: nowrap，确保连接前后高度绝对锁定 50px 不变） */
 .statusbar {
     flex: 1 1 auto;
     background: var(--card-bg);
@@ -163,11 +162,12 @@ button {
     padding: 8px 14px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(0, 0, 0, 0.02);
     min-width: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* 绝对单行排布，禁止换行撑高 */
+    overflow: hidden;
 }
 
 /* 串口选择 */
@@ -180,6 +180,9 @@ button {
     padding: 0 8px 0 10px;
     height: 32px;
     border: 1px solid var(--border-soft);
+    max-width: 175px;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .control-label {
@@ -187,6 +190,11 @@ button {
     font-weight: 800;
     color: var(--fg-muted);
     letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.select-wrapper {
+    min-width: 0;
 }
 
 .select-wrapper select {
@@ -198,6 +206,10 @@ button {
     color: var(--fg-default);
     cursor: pointer;
     padding-right: 4px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .btn-refresh {
@@ -369,7 +381,7 @@ button {
 }
 
 .keymap-panel {
-    padding: 24px 28px;
+    padding: 20px 24px;
     overflow: hidden;
 }
 
@@ -386,8 +398,8 @@ button {
     grid-template-columns: 240px 1fr 240px;
     align-items: center; /* 左右和中间各自在其占位区域上下居中对齐 */
     justify-items: center;
-    gap: 20px;
-    min-height: 560px; /* 高度加多一些，留白更多呼吸空间 */
+    gap: 18px;
+    min-height: 520px; /* 适度舒展，保证 OTA 板块完全露出且绝无滚动条 */
     width: 100%;
 }
 
@@ -633,6 +645,15 @@ button {
     width: 100%;
 }
 
+/* 产品示意图正下方的操作系统识别图标（小巧精致，无文字，位置完全锁定固定） */
+.device-os-indicator-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    margin-top: 10px;
+}
+
 /* 拟物化铝合金竖向外壳（按键周围与外壳四周间隔完全一致，外侧一圈浅灰白色倒角高光） */
 .virtual-device-body-vertical {
     width: 106px;
@@ -851,16 +872,21 @@ button {
     gap: 12px;
 }
 
-/* 操作系统类型识别徽章 */
+/* 操作系统类型识别徽章（小巧正方形胶囊，纯图标） */
 .os-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 7px;
+    justify-content: center;
+    width: 28px;
+    height: 24px;
     border-radius: 6px;
-    font-size: 10px;
-    font-weight: 800;
     transition: all 0.2s ease;
+}
+
+.os-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .os-apple {
@@ -1031,7 +1057,7 @@ button {
    3. 下半区：OTA 固件升级面板（ESP32 固件版本展示与刷写）
    ========================================================================== */
 .ota-panel {
-    padding: 16px 20px 18px;
+    padding: 14px 20px 16px;
 }
 
 .ota-head {
