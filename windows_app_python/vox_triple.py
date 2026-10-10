@@ -69,7 +69,11 @@ class Api:
         """Connect to physical USB-serial device."""
         log.info(f"Connecting to {port}...")
         future = run_coro(self.spp.connect(port))
-        ok = future.result(timeout=6.0)
+        try:
+            ok = future.result(timeout=8.0)
+        except Exception as e:
+            log.error(f"connect_device exception: {e}")
+            ok = False
         self._connected = ok
         return ok
 
@@ -201,10 +205,18 @@ class Api:
         
         def progress_cb(written, total):
             if self._window:
-                self._window.evaluate_js(f"onOtaProgress({written}, {total}, 'flash')")
+                try:
+                    self._window.evaluate_js(f"onOtaProgress({written}, {total}, 'flash')")
+                except Exception:
+                    pass
 
         future = run_coro(self.spp.upload_firmware(bin_path, progress_cb))
-        ok = future.result(timeout=60.0)
+        try:
+            ok = future.result(timeout=180.0)
+        except Exception as e:
+            log.error(f"trigger_ota failed or timeout: {e}")
+            ok = False
+
         if ok:
             # 升级成功，ESP32 正在重启，上位机断开连接以保持状态同步
             self._connected = False

@@ -897,21 +897,34 @@ async function onFlashFirmware() {
     
     const progressFill = document.getElementById("progress-fill");
     const progressPct = document.getElementById("progress-pct");
+    const btnLocal = document.querySelector(".btn-ota-local");
+    const btnCloud = document.querySelector(".btn-ota-cloud");
     
+    if (btnLocal) btnLocal.disabled = true;
+    if (btnCloud) btnCloud.disabled = true;
+
     if (progressFill) progressFill.style.width = "0%";
     if (progressPct) progressPct.textContent = "Flashing: 0.0%";
     
-    const ok = await window.pywebview.api.trigger_ota(selectedOtaPath);
-    
-    if (ok) {
-        if (progressFill) progressFill.style.width = "100%";
-        if (progressPct) progressPct.textContent = "100.0% Done";
-        // 升级完成ESP32重启，断开连接重置UI状态
-        applyDisconnectedUi();
-        alert("固件升级成功！开发板正在执行引导重启，请点击 CONNECT 重新连接。");
-    } else {
-        alert("固件写入失败或被取消，请检查串口与供电后重试。");
+    try {
+        const ok = await window.pywebview.api.trigger_ota(selectedOtaPath);
+        
+        if (ok) {
+            if (progressFill) progressFill.style.width = "100%";
+            if (progressPct) progressPct.textContent = "100.0% Done";
+            // 升级完成ESP32重启，断开连接重置UI状态
+            applyDisconnectedUi();
+            alert("固件升级成功！开发板正在执行引导重启，请点击 CONNECT 重新连接。");
+        } else {
+            alert("固件写入失败或被取消，请检查串口与供电后重试。");
+            if (progressPct) progressPct.textContent = "Failed";
+        }
+    } catch (e) {
+        alert("固件升级过程异常: " + e.message);
         if (progressPct) progressPct.textContent = "Failed";
+    } finally {
+        if (btnLocal) btnLocal.disabled = false;
+        if (btnCloud) btnCloud.disabled = false;
     }
 }
 
