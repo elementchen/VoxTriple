@@ -10,7 +10,7 @@
     <div class="app-container">
         <!-- 1. 顶部 Header 栏：品牌卡片 + 状态与控制条 -->
         <header class="topbar">
-            <!-- 品牌标识卡片（展示客户端软件版本及客户端升级小图标） -->
+            <!-- 品牌标识卡片（展示客户端软件版本及小图标升级按钮） -->
             <div class="brand-card">
                 <img src="logo.png" alt="Logo" class="brand-img">
                 <div class="brand-info">
@@ -74,16 +74,16 @@
             </div>
         </header>
 
-        <!-- 2. 主核心区域：三栏布局（左：节能设置，中：竖向ESP32键盘，右：按键捕获） -->
+        <!-- 2. 主核心区域：视觉打通的三栏大面板（左：节能设置，中：铝合金竖向ESP32键盘，右：按键捕获与右下角保存） -->
         <main class="main-layout">
             <section class="panel keymap-panel">
                 <div class="keymap-split-three">
 
-                    <!-- ============ 左栏：节能与硬件设置（竖向排列） ============ -->
+                    <!-- ============ 左栏：节能与硬件设置（竖向排列，视觉打通） ============ -->
                     <div class="settings-panel">
                         <div class="panel-header">
                             <h2 class="panel-title">SETTINGS</h2>
-                            <span class="panel-subtitle">Power & Hardware</span>
+                            <span class="panel-subtitle">Hardware</span>
                         </div>
 
                         <div class="settings-list">
@@ -150,44 +150,36 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- 写入到硬件主按钮 -->
-                        <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
-                            <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
-                                <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
-                            </svg>
-                            <span>WRITE TO ESP32</span>
-                        </button>
                     </div>
 
-                    <!-- ============ 中栏：竖向真实 ESP32 键盘样子（上至下：MIC、KEY1~4） ============ -->
+                    <!-- ============ 中栏：1:1铝合金竖向真实ESP32键盘机身（空间开阔，正方形键帽） ============ -->
                     <div class="device-panel">
                         <div class="panel-header center-header">
                             <h2 class="panel-title">ESP32 KEYBOARD</h2>
-                            <span class="panel-subtitle">Vertical Physical Layout</span>
+                            <span class="panel-subtitle">Physical 1:1 Layout</span>
                         </div>
 
-                        <!-- 竖向仿真机身 -->
+                        <!-- 铝合金竖向仿真机身 -->
                         <div class="vertical-device-wrapper">
                             <div class="virtual-device-body-vertical" id="virtualKeyboard">
-                                <!-- 顶部麦克风 -->
-                                <div class="virtual-mic-slot-vertical" id="virtualMicSlot" title="Integrated Mic (PTT on Button 1)">
+                                <!-- 顶部麦克风区域（占约一个按键高度，支持点击联动麦克风开关） -->
+                                <div class="virtual-mic-slot-vertical" id="virtualMicSlot" onclick="toggleMicFromDevice()" title="点击切换麦克风开启/关闭状态">
                                     <div class="mic-grille">
                                         <span class="grille-hole"></span>
                                         <span class="grille-hole"></span>
                                         <span class="grille-hole"></span>
                                     </div>
-                                    <div class="mic-slot-tag">
-                                        <svg class="mic-slot-icon" viewBox="0 0 24 24" width="13" height="13">
+                                    <div class="mic-glyph-wrap">
+                                        <svg class="mic-slot-icon" viewBox="0 0 24 24" width="22" height="22">
                                             <rect x="9" y="3" width="6" height="12" rx="3" fill="currentColor"></rect>
-                                            <path d="M5 11a7 7 0 0 0 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                                            <path d="M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                            <path d="M5 11a7 7 0 0 0 14 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path>
+                                            <path d="M12 18v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path>
                                         </svg>
-                                        <span>MIC</span>
                                     </div>
+                                    <span class="mic-status-text" id="mic-status-text">MIC ON</span>
                                 </div>
 
-                                <!-- 竖向 4 个按键（KEY 1 ~ KEY 4） -->
+                                <!-- 下凹按键槽与 4 个紧凑正方形纯白键帽（KEY 1 ~ KEY 4） -->
                                 <div class="device-keys-column">
                                     <!-- Key 1 -->
                                     <div class="virtual-keycap active" data-idx="0" id="key-cap-0" onclick="selectKey(0)">
@@ -237,42 +229,54 @@
                         </div>
                     </div>
 
-                    <!-- ============ 右栏：按键捕获与修饰键配置 ============ -->
+                    <!-- ============ 右栏：按键捕获配置 + 右下角写入硬件大按钮 ============ -->
                     <div class="config-panel">
-                        <div class="panel-header">
-                            <div class="panel-title-wrapper">
-                                <h2 class="panel-title">KEY MAPPING</h2>
-                                <div class="os-badge" id="os-badge" style="display: none;" title="识别当前槽位配对电脑系统">
-                                    <span class="os-badge-icon" id="os-badge-icon"></span>
-                                    <span class="os-badge-text" id="os-badge-text">--</span>
+                        <div class="config-top-content">
+                            <div class="panel-header">
+                                <div class="panel-title-wrapper">
+                                    <h2 class="panel-title">KEY MAPPING</h2>
+                                    <div class="os-badge" id="os-badge" style="display: none;" title="识别当前槽位配对电脑系统">
+                                        <span class="os-badge-icon" id="os-badge-icon"></span>
+                                        <span class="os-badge-text" id="os-badge-text">--</span>
+                                    </div>
+                                </div>
+                                <span class="panel-subtitle" id="mapping-tips">Click Capture · press key</span>
+                            </div>
+
+                            <!-- 焦点捕获卡片 -->
+                            <div class="capture-view" id="captureView">
+                                <div class="capture-header">
+                                    <span class="capture-key-index" id="currentKeyIndex">KEY 1</span>
+                                    <button class="btn-capture" id="btnCapture" onclick="triggerCurrentKeyCapture()">CAPTURE</button>
+                                </div>
+                                <div class="capture-key-display" id="keyDisplay">--</div>
+                                <div class="capture-hint" id="captureSub">Press any physical key on keyboard</div>
+                            </div>
+
+                            <!-- 2x4 修饰键胶囊网格 -->
+                            <div class="modifiers-section">
+                                <div class="modifiers-label">MODIFIERS</div>
+                                <div class="modifier-grid" id="modifierGrid">
+                                    <div class="mod-pill" data-mask="0x01">L·Ctrl</div>
+                                    <div class="mod-pill" data-mask="0x02">L·Shift</div>
+                                    <div class="mod-pill" data-mask="0x04">L·Alt</div>
+                                    <div class="mod-pill" data-mask="0x08">L·Win</div>
+                                    <div class="mod-pill" data-mask="0x10">R·Ctrl</div>
+                                    <div class="mod-pill" data-mask="0x20">R·Shift</div>
+                                    <div class="mod-pill" data-mask="0x40">R·Alt</div>
+                                    <div class="mod-pill" data-mask="0x80">R·Win</div>
                                 </div>
                             </div>
-                            <span class="panel-subtitle" id="mapping-tips">Click Capture · press key</span>
                         </div>
 
-                        <!-- 焦点捕获卡片 -->
-                        <div class="capture-view" id="captureView">
-                            <div class="capture-header">
-                                <span class="capture-key-index" id="currentKeyIndex">KEY 1</span>
-                                <button class="btn-capture" id="btnCapture" onclick="triggerCurrentKeyCapture()">CAPTURE</button>
-                            </div>
-                            <div class="capture-key-display" id="keyDisplay">--</div>
-                            <div class="capture-hint" id="captureSub">Press any physical key on keyboard</div>
-                        </div>
-
-                        <!-- 2x4 修饰键胶囊网格 -->
-                        <div class="modifiers-section">
-                            <div class="modifiers-label">MODIFIERS</div>
-                            <div class="modifier-grid" id="modifierGrid">
-                                <div class="mod-pill" data-mask="0x01">L·Ctrl</div>
-                                <div class="mod-pill" data-mask="0x02">L·Shift</div>
-                                <div class="mod-pill" data-mask="0x04">L·Alt</div>
-                                <div class="mod-pill" data-mask="0x08">L·Win</div>
-                                <div class="mod-pill" data-mask="0x10">R·Ctrl</div>
-                                <div class="mod-pill" data-mask="0x20">R·Shift</div>
-                                <div class="mod-pill" data-mask="0x40">R·Alt</div>
-                                <div class="mod-pill" data-mask="0x80">R·Win</div>
-                            </div>
+                        <!-- 右下角：保存写入硬件大按钮 -->
+                        <div class="config-bottom-action">
+                            <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
+                                <svg class="save-icon" viewBox="0 0 24 24" width="16" height="16">
+                                    <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
+                                </svg>
+                                <span>WRITE TO ESP32</span>
+                            </button>
                         </div>
                     </div>
 

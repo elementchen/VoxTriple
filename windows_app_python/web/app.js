@@ -474,22 +474,39 @@ async function setTxPower(level) {
     setTxPowerUi(level);
 }
 
+function toggleMicFromDevice() {
+    const micToggle = document.getElementById("mic-toggle");
+    if (!micToggle) return;
+    micToggle.checked = !micToggle.checked;
+    onMicToggle();
+}
+
 function onMicToggle() {
-    // 麦克风硬件指示联动
+    // 麦克风硬件指示与开关双向联动
     const slot = document.getElementById("virtualMicSlot");
     const micToggle = document.getElementById("mic-toggle");
     if (slot && micToggle) {
         const icon = slot.querySelector(".mic-slot-icon");
-        const tag = slot.querySelector(".mic-slot-tag");
+        const statusText = document.getElementById("mic-status-text");
         const holes = slot.querySelectorAll(".grille-hole");
         if (micToggle.checked) {
             if (icon) icon.style.color = "var(--accent-orange)";
-            if (tag) tag.style.color = "var(--accent-orange)";
+            if (statusText) {
+                statusText.textContent = "MIC ON";
+                statusText.style.color = "var(--accent-orange)";
+            }
             holes.forEach(h => h.style.backgroundColor = "var(--accent-orange)");
+            slot.style.borderColor = "rgba(249, 115, 22, 0.4)";
+            slot.style.backgroundColor = "rgba(249, 115, 22, 0.08)";
         } else {
-            if (icon) icon.style.color = "#8a909a";
-            if (tag) tag.style.color = "#8a909a";
-            holes.forEach(h => h.style.backgroundColor = "#1b1d20");
+            if (icon) icon.style.color = "#6b7280";
+            if (statusText) {
+                statusText.textContent = "MIC OFF";
+                statusText.style.color = "#6b7280";
+            }
+            holes.forEach(h => h.style.backgroundColor = "#6b7280");
+            slot.style.borderColor = "transparent";
+            slot.style.backgroundColor = "rgba(0, 0, 0, 0.03)";
         }
     }
 }

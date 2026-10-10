@@ -1,6 +1,6 @@
 /* ==========================================================================
-   VoxTriple Webview Frontend - 3-Column Physical Hardware Layout (Windows Edition)
-   1:1 Aligned with Real 3D Vertical Model, Native Typography & Solid Color Controls
+   VoxTriple Webview Frontend - 3-Column Seamless Physical Hardware Layout
+   1:1 Real 3D Anodized Aluminum Enclosure, Square Keycaps, Seamless Panel
    ========================================================================== */
 
 :root {
@@ -24,7 +24,7 @@
     --status-green: #16a34a;
     --status-red: #ef4444;
     
-    /* Native Modern System Typography (恢复之前好评的原生字体) */
+    /* Native Modern System Typography (原版现代饱满无衬线字体) */
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     
     /* Radii */
@@ -36,8 +36,8 @@
     /* Shadows */
     --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.04);
     --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
-    --shadow-keycap: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    --shadow-keycap-active: 0 0 0 2px var(--accent-orange), 0 3px 10px rgba(249, 115, 22, 0.28);
+    --shadow-keycap: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --shadow-keycap-active: 0 0 0 2.5px var(--accent-orange), 0 3px 12px rgba(249, 115, 22, 0.35);
 }
 
 *, *::before, *::after {
@@ -61,7 +61,7 @@ body {
 }
 
 .app-container {
-    max-width: 1020px;
+    max-width: 1040px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -222,8 +222,8 @@ button {
     height: 32px;
     padding: 0 16px;
     border-radius: var(--r-control);
-    background-color: #ef4444; /* 未连接：全红色 */
-    color: #ffffff; /* 纯白文字 */
+    background-color: #ef4444; /* 未连接：全红 */
+    color: #ffffff;            /* 纯白字 */
     font-size: 11.5px;
     font-weight: 800;
     letter-spacing: 0.05em;
@@ -249,7 +249,7 @@ button {
 
 /* 已连接状态：全绿色白字 */
 .btn-connect.connected-state {
-    background-color: #16a34a; /* 全绿色 */
+    background-color: #16a34a; /* 全绿 */
     color: #ffffff;
     box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
 }
@@ -347,7 +347,7 @@ button {
 }
 
 /* ==========================================================================
-   2. 主核心区域：三栏布局（左：节能设置，中：竖向ESP32机身，右：按键捕获）
+   2. 主核心区域：视觉打通的三栏大面板（左：设置，中：铝合金机身，右：按键捕获与保存）
    ========================================================================== */
 .main-layout {
     display: flex;
@@ -363,15 +363,16 @@ button {
 }
 
 .keymap-panel {
-    padding: 0;
+    padding: 20px 22px;
     overflow: hidden;
 }
 
-/* 三栏网格：左 240px，中 270px，右 1fr */
+/* 视觉完全打通：无割裂线，左 210px，中 1fr（空间留给产品），右 255px */
 .keymap-split-three {
     display: grid;
-    grid-template-columns: 240px 270px 1fr;
-    min-height: 490px;
+    grid-template-columns: 210px 1fr 255px;
+    gap: 20px;
+    min-height: 480px;
 }
 
 /* 通用面板标题 */
@@ -386,7 +387,7 @@ button {
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 .panel-title-wrapper {
@@ -410,16 +411,12 @@ button {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   【左栏】：节能与硬件设置面板 (settings-panel)
+   【左栏】：节能与硬件设置面板 (settings-panel) - 视觉打通
    ────────────────────────────────────────────────────────────────────────── */
 .settings-panel {
-    padding: 20px 18px;
-    background: #fafafc;
-    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 14px;
+    gap: 12px;
 }
 
 .settings-list {
@@ -429,10 +426,10 @@ button {
 }
 
 .setting-item-card {
-    background: var(--card-bg);
+    background: #fafafc;
     border: 1px solid var(--border-soft);
     border-radius: var(--r-panel);
-    padding: 11px 12px;
+    padding: 10px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -471,7 +468,7 @@ button {
 
 .sleep-select-full select {
     width: 100%;
-    background: var(--container-bg);
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--r-control);
     padding: 5px 8px;
@@ -558,47 +555,14 @@ button {
     transform: translateX(16px);
 }
 
-/* 保存到设备主按钮 */
-.save-action-btn {
-    width: 100%;
-    height: 40px;
-    border-radius: var(--r-panel);
-    background: #18181b;
-    color: #ffffff;
-    font-size: 11.5px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.save-action-btn:not([disabled]):hover {
-    background: var(--accent-orange);
-    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
-    transform: translateY(-1px);
-}
-
-.save-action-btn[disabled] {
-    background: #e4e4e8;
-    color: #9c9ca3;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
 /* ──────────────────────────────────────────────────────────────────────────
-   【中栏】：竖向 1:1 真实 ESP32 键盘样子 (device-panel)
+   【中栏】：1:1 真实铝合金阳极氧化机身 (device-panel) - 空间充足、正方形键帽
    ────────────────────────────────────────────────────────────────────────── */
 .device-panel {
-    padding: 20px 18px;
-    background: #ffffff;
-    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
 }
 
 .vertical-device-wrapper {
@@ -606,17 +570,17 @@ button {
     justify-content: center;
     align-items: center;
     width: 100%;
-    flex-grow: 1;
+    padding: 4px 0;
 }
 
-/* 拟物化竖向外壳（按真实 3D 渲染图 1:1 调校：深灰哑光外壳、大圆角、侧键） */
+/* 拟物化铝合金竖向外壳（浅灰阳极氧化铝质感、微倒角、侧键） */
 .virtual-device-body-vertical {
-    width: 122px;
-    background: linear-gradient(180deg, #3d4147 0%, #303338 100%);
-    border-radius: 26px;
-    padding: 14px 10px 12px;
-    border: 1.5px solid #4a4f56;
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    width: 106px;
+    background: linear-gradient(170deg, #eaecef 0%, #d8dce2 50%, #c6ccd5 100%);
+    border-radius: 24px;
+    padding: 12px 10px 14px;
+    border: 1px solid #b4b9c2;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -624,27 +588,40 @@ button {
     user-select: none;
 }
 
-/* 右上侧物理小侧键（还原 3D 模型中的右侧凸起） */
+/* 右侧物理小侧键凸起（还原 3D 渲染图铝合金侧键） */
 .virtual-device-body-vertical::after {
     content: "";
     position: absolute;
-    right: -5px;
-    top: 48px;
+    right: -4px;
+    top: 52px;
     width: 4px;
     height: 18px;
-    background: #c0c4cc;
+    background: #b0b5be;
     border-radius: 2px;
-    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.25);
 }
 
-/* 顶部麦克风物理区（还原 3D 模型的雕刻麦克风图案） */
+/* 顶部麦克风区域（约占一个按键高度 70px，可点击交互切换麦克风开关） */
 .virtual-mic-slot-vertical {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-    margin-bottom: 10px;
-    cursor: default;
+    height: 70px;
+    width: 82px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid transparent;
+}
+
+.virtual-mic-slot-vertical:hover {
+    background: rgba(249, 115, 22, 0.08);
+    border-color: rgba(249, 115, 22, 0.3);
+    transform: translateY(-1px);
 }
 
 .mic-grille {
@@ -657,58 +634,62 @@ button {
     width: 2.5px;
     height: 2.5px;
     border-radius: 50%;
-    background: #1b1d20;
-    box-shadow: inset 0 0.5px 1px rgba(0, 0, 0, 0.8);
+    background: #6b7280;
+    transition: background-color 0.2s ease;
 }
 
-.mic-slot-tag {
+.mic-glyph-wrap {
     display: flex;
     align-items: center;
-    gap: 3px;
-    color: #8a909a;
-    font-size: 8.5px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    transition: all 0.2s ease;
+    justify-content: center;
 }
 
 .mic-slot-icon {
-    color: #8a909a;
+    color: #4b5563;
     transition: color 0.2s ease;
 }
 
-/* 4 个按键下凹槽（Button Well） */
+.mic-status-text {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+/* 下凹按键槽（Button Well） */
 .device-keys-column {
-    width: 100%;
-    background: #242629;
-    border-radius: 12px;
+    width: 86px;
+    background: #25282c;
+    border-radius: 10px;
     padding: 3.5px;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 -1px 2px rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 -1px 2px rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
     gap: 3px;
 }
 
-/* 纯白方块 3D 拟物键帽（还原 3D 渲染图中的 4 个白色方块） */
+/* 纯白方块 3D 拟物键帽（正方形 78px × 78px！） */
 .virtual-keycap {
+    width: 79px;
+    height: 79px;
     background: linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%);
     border-radius: 6px;
-    padding: 6px 8px;
+    padding: 7px 8px;
     cursor: pointer;
     border: 1px solid #e1e3e8;
     box-shadow: var(--shadow-keycap);
     transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    height: 64px;
+    justify-content: space-between;
     position: relative;
 }
 
 .virtual-keycap:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    border-color: #d0d2d8;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    border-color: #cbd0d8;
 }
 
 .virtual-keycap.active {
@@ -720,8 +701,8 @@ button {
 /* 物理按键下沉按下动画 */
 .virtual-keycap.physical-pressed {
     transform: translateY(2px) scale(0.97);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
-    background: #e8e9ed;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.12);
+    background: #e6e7eb;
 }
 
 .keycap-inner {
@@ -752,10 +733,10 @@ button {
 
 .keycap-value {
     text-align: center;
-    font-size: 16px;
+    font-size: 19px;
     font-weight: 800;
     color: #1a1c20;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.4px;
     margin: auto 0;
 }
 
@@ -764,14 +745,19 @@ button {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   【右栏】：按键映射具体设置面板 (config-panel)
+   【右栏】：按键映射具体设置面板 + 右下角写入硬件大按钮 (config-panel)
    ────────────────────────────────────────────────────────────────────────── */
 .config-panel {
-    padding: 20px 22px;
-    background: #fafafc;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: 14px;
+}
+
+.config-top-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 /* 操作系统类型识别徽章 */
@@ -800,15 +786,15 @@ button {
 
 /* 焦点捕获卡片 */
 .capture-view {
-    background: var(--card-bg);
+    background: #fafafc;
     border-radius: var(--r-panel);
-    padding: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 180px;
+    height: 165px;
     border: 1.5px dashed var(--border-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
     transition: all 0.22s ease;
 }
 
@@ -833,7 +819,7 @@ button {
 }
 
 .btn-capture {
-    padding: 5px 13px;
+    padding: 5px 12px;
     background: #18181b;
     color: #ffffff;
     border-radius: 6px;
@@ -858,7 +844,7 @@ button {
 .capture-key-display {
     text-align: center;
     font-weight: 800;
-    font-size: 32px;
+    font-size: 30px;
     color: var(--fg-strong);
     margin: auto 0;
     letter-spacing: -0.5px;
@@ -881,7 +867,7 @@ button {
 .modifiers-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 7px;
 }
 
 .modifiers-label {
@@ -894,15 +880,15 @@ button {
 .modifier-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    gap: 5px;
 }
 
 .mod-pill {
-    background: var(--card-bg);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: var(--r-control);
-    padding: 8px 10px;
-    font-size: 11px;
+    padding: 7px 8px;
+    font-size: 10.5px;
     font-weight: 700;
     color: var(--fg-default);
     text-align: center;
@@ -922,6 +908,41 @@ button {
     color: #ffffff;
     border-color: #18181b;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 右下角：保存写入硬件大按钮 */
+.config-bottom-action {
+    margin-top: 6px;
+}
+
+.save-action-btn {
+    width: 100%;
+    height: 42px;
+    border-radius: var(--r-panel);
+    background: #18181b;
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.save-action-btn:not([disabled]):hover {
+    background: var(--accent-orange);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+    transform: translateY(-1px);
+}
+
+.save-action-btn[disabled] {
+    background: #e4e4e8;
+    color: #9c9ca3;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 /* ==========================================================================
@@ -1076,10 +1097,6 @@ button {
 @media (max-width: 900px) {
     .keymap-split-three {
         grid-template-columns: 1fr;
-    }
-    .settings-panel, .device-panel {
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
     }
     .ota-body {
         grid-template-columns: 1fr;
