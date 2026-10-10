@@ -84,7 +84,7 @@ button {
 }
 
 /* ==========================================================================
-   1. 顶部 Header 栏（品牌卡片 + 状态连接条）
+   1. 顶部 Header 栏（品牌卡片 + 状态与控制条）
    ========================================================================== */
 .topbar {
     display: flex;
@@ -94,10 +94,10 @@ button {
 
 /* 品牌卡片 */
 .brand-card {
-    flex: 0 0 220px;
+    flex: 0 0 240px;
     background: var(--card-bg);
     border-radius: var(--r-card);
-    padding: 10px 18px 10px 16px;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -116,6 +116,7 @@ button {
 .brand-info {
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 .brand-title {
@@ -126,12 +127,41 @@ button {
     letter-spacing: -0.02em;
 }
 
+.brand-sub-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .brand-sub {
-    margin-top: 3px;
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--fg-muted);
     letter-spacing: 0.02em;
+}
+
+/* 客户端版本升级小按钮 */
+.btn-app-upgrade {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--container-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1px 5px;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+}
+
+.btn-app-upgrade:hover {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: #ffffff;
+    box-shadow: 0 1px 5px rgba(249, 115, 22, 0.3);
+    transform: translateY(-0.5px);
 }
 
 /* 状态控制胶囊条 */
@@ -142,53 +172,11 @@ button {
     padding: 8px 14px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(0, 0, 0, 0.02);
     min-width: 0;
     flex-wrap: wrap;
-}
-
-.status-divider {
-    width: 1px;
-    height: 18px;
-    background: var(--border-color);
-    margin: 0 2px;
-}
-
-/* 连接状态胶囊 */
-.conn-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 0 12px;
-    height: 30px;
-    border-radius: var(--r-control);
-    background: var(--container-bg);
-    color: var(--fg-strong);
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.conn-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--fg-light);
-    transition: background-color 0.25s ease;
-}
-
-.conn-pill[data-state="connected"] .conn-dot,
-.conn-dot.connected {
-    background: var(--status-green);
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-}
-
-.conn-pill[data-state="disconnected"] .conn-dot,
-.conn-dot.disconnected {
-    background: var(--fg-light);
 }
 
 /* 串口控制 */
@@ -199,7 +187,7 @@ button {
     background: var(--container-bg);
     border-radius: var(--r-control);
     padding: 0 8px 0 10px;
-    height: 30px;
+    height: 32px;
 }
 
 .control-label {
@@ -239,9 +227,9 @@ button {
     transform: rotate(90deg);
 }
 
-/* 连接按钮 */
+/* 整合连接状态与操作的连接按钮 */
 .btn-connect {
-    height: 30px;
+    height: 32px;
     padding: 0 14px;
     border-radius: var(--r-control);
     background: var(--btn-gray);
@@ -250,7 +238,19 @@ button {
     font-size: 11.5px;
     font-weight: 700;
     letter-spacing: 0.04em;
-    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid transparent;
+    transition: all 0.18s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.btn-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #9ca3af;
+    transition: all 0.2s ease;
 }
 
 .btn-connect:hover {
@@ -258,37 +258,27 @@ button {
     transform: translateY(-0.5px);
 }
 
+/* 已连接状态 */
 .btn-connect.connected-state {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    background: #ecfdf5;
+    border-color: rgba(34, 197, 94, 0.25);
+    color: #059669;
+}
+
+.btn-connect.connected-state .btn-status-dot {
+    background: var(--status-green);
+    box-shadow: 0 0 7px rgba(34, 197, 94, 0.6);
 }
 
 .btn-connect.connected-state:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #dc2626;
 }
 
-/* 固件与外设胶囊项 */
-.firmware-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--container-bg);
-    border-radius: var(--r-control);
-    padding: 0 10px;
-    height: 30px;
-}
-
-.firmware-ver {
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--fg-default);
-}
-
-.firmware-status-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--status-green);
+.btn-connect.connected-state:hover .btn-status-dot {
+    background: #ef4444;
+    box-shadow: 0 0 7px rgba(239, 68, 68, 0.6);
 }
 
 /* 双设备切换 HOST Pills */
@@ -299,7 +289,7 @@ button {
     background: var(--container-bg);
     border-radius: var(--r-control);
     padding: 2px 6px 2px 10px;
-    height: 30px;
+    height: 32px;
 }
 
 .host-switch-pills {
@@ -358,7 +348,7 @@ button {
     font-family: var(--font-mono);
     font-weight: 700;
     font-size: 10.5px;
-    height: 30px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -372,26 +362,8 @@ button {
     transform: scale(0.98);
 }
 
-/* 固件在线升级触发按钮 */
-.btn-update-trigger {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: var(--r-control);
-    padding: 0 12px;
-    font-family: var(--font-mono);
-    font-weight: 800;
-    font-size: 10.5px;
-    height: 30px;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
-}
-
-.btn-update-trigger:hover {
-    background-color: var(--accent-hover);
-    transform: scale(0.98);
-}
-
 /* ==========================================================================
-   2. 主核心区域：OpenDesign 2-Panel 分屏布局
+   2. 主核心区域：OpenDesign 2-Panel 对调分屏布局（左：示意图，右：捕获）
    ========================================================================== */
 .main-layout {
     display: flex;
@@ -411,9 +383,10 @@ button {
     overflow: hidden;
 }
 
+/* 对调网格：左边是机身示意图与设置(1fr)，右边是按键捕获(310px) */
 .keymap-split {
     display: grid;
-    grid-template-columns: 290px 1fr;
+    grid-template-columns: 1fr 310px;
     min-height: 490px;
 }
 
@@ -446,174 +419,10 @@ button {
     color: #9aa0a6;
 }
 
-/* 操作系统类型识别徽章 */
-.os-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 7px;
-    border-radius: 6px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    transition: all 0.2s ease;
-}
-
-.os-apple {
-    background: rgba(0, 0, 0, 0.06);
-    color: #111111;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.os-windows {
-    background: rgba(0, 120, 215, 0.1);
-    color: #0078d7;
-    border: 1px solid rgba(0, 120, 215, 0.2);
-}
-
-/* ── 左侧栏：按键配置与捕获面板 ── */
-.config-panel {
-    padding: 22px 22px 20px;
-    border-right: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background: #fafafc;
-}
-
-/* 捕获焦点大卡片 */
-.capture-view {
-    background: var(--card-bg);
-    border-radius: var(--r-panel);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 205px;
-    border: 1.5px dashed var(--border-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    transition: all 0.25s ease;
-}
-
-.capture-view.listening {
-    border-color: var(--accent-orange);
-    background: var(--accent-soft);
-    box-shadow: 0 4px 18px rgba(249, 115, 22, 0.15);
-}
-
-.capture-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.capture-key-index {
-    font-family: var(--font-mono);
-    color: var(--fg-muted);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-
-.btn-capture {
-    padding: 6px 14px;
-    background: var(--btn-dark);
-    color: #ffffff;
-    border-radius: 8px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    transition: all 0.15s ease;
-}
-
-.btn-capture:hover {
-    background: var(--btn-dark-hover);
-    transform: translateY(-0.5px);
-}
-
-.btn-capture.active,
-.capture-view.listening .btn-capture {
-    background: var(--accent-orange);
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
-}
-
-.capture-key-display {
-    text-align: center;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 32px;
-    color: var(--fg-strong);
-    margin: auto 0;
-    letter-spacing: -0.01em;
-    word-break: break-all;
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.capture-view.listening .capture-key-display {
-    color: var(--accent-orange);
-}
-
-.capture-hint {
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    color: var(--fg-muted);
-    text-align: center;
-}
-
-/* 2x4 修饰键网格 */
-.modifiers-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.modifiers-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--fg-muted);
-    letter-spacing: 0.8px;
-}
-
-.modifier-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-}
-
-.mod-pill {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--r-control);
-    padding: 8px 10px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--fg-default);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-
-.mod-pill:hover {
-    background: #f4f4f7;
-    border-color: #d1d1d6;
-    transform: translateY(-0.5px);
-}
-
-.mod-pill.active {
-    background: var(--btn-dark);
-    color: #ffffff;
-    border-color: var(--btn-dark);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-/* ── 右侧栏：虚拟硬件键盘矩阵面板 ── */
+/* ── 左侧栏：虚拟硬件键盘矩阵面板 ── */
 .matrix-panel {
     padding: 22px 24px 20px;
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -900,8 +709,172 @@ button {
     box-shadow: none;
 }
 
+/* ── 右侧栏：按键配置与捕获面板 ── */
+.config-panel {
+    padding: 22px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #fafafc;
+}
+
+/* 操作系统类型识别徽章 */
+.os-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.os-apple {
+    background: rgba(0, 0, 0, 0.06);
+    color: #111111;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.os-windows {
+    background: rgba(0, 120, 215, 0.1);
+    color: #0078d7;
+    border: 1px solid rgba(0, 120, 215, 0.2);
+}
+
+/* 捕获焦点大卡片 */
+.capture-view {
+    background: var(--card-bg);
+    border-radius: var(--r-panel);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 205px;
+    border: 1.5px dashed var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s ease;
+}
+
+.capture-view.listening {
+    border-color: var(--accent-orange);
+    background: var(--accent-soft);
+    box-shadow: 0 4px 18px rgba(249, 115, 22, 0.15);
+}
+
+.capture-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.capture-key-index {
+    font-family: var(--font-mono);
+    color: var(--fg-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.btn-capture {
+    padding: 6px 14px;
+    background: var(--btn-dark);
+    color: #ffffff;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    transition: all 0.15s ease;
+}
+
+.btn-capture:hover {
+    background: var(--btn-dark-hover);
+    transform: translateY(-0.5px);
+}
+
+.btn-capture.active,
+.capture-view.listening .btn-capture {
+    background: var(--accent-orange);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
+}
+
+.capture-key-display {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--fg-strong);
+    margin: auto 0;
+    letter-spacing: -0.01em;
+    word-break: break-all;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.capture-view.listening .capture-key-display {
+    color: var(--accent-orange);
+}
+
+.capture-hint {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--fg-muted);
+    text-align: center;
+}
+
+/* 2x4 修饰键网格 */
+.modifiers-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modifiers-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fg-muted);
+    letter-spacing: 0.8px;
+}
+
+.modifier-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.mod-pill {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-control);
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg-default);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.mod-pill:hover {
+    background: #f4f4f7;
+    border-color: #d1d1d6;
+    transform: translateY(-0.5px);
+}
+
+.mod-pill.active {
+    background: var(--btn-dark);
+    color: #ffffff;
+    border-color: var(--btn-dark);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
 /* ==========================================================================
-   3. 下半区：OTA 固件升级面板
+   3. 下半区：OTA 固件升级面板（ESP32 固件版本展示与刷写）
    ========================================================================== */
 .ota-panel {
     padding: 18px 22px 20px;
@@ -917,7 +890,7 @@ button {
 .ota-title-wrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .ota-icon {
@@ -930,6 +903,31 @@ button {
     font-weight: 700;
     color: var(--fg-strong);
     letter-spacing: 0.8px;
+}
+
+/* ESP32 固件版本专属胶囊徽章（位于 OTA 标题旁） */
+.firmware-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--container-bg);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-control);
+    padding: 2px 10px;
+    height: 26px;
+}
+
+.firmware-ver {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fg-default);
+}
+
+.firmware-status-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--status-green);
 }
 
 .ota-subtitle {
@@ -1033,7 +1031,7 @@ button {
     .keymap-split {
         grid-template-columns: 1fr;
     }
-    .config-panel {
+    .matrix-panel {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
     }

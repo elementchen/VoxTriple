@@ -66,6 +66,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnConnect = document.getElementById("btn-connect");
     if (btnConnect) {
         btnConnect.addEventListener("click", onConnectClick);
+        btnConnect.addEventListener("mouseenter", () => {
+            if (isConnected) {
+                const textEl = document.getElementById("btn-connect-text");
+                if (textEl) textEl.textContent = "DISCONNECT";
+            }
+        });
+        btnConnect.addEventListener("mouseleave", () => {
+            if (isConnected) {
+                const textEl = document.getElementById("btn-connect-text");
+                if (textEl) textEl.textContent = "CONNECTED";
+            }
+        });
     }
     
     // 修饰键 Pills 点击委托
@@ -84,6 +96,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(pollPorts, 3000);
     pollPorts();
 });
+
+// ── Client App Upgrade Link ───────────────────────────────────────────────
+function openClientReleasePage() {
+    if (window.pywebview && window.pywebview.api && window.pywebview.api.open_browser_url) {
+        window.pywebview.api.open_browser_url("https://github.com/elementchen/VoxTriple_Classic/releases");
+    } else {
+        window.open("https://github.com/elementchen/VoxTriple_Classic/releases", "_blank");
+    }
+}
 
 // ── Serial Port Polling ───────────────────────────────────────────────────
 async function pollPorts() {
@@ -125,10 +146,8 @@ async function onConnectClick() {
     if (!window.pywebview || !window.pywebview.api) return;
     
     const btn = document.getElementById("btn-connect");
+    const textEl = document.getElementById("btn-connect-text");
     const btnWrite = document.getElementById("btn-write-config");
-    const connPill = document.getElementById("conn-pill");
-    const statusDot = document.getElementById("status-dot");
-    const statusText = document.getElementById("status-text");
     
     if (!isConnected) {
         const portSelect = document.getElementById("port-select");
@@ -138,15 +157,12 @@ async function onConnectClick() {
             return;
         }
         
-        btn.textContent = "CONNECTING...";
+        if (textEl) textEl.textContent = "CONNECTING...";
         const ok = await window.pywebview.api.connect_device(selectedPort);
         if (ok) {
             isConnected = true;
-            btn.textContent = "DISCONNECT";
             btn.classList.add("connected-state");
-            if (connPill) connPill.setAttribute("data-state", "connected");
-            if (statusDot) statusDot.className = "conn-dot connected";
-            if (statusText) statusText.textContent = "Connected";
+            if (textEl) textEl.textContent = "CONNECTED";
             
             // 启用保存按钮
             if (btnWrite) btnWrite.disabled = false;
@@ -157,7 +173,7 @@ async function onConnectClick() {
                 renderConfig(config);
             }
             
-            // 展示固件版本信息区块
+            // 展示固件版本信息区块（位于底部 OTA 面板中）
             const fwSection = document.getElementById("firmware-section");
             if (fwSection) fwSection.style.display = "inline-flex";
 
@@ -170,17 +186,14 @@ async function onConnectClick() {
             // 静默检查固件更新
             postConnectUpdateCheck();
         } else {
-            btn.textContent = "CONNECT";
+            if (textEl) textEl.textContent = "CONNECT";
             alert("连接失败，请检查串口是否已被占用或设备未插好！");
         }
     } else {
         await window.pywebview.api.disconnect_device();
         isConnected = false;
-        btn.textContent = "CONNECT";
         btn.classList.remove("connected-state");
-        if (connPill) connPill.setAttribute("data-state", "disconnected");
-        if (statusDot) statusDot.className = "conn-dot disconnected";
-        if (statusText) statusText.textContent = "Disconnected";
+        if (textEl) textEl.textContent = "CONNECT";
         document.getElementById("firmware-ver").textContent = "v--";
         
         // 禁用保存按钮

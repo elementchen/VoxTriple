@@ -231,6 +231,14 @@ class Api:
                 "message": "Failed to fetch updates from GitHub.\n获取 GitHub 在线更新版本失败，请检查网络！"
             }
 
+    def open_browser_url(self, url: str = None) -> bool:
+        """Open release or target URL in default system browser."""
+        import webbrowser
+        target = url or "https://github.com/elementchen/VoxTriple_Classic/releases"
+        log.info(f"Opening browser URL: {target}")
+        webbrowser.open(target)
+        return True
+
     def start_smart_update(self) -> bool:
         """Automatically download latest firmware and trigger OTA flash."""
         if not self._connected or not self._github_version or not self._github_bin_url:

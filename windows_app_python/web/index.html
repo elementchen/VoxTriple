@@ -11,27 +11,27 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- 1. 顶部 Header 栏：品牌卡片 + 状态连接胶囊栏 -->
+        <!-- 1. 顶部 Header 栏：品牌卡片 + 状态与控制条 -->
         <header class="topbar">
-            <!-- 品牌标识卡片 -->
+            <!-- 品牌标识卡片（展示客户端软件版本及客户端升级交互） -->
             <div class="brand-card">
                 <img src="logo.png" alt="Logo" class="brand-img">
                 <div class="brand-info">
                     <span class="brand-title">KeyMapper</span>
-                    <span class="brand-sub">VoxTriple Classic · <span id="app-version">v1.0.18-beta1</span></span>
+                    <div class="brand-sub-row">
+                        <span class="brand-sub">VoxTriple · <span id="app-version">v1.0.18-beta1</span></span>
+                        <button class="btn-app-upgrade" id="btn-app-upgrade" onclick="openClientReleasePage()" title="Check and Download Latest Client App / 检查客户端软件升级">
+                            <svg viewBox="0 0 24 24" width="10" height="10">
+                                <path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                            </svg>
+                            <span>UPGRADE</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- 状态与设备控制条 -->
+            <!-- 设备控制条（融合连接状态于单一按钮，精简去除冗余标签） -->
             <div class="statusbar">
-                <!-- 连接状态胶囊 -->
-                <div class="conn-pill" id="conn-pill" data-state="disconnected">
-                    <span class="conn-dot" id="status-dot"></span>
-                    <span class="conn-text" id="status-text">Disconnected</span>
-                </div>
-
-                <div class="status-divider"></div>
-
                 <!-- 串口选择 -->
                 <div class="port-control">
                     <span class="control-label">PORT</span>
@@ -47,15 +47,11 @@
                     </button>
                 </div>
 
-                <!-- 连接按钮 -->
-                <button class="btn-connect" id="btn-connect">CONNECT</button>
-
-                <!-- 固件版本信息（连接后显示） -->
-                <div class="firmware-badge" id="firmware-section" style="display: none;">
-                    <span class="control-label">FW</span>
-                    <span class="firmware-ver" id="firmware-ver">v--</span>
-                    <span class="firmware-status-label" id="firmware-status-label"></span>
-                </div>
+                <!-- 整合连接状态与操作的连接按钮 -->
+                <button class="btn-connect" id="btn-connect">
+                    <span class="btn-status-dot" id="btn-status-dot"></span>
+                    <span class="btn-connect-text" id="btn-connect-text">CONNECT</span>
+                </button>
 
                 <!-- 双设备配对快速切换组件 (电脑一 / 电脑二) -->
                 <div class="host-switch-section" id="host-switch-section" style="display: none;">
@@ -79,57 +75,15 @@
                         FORGET BT
                     </button>
                 </div>
-
-                <!-- 固件升级触发按钮（仅有新固件时显示） -->
-                <button class="btn-update-trigger" id="btn-update-trigger" style="display: none;" onclick="triggerSmartUpdate()" title="Start Smart Firmware Upgrade">UPDATE</button>
             </div>
         </header>
 
-        <!-- 2. 主核心区域：OpenDesign 2-Panel 分屏布局 -->
+        <!-- 2. 主核心区域：OpenDesign 2-Panel 对调布局（左：示意图与按键选择，右：按键捕获） -->
         <main class="main-layout">
             <section class="panel keymap-panel">
                 <div class="keymap-split">
 
-                    <!-- ============ 左侧栏：按键捕获与修饰键配置 ============ -->
-                    <div class="config-panel">
-                        <div class="panel-header">
-                            <div class="panel-title-wrapper">
-                                <h2 class="panel-title">KEY MAPPING</h2>
-                                <div class="os-badge" id="os-badge" style="display: none;" title="识别当前槽位配对电脑系统">
-                                    <span class="os-badge-icon" id="os-badge-icon"></span>
-                                    <span class="os-badge-text" id="os-badge-text">--</span>
-                                </div>
-                            </div>
-                            <span class="panel-subtitle" id="mapping-tips">Click Capture · press key</span>
-                        </div>
-
-                        <!-- 焦点捕获卡片 -->
-                        <div class="capture-view" id="captureView">
-                            <div class="capture-header">
-                                <span class="capture-key-index" id="currentKeyIndex">KEY 1</span>
-                                <button class="btn-capture" id="btnCapture" onclick="triggerCurrentKeyCapture()">CAPTURE</button>
-                            </div>
-                            <div class="capture-key-display" id="keyDisplay">--</div>
-                            <div class="capture-hint" id="captureSub">Press any physical key on keyboard</div>
-                        </div>
-
-                        <!-- 2x4 修饰键胶囊网格 -->
-                        <div class="modifiers-section">
-                            <div class="modifiers-label">MODIFIERS</div>
-                            <div class="modifier-grid" id="modifierGrid">
-                                <div class="mod-pill" data-mask="0x01">L·Ctrl</div>
-                                <div class="mod-pill" data-mask="0x02">L·Shift</div>
-                                <div class="mod-pill" data-mask="0x04">L·Alt</div>
-                                <div class="mod-pill" data-mask="0x08">L·Win</div>
-                                <div class="mod-pill" data-mask="0x10">R·Ctrl</div>
-                                <div class="mod-pill" data-mask="0x20">R·Shift</div>
-                                <div class="mod-pill" data-mask="0x40">R·Alt</div>
-                                <div class="mod-pill" data-mask="0x80">R·Win</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ============ 右侧栏：虚拟硬件键盘仿真矩阵 ============ -->
+                    <!-- ============ 左侧栏：虚拟硬件键盘示意图与按键选择 ============ -->
                     <div class="matrix-panel">
                         <div class="panel-header">
                             <h2 class="panel-title">VIRTUAL KEY MATRIX</h2>
@@ -265,10 +219,49 @@
                         </button>
                     </div>
 
+                    <!-- ============ 右侧栏：按键捕获与修饰键配置 ============ -->
+                    <div class="config-panel">
+                        <div class="panel-header">
+                            <div class="panel-title-wrapper">
+                                <h2 class="panel-title">KEY MAPPING</h2>
+                                <div class="os-badge" id="os-badge" style="display: none;" title="识别当前槽位配对电脑系统">
+                                    <span class="os-badge-icon" id="os-badge-icon"></span>
+                                    <span class="os-badge-text" id="os-badge-text">--</span>
+                                </div>
+                            </div>
+                            <span class="panel-subtitle" id="mapping-tips">Click Capture · press key</span>
+                        </div>
+
+                        <!-- 焦点捕获卡片 -->
+                        <div class="capture-view" id="captureView">
+                            <div class="capture-header">
+                                <span class="capture-key-index" id="currentKeyIndex">KEY 1</span>
+                                <button class="btn-capture" id="btnCapture" onclick="triggerCurrentKeyCapture()">CAPTURE</button>
+                            </div>
+                            <div class="capture-key-display" id="keyDisplay">--</div>
+                            <div class="capture-hint" id="captureSub">Press any physical key on keyboard</div>
+                        </div>
+
+                        <!-- 2x4 修饰键胶囊网格 -->
+                        <div class="modifiers-section">
+                            <div class="modifiers-label">MODIFIERS</div>
+                            <div class="modifier-grid" id="modifierGrid">
+                                <div class="mod-pill" data-mask="0x01">L·Ctrl</div>
+                                <div class="mod-pill" data-mask="0x02">L·Shift</div>
+                                <div class="mod-pill" data-mask="0x04">L·Alt</div>
+                                <div class="mod-pill" data-mask="0x08">L·Win</div>
+                                <div class="mod-pill" data-mask="0x10">R·Ctrl</div>
+                                <div class="mod-pill" data-mask="0x20">R·Shift</div>
+                                <div class="mod-pill" data-mask="0x40">R·Alt</div>
+                                <div class="mod-pill" data-mask="0x80">R·Win</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
-            <!-- 3. 下半区：OTA 固件升级面板 -->
+            <!-- 3. 下半区：OTA 固件升级面板（展示 ESP32 固件版本与固件升级） -->
             <section class="panel ota-panel" id="ota-panel">
                 <div class="ota-head">
                     <div class="ota-title-wrapper">
@@ -276,6 +269,13 @@
                             <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
                         </svg>
                         <h2 class="ota-title">FIRMWARE UPGRADE (OTA)</h2>
+                        
+                        <!-- ESP32 硬件固件版本专属展示徽章 -->
+                        <div class="firmware-badge" id="firmware-section" style="display: none;">
+                            <span class="control-label">BOARD FW</span>
+                            <span class="firmware-ver" id="firmware-ver">v--</span>
+                            <span class="firmware-status-label" id="firmware-status-label"></span>
+                        </div>
                     </div>
                     <span class="ota-subtitle" id="selected-file-name">Flash official bin or cloud release</span>
                 </div>
