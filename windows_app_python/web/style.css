@@ -1180,42 +1180,48 @@ button {
     transform: translateY(-0.5px);
 }
 
-/* 进度条 */
+/* 进度条：单行横向排布，右侧固定文字占位杜绝进度条跳动 */
 .ota-progress-box {
     background: var(--container-bg);
     border-radius: var(--r-control);
-    padding: 9px 12px;
+    padding: 0 14px;
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
     border: 1px solid var(--border-soft);
+    box-sizing: border-box;
 }
 
 .progress-bar-bg {
+    flex: 1;
+    min-width: 0;
     height: 6px;
     background: #e2e2e7;
     border-radius: 3px;
     overflow: hidden;
-    width: 100%;
 }
 
 .progress-fill {
     height: 100%;
     background: var(--accent-orange);
     width: 0%;
-    transition: width 0.25s ease-out;
-}
-
-.progress-status-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    transition: width 0.15s ease-out;
 }
 
 .progress-status-text {
+    width: 125px;
+    flex-shrink: 0;
+    text-align: right;
     font-size: 10.5px;
-    font-weight: 600;
+    font-weight: 700;
+    font-family: var(--font-mono, ui-monospace, monospace);
     color: var(--fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
 }
 
 /* ==========================================================================

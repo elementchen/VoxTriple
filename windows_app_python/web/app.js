@@ -260,38 +260,47 @@ async function onConnectClick() {
         }
     } else {
         await window.pywebview.api.disconnect_device();
-        isConnected = false;
-        btn.classList.remove("connected-state");
-        if (textEl) textEl.textContent = "CONNECT";
-        document.getElementById("firmware-ver").textContent = "v--";
-        
-        // 隐藏并禁用设置底部的保存按钮
-        if (btnWrite) {
-            btnWrite.classList.add("panel-hidden");
-            btnWrite.disabled = true;
-        }
-        
-        clearPhysicalPressedStates();
-        
-        // 隐藏升级触发按钮与状态
-        const btnUpdate = document.getElementById("btn-update-trigger");
-        if (btnUpdate) btnUpdate.style.display = "none";
-        const labelStatus = document.getElementById("firmware-status-label");
-        if (labelStatus) labelStatus.textContent = "";
-        
-        // 隐藏设备信息胶囊（保持占位隐藏）
-        const fwSection = document.getElementById("firmware-section");
-        if (fwSection) fwSection.classList.add("panel-hidden");
-        const hostSection = document.getElementById("host-switch-section");
-        if (hostSection) hostSection.style.display = "none";
-        const resetBtSection = document.getElementById("reset-bt-section");
-        if (resetBtSection) resetBtSection.style.display = "none";
-        
-        // 隐藏操作系统徽章（保持占位隐藏）
-        updateOsBadge(0);
-        
-        resetConfigUi();
+        applyDisconnectedUi();
     }
+}
+
+function applyDisconnectedUi() {
+    isConnected = false;
+    const btn = document.getElementById("btn-connect");
+    const textEl = document.getElementById("btn-connect-text");
+    const btnWrite = document.getElementById("btn-write-config");
+
+    if (btn) btn.classList.remove("connected-state");
+    if (textEl) textEl.textContent = "CONNECT";
+    const fwVer = document.getElementById("firmware-ver");
+    if (fwVer) fwVer.textContent = "v--";
+
+    // 隐藏并禁用设置底部的保存按钮
+    if (btnWrite) {
+        btnWrite.classList.add("panel-hidden");
+        btnWrite.disabled = true;
+    }
+
+    clearPhysicalPressedStates();
+
+    // 隐藏升级触发按钮与状态
+    const btnUpdate = document.getElementById("btn-update-trigger");
+    if (btnUpdate) btnUpdate.style.display = "none";
+    const labelStatus = document.getElementById("firmware-status-label");
+    if (labelStatus) labelStatus.textContent = "";
+
+    // 隐藏设备信息胶囊（保持占位隐藏）
+    const fwSection = document.getElementById("firmware-section");
+    if (fwSection) fwSection.classList.add("panel-hidden");
+    const hostSection = document.getElementById("host-switch-section");
+    if (hostSection) hostSection.style.display = "none";
+    const resetBtSection = document.getElementById("reset-bt-section");
+    if (resetBtSection) resetBtSection.style.display = "none";
+
+    // 隐藏操作系统徽章（保持占位隐藏）
+    updateOsBadge(0);
+
+    resetConfigUi();
 }
 
 // ── Render Config Cache ──────────────────────────────────────────────────
@@ -889,18 +898,20 @@ async function onFlashFirmware() {
     const progressFill = document.getElementById("progress-fill");
     const progressPct = document.getElementById("progress-pct");
     
-    progressFill.style.width = "0%";
-    progressPct.textContent = "Flashing: 0.0%";
+    if (progressFill) progressFill.style.width = "0%";
+    if (progressPct) progressPct.textContent = "Flashing: 0.0%";
     
     const ok = await window.pywebview.api.trigger_ota(selectedOtaPath);
     
     if (ok) {
-        alert("固件升级成功！开发板正在重启，请稍候重新连接。");
-        progressFill.style.width = "100%";
-        progressPct.textContent = "100% Completed";
-        if (isConnected) onConnectClick();
+        if (progressFill) progressFill.style.width = "100%";
+        if (progressPct) progressPct.textContent = "100.0% Done";
+        // 升级完成ESP32重启，断开连接重置UI状态
+        applyDisconnectedUi();
+        alert("固件升级成功！开发板正在执行引导重启，请点击 CONNECT 重新连接。");
     } else {
-        alert("固件写入完成，设备正在执行引导校验与重启。");
+        alert("固件写入失败或被取消，请检查串口与供电后重试。");
+        if (progressPct) progressPct.textContent = "Failed";
     }
 }
 
@@ -981,17 +992,13 @@ function onSmartUpdateComplete(success) {
     
     const progressFill = document.getElementById("progress-fill");
     const progressPct = document.getElementById("progress-pct");
-    const labelStatus = document.getElementById("firmware-status-label");
     
     if (progressFill) progressFill.style.width = "100%";
-    if (progressPct) progressPct.textContent = "100% Completed";
-    if (labelStatus) {
-        labelStatus.textContent = "(Latest)";
-        labelStatus.style.color = "var(--status-green)";
-    }
+    if (progressPct) progressPct.textContent = "100.0% Done";
     
-    alert("Firmware upgraded successfully! The device is rebooting, please reconnect shortly.");
-    if (isConnected) onConnectClick();
+    // 升级完成ESP32重启，断开连接重置UI状态
+    applyDisconnectedUi();
+    alert("Firmware upgraded successfully! The device is rebooting, please click CONNECT to reconnect.\n固件升级成功！开发板正在执行引导重启，请点击 CONNECT 重新连接。");
 }
 
 function onSmartUpdateError(reason) {
@@ -1000,11 +1007,14 @@ function onSmartUpdateError(reason) {
         btnUpdate.disabled = false;
         btnUpdate.textContent = "UPDATE";
     }
+    const progressPct = document.getElementById("progress-pct");
+    if (progressPct) progressPct.textContent = "Failed";
     alert(`Firmware upgrade failed!\nReason: ${reason}`);
 }
 
 function onOtaProgress(written, total, type) {
-    const pct = ((written / total) * 100).toFixed(1);
+    if (!total || total <= 0) return;
+    const pct = Math.min(100, Math.max(0, (written / total) * 100)).toFixed(1);
     const progressFill = document.getElementById("progress-fill");
     const progressPct = document.getElementById("progress-pct");
     if (progressFill) progressFill.style.width = `${pct}%`;

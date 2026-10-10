@@ -17,14 +17,17 @@ log = logging.getLogger(__name__)
 
 
 class _EsptoolProgressWriter:
-    """Captures esptool stdout to extract flash write percentage and invoke GUI progress callback."""
+    """Captures esptool stdout/stderr to extract flash write percentage and invoke GUI progress callback."""
     def __init__(self, orig_stdout, total_size, cb=None):
         self.orig_stdout = orig_stdout
         self.total_size = total_size
         self.cb = cb
-        self.pct_re = re.compile(r'\((\d+)\s*%\)')
+        # Matches `]  35.2%` (esptool v4+), `( 35 %)` (esptool v3-), or bare `35.2%`
+        self.pct_re = re.compile(r'(?:\]|\(|\b)\s*(\d+(?:\.\d+)?)\s*%')
         self.encoding = getattr(orig_stdout, "encoding", "utf-8") or "utf-8"
         self.errors = getattr(orig_stdout, "errors", "replace") or "replace"
+        self._last_pct = -1.0
+        self._buffer = ""
 
     def isatty(self):
         return False
@@ -35,15 +38,25 @@ class _EsptoolProgressWriter:
                 self.orig_stdout.write(text)
             except Exception:
                 pass
-        m = self.pct_re.search(text)
-        if m:
-            pct = int(m.group(1))
-            if self.cb:
-                written = int(self.total_size * pct / 100)
-                try:
-                    self.cb(written, self.total_size)
-                except Exception:
-                    pass
+
+        if not text:
+            return
+
+        self._buffer += text
+        if len(self._buffer) > 2048:
+            self._buffer = self._buffer[-1024:]
+
+        matches = self.pct_re.findall(self._buffer)
+        if matches:
+            try:
+                pct = float(matches[-1])
+                if pct > self._last_pct + 0.3 or pct >= 100.0:
+                    self._last_pct = pct
+                    if self.cb:
+                        written = int(self.total_size * min(pct, 100.0) / 100.0)
+                        self.cb(written, self.total_size)
+            except Exception:
+                pass
 
     def flush(self):
         if self.orig_stdout:
@@ -51,6 +64,7 @@ class _EsptoolProgressWriter:
                 self.orig_stdout.flush()
             except Exception:
                 pass
+
 
 
 class SppClient:
@@ -593,15 +607,9 @@ class SppClient:
             except Exception:
                 pass
 
-        # 3. Wait 2.0s for hardware reset to stabilize and re-establish connection
-        await asyncio.sleep(2.0)
-        log.info(f"Re-connecting to {port} to restore application link...")
-        for retry in range(3):
-            if await self.connect(port):
-                log.info("Re-connected successfully to device after flash!")
-                break
-            await asyncio.sleep(1.0)
-
+        # 3. Disconnect port cleanly so device can reboot independently and UI resets connection
+        self.disconnect_sync()
+        log.info("SPP serial handle closed after flash. Awaiting user reconnection.")
         return True
 
     async def _upload_firmware_legacy(self, bin_path: str, total_size: int, progress_callback=None) -> bool:

@@ -201,10 +201,14 @@ class Api:
         
         def progress_cb(written, total):
             if self._window:
-                self._window.evaluate_js(f"onOtaProgress({written}, {total})")
+                self._window.evaluate_js(f"onOtaProgress({written}, {total}, 'flash')")
 
         future = run_coro(self.spp.upload_firmware(bin_path, progress_cb))
         ok = future.result(timeout=60.0)
+        if ok:
+            # 升级成功，ESP32 正在重启，上位机断开连接以保持状态同步
+            self._connected = False
+            self.spp.disconnect_sync()
         return ok
 
     def check_update(self) -> dict:
@@ -324,14 +328,16 @@ class Api:
             ok = await self.spp.upload_firmware(save_path, progress_cb)
             if self._window:
                 if ok:
-                    self._window.evaluate_js("alert('OTA Upgrade Completed Successfully! The device is now rebooting.\\n固件升级成功！开发板正在重启，请稍候。')")
+                    self._connected = False
+                    self.spp.disconnect_sync()
+                    self._window.evaluate_js("onSmartUpdateComplete(true)")
                 else:
                     err_msg = getattr(self.spp, 'last_error', '') or '写入握手超时或串口未响应'
-                    self._window.evaluate_js(f"alert('固件写入失败！\\n原因: {err_msg}\\n请检查供电线并复位重新连接测试！')")
+                    self._window.evaluate_js(f"onSmartUpdateError('{err_msg}')")
         except Exception as e:
             log.error(f"Flash failed: {e}")
             if self._window:
-                self._window.evaluate_js(f"alert('固件写入异常: {str(e)}')")
+                self._window.evaluate_js(f"onSmartUpdateError('{str(e)}')")
 
     async def _download_firmware_async(self, download_url, save_path):
         loop = asyncio.get_running_loop()
