@@ -79,8 +79,8 @@
             <section class="panel keymap-panel">
                 <div class="keymap-split-three">
 
-                    <!-- ============ 左栏：节能与硬件设置（未连接时隐藏） ============ -->
-                    <div class="settings-panel" id="settings-panel" style="display: none;">
+                    <!-- ============ 左栏：节能与硬件设置（未连接时通过 panel-hidden 隐藏但固定占位） ============ -->
+                    <div class="settings-panel panel-hidden" id="settings-panel">
                         <div class="panel-header">
                             <h2 class="panel-title">SETTINGS</h2>
                             <span class="panel-subtitle">Hardware</span>
@@ -218,9 +218,9 @@
                             </div>
                         </div>
 
-                        <!-- 产品示意图正下方的保存按钮（连接后显示） -->
+                        <!-- 产品示意图正下方的保存按钮（连接后显示，未连时保持占位） -->
                         <div class="device-bottom-action">
-                            <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled style="display: none;">
+                            <button class="save-action-btn panel-hidden" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
                                 <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
                                     <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
                                 </svg>
@@ -229,8 +229,8 @@
                         </div>
                     </div>
 
-                    <!-- ============ 右栏：按键捕获配置（未选中按键时隐藏） ============ -->
-                    <div class="config-panel" id="config-panel" style="display: none;">
+                    <!-- ============ 右栏：按键捕获配置（未选中按键时通过 panel-hidden 隐藏但固定占位） ============ -->
+                    <div class="config-panel panel-hidden" id="config-panel">
                         <div class="config-top-content">
                             <div class="panel-header">
                                 <div class="panel-title-wrapper">

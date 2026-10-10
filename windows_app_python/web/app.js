@@ -191,11 +191,11 @@ async function onConnectClick() {
             
             // 展示左侧设置面板
             const settingsPanel = document.getElementById("settings-panel");
-            if (settingsPanel) settingsPanel.style.display = "flex";
+            if (settingsPanel) settingsPanel.classList.remove("panel-hidden");
 
             // 展示产品正下方的保存按钮并启用
             if (btnWrite) {
-                btnWrite.style.display = "inline-flex";
+                btnWrite.classList.remove("panel-hidden");
                 btnWrite.disabled = false;
             }
             
@@ -230,7 +230,7 @@ async function onConnectClick() {
         
         // 隐藏并禁用产品正下方的保存按钮
         if (btnWrite) {
-            btnWrite.style.display = "none";
+            btnWrite.classList.add("panel-hidden");
             btnWrite.disabled = true;
         }
         
@@ -361,7 +361,7 @@ function selectKey(idx) {
     // 显示右侧 KEY MAPPING 面板
     const configPanel = document.getElementById("config-panel");
     if (configPanel) {
-        configPanel.style.display = "flex";
+        configPanel.classList.remove("panel-hidden");
     }
 
     // 更新按键序号
@@ -508,11 +508,16 @@ function resetConfigUi() {
         if (modsEl) modsEl.textContent = "";
     }
 
-    // 隐藏左侧与右侧面板
+    // 隐藏左侧与右侧面板（保持占位，位置不移动）
     const settingsPanel = document.getElementById("settings-panel");
-    if (settingsPanel) settingsPanel.style.display = "none";
+    if (settingsPanel) settingsPanel.classList.add("panel-hidden");
     const configPanel = document.getElementById("config-panel");
-    if (configPanel) configPanel.style.display = "none";
+    if (configPanel) configPanel.classList.add("panel-hidden");
+    const btnWrite = document.getElementById("btn-write-config");
+    if (btnWrite) {
+        btnWrite.classList.add("panel-hidden");
+        btnWrite.disabled = true;
+    }
 
     const micToggle = document.getElementById("mic-toggle");
     if (micToggle) micToggle.checked = false;

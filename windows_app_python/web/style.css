@@ -369,17 +369,25 @@ button {
 }
 
 .keymap-panel {
-    padding: 20px 22px;
+    padding: 24px 28px;
     overflow: hidden;
 }
 
-/* 视觉完全打通：弹性盒居中对齐，未连时只有中栏居中，连后左右展开 */
+/* 占位固定隐藏类：保留尺寸与布局空间，避免界面跳动 */
+.panel-hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 视觉完全打通：固定 3 栏对称网格（240px - 1fr - 240px），中间产品图绝对居中且位置锁死 */
 .keymap-split-three {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 28px;
-    min-height: 480px;
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    align-items: center; /* 左右和中间各自在其占位区域上下居中对齐 */
+    justify-items: center;
+    gap: 20px;
+    min-height: 560px; /* 高度加多一些，留白更多呼吸空间 */
     width: 100%;
 }
 
@@ -419,15 +427,16 @@ button {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   【左栏】：节能与硬件设置面板 (settings-panel) - 未连接时隐藏，连接后居中
+   【左栏】：节能与硬件设置面板 (settings-panel) - 固定 240px 占位居中
    ────────────────────────────────────────────────────────────────────────── */
 .settings-panel {
-    width: 215px;
+    width: 240px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 12px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .settings-list {
@@ -584,14 +593,19 @@ button {
     width: 100%;
 }
 
-/* 拟物化铝合金竖向外壳（按键周围与外壳四周间隔完全一致） */
+/* 拟物化铝合金竖向外壳（按键周围与外壳四周间隔完全一致，外侧一圈浅灰白色倒角高光） */
 .virtual-device-body-vertical {
     width: 106px;
     background: linear-gradient(170deg, #eaecef 0%, #d8dce2 50%, #c6ccd5 100%);
     border-radius: 20px;
     padding: 10px 8px 8px;
     border: 1px solid #b4b9c2;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 
+        0 0 0 2px #f4f6fa, /* 铝合金外圈浅浅的灰白倒角切面高光！ */
+        0 0 0 3px #c6ccd5, /* 倒角外边界阴影线条 */
+        0 20px 42px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.12);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -668,13 +682,13 @@ button {
     transition: all 0.2s ease;
 }
 
-/* 下凹按键槽（Button Well）：四周留白与按键间距皆为 7px，完美协调一致 */
+/* 下凹按键槽（Button Well）：浅一点点的精致深灰色，四周留白与按键间距皆为 7px */
 .device-keys-column {
     width: 90px;
-    background: #25282c;
+    background: #464a52; /* 浅一点点的精致深灰色！ */
     border-radius: 10px;
     padding: 7px;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 -1px 2px rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35), inset 0 -1px 1px rgba(255, 255, 255, 0.12);
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -702,11 +716,12 @@ button {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
-/* 选中高亮状态：绝美内发光！不改变外边框！ */
+/* 选中高亮状态：充满高级感的橘色底 + 纯白字！ */
 .virtual-keycap.active {
-    border-color: #d1d5db;
-    box-shadow: inset 0 0 0 2px var(--accent-orange), inset 0 0 8px rgba(249, 115, 22, 0.38);
-    background: #ffffff;
+    background: linear-gradient(180deg, #ff8122 0%, #ea580c 100%);
+    border-color: #ea580c;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
+    transform: translateY(-1px);
 }
 
 /* 物理按键下沉按下动画 */
@@ -737,11 +752,19 @@ button {
     line-height: 1;
 }
 
+.virtual-keycap.active .keycap-num {
+    color: rgba(255, 255, 255, 0.9);
+}
+
 .keycap-mods {
     font-size: 8px;
     font-weight: 700;
     color: var(--accent-orange);
     line-height: 1;
+}
+
+.virtual-keycap.active .keycap-mods {
+    color: #ffffff;
 }
 
 /* 按键映射文字：不用粗体，字体小一号（14px, 500字重） */
@@ -756,7 +779,9 @@ button {
 }
 
 .virtual-keycap.active .keycap-value {
-    color: var(--accent-orange);
+    color: #ffffff; /* 纯白文字！ */
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 /* 产品示意图正下方的保存按钮 */
@@ -765,6 +790,7 @@ button {
     width: 100%;
     display: flex;
     justify-content: center;
+    min-height: 38px; /* 固定高度留白，避免未连接显隐时产生上下抖动 */
 }
 
 .device-bottom-action .save-action-btn {
@@ -798,15 +824,16 @@ button {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   【右栏】：按键映射具体设置面板 (config-panel)
+   【右栏】：按键映射具体设置面板 (config-panel) - 固定 240px 占位居中
    ────────────────────────────────────────────────────────────────────────── */
 .config-panel {
-    width: 255px;
+    width: 240px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 14px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .config-top-content {
