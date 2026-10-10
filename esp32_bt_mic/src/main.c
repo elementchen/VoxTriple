@@ -26,6 +26,7 @@
 #include "uart_console.h"
 #include "bt_config.h"
 #include "board_profile.h"
+#include "multi_host.h"
 
 static const char *TAG = "MAIN";
 
@@ -153,8 +154,15 @@ void app_main(void)
     ESP_LOGI(TAG, "Step 6: Initializing button handler...");
     button_handler_init();
 
+    /* Step 7: Initialize Multi-Host Manager */
+    ESP_LOGI(TAG, "Step 7: Initializing Multi-Host Manager...");
+    multi_host_init();
+    uint8_t curr_slot = multi_host_get_current_slot();
+
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  System initialized successfully!");
+    ESP_LOGI(TAG, "  Firmware: v1.0.18-beta1 (Dual-Host Ready)");
+    ESP_LOGI(TAG, "  Active Slot: [%d] (Switch via Btn 3+4)", curr_slot);
     ESP_LOGI(TAG, "  Waiting for Bluetooth connections...");
     ESP_LOGI(TAG, "============================================");
 

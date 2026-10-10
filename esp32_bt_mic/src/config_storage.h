@@ -69,6 +69,15 @@ esp_err_t config_storage_load_hfp_addr(esp_bd_addr_t addr);
 esp_err_t config_storage_clear_hfp_addr(void);
 
 /**
+ * @brief Multi-host slot functions
+ */
+esp_err_t config_storage_get_active_slot(uint8_t *slot);
+esp_err_t config_storage_set_active_slot(uint8_t slot);
+esp_err_t config_storage_load_slot_hfp_addr(uint8_t slot, esp_bd_addr_t addr);
+esp_err_t config_storage_save_slot_hfp_addr(uint8_t slot, const esp_bd_addr_t addr);
+esp_err_t config_storage_clear_slot_hfp_addr(uint8_t slot);
+
+/**
  * @brief Save Classic BT TX power level to NVS
  * @param level  Power level (0-7, maps to ESP_PWR_LVL_N12..ESP_PWR_LVL_P9)
  * @return ESP_OK on success

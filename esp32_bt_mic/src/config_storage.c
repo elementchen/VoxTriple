@@ -130,51 +130,125 @@ esp_err_t config_storage_load_button(uint8_t button_id, uint8_t *vk_code, uint8_
     return ret;
 }
 
-#define NVS_KEY_HFP_ADDR "hfp_addr"
+#define NVS_KEY_HFP_ADDR     "hfp_addr"
+#define NVS_KEY_ACTIVE_SLOT  "act_slot"
+#define NVS_KEY_HFP_ADDR_0   "hfp_addr_0"
+#define NVS_KEY_HFP_ADDR_1   "hfp_addr_1"
 
-esp_err_t config_storage_save_hfp_addr(esp_bd_addr_t addr)
+esp_err_t config_storage_get_active_slot(uint8_t *slot)
 {
+    if (!slot) return ESP_ERR_INVALID_ARG;
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
+    if (ret != ESP_OK) {
+        *slot = 0;
+        return ESP_OK;
+    }
+    uint8_t val = 0;
+    ret = nvs_get_u8(nvs_handle, NVS_KEY_ACTIVE_SLOT, &val);
+    nvs_close(nvs_handle);
+    if (ret == ESP_OK && val <= 1) {
+        *slot = val;
+    } else {
+        *slot = 0;
+    }
+    return ESP_OK;
+}
+
+esp_err_t config_storage_set_active_slot(uint8_t slot)
+{
+    if (slot > 1) return ESP_ERR_INVALID_ARG;
     nvs_handle_t nvs_handle;
     esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
     if (ret != ESP_OK) return ret;
-
-    ret = nvs_set_blob(nvs_handle, NVS_KEY_HFP_ADDR, addr, ESP_BD_ADDR_LEN);
+    ret = nvs_set_u8(nvs_handle, NVS_KEY_ACTIVE_SLOT, slot);
     if (ret == ESP_OK) nvs_commit(nvs_handle);
     nvs_close(nvs_handle);
-
     if (ret == ESP_OK) {
-        ESP_LOGI(TAG, "HFP addr saved: %02x:%02x:%02x:%02x:%02x:%02x",
-                 addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+        ESP_LOGI(TAG, "Active host slot set to: %d", slot);
     }
     return ret;
 }
 
-esp_err_t config_storage_load_hfp_addr(esp_bd_addr_t addr)
+esp_err_t config_storage_load_slot_hfp_addr(uint8_t slot, esp_bd_addr_t addr)
 {
+    if (slot > 1 || !addr) return ESP_ERR_INVALID_ARG;
+    const char *key = (slot == 0) ? NVS_KEY_HFP_ADDR_0 : NVS_KEY_HFP_ADDR_1;
     nvs_handle_t nvs_handle;
     esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
     if (ret != ESP_OK) return ret;
 
     size_t len = ESP_BD_ADDR_LEN;
-    ret = nvs_get_blob(nvs_handle, NVS_KEY_HFP_ADDR, addr, &len);
+    ret = nvs_get_blob(nvs_handle, key, addr, &len);
+    // 向后兼容：如果是 Slot 0 且未找到 hfp_addr_0，尝试读取原有的 hfp_addr
+    if (ret != ESP_OK && slot == 0) {
+        len = ESP_BD_ADDR_LEN;
+        ret = nvs_get_blob(nvs_handle, NVS_KEY_HFP_ADDR, addr, &len);
+    }
     nvs_close(nvs_handle);
     return ret;
 }
 
-esp_err_t config_storage_clear_hfp_addr(void)
+esp_err_t config_storage_save_slot_hfp_addr(uint8_t slot, const esp_bd_addr_t addr)
 {
+    if (slot > 1 || !addr) return ESP_ERR_INVALID_ARG;
+    const char *key = (slot == 0) ? NVS_KEY_HFP_ADDR_0 : NVS_KEY_HFP_ADDR_1;
     nvs_handle_t nvs_handle;
     esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
     if (ret != ESP_OK) return ret;
 
-    ret = nvs_erase_key(nvs_handle, NVS_KEY_HFP_ADDR);
-    if (ret == ESP_OK || ret == ESP_ERR_NVS_NOT_FOUND) {
-        nvs_commit(nvs_handle);
-        ret = ESP_OK;
+    ret = nvs_set_blob(nvs_handle, key, addr, ESP_BD_ADDR_LEN);
+    // 同时同步保存到全局 hfp_addr 保证遗留模块兼容
+    if (slot == 0 && ret == ESP_OK) {
+        nvs_set_blob(nvs_handle, NVS_KEY_HFP_ADDR, addr, ESP_BD_ADDR_LEN);
     }
+    if (ret == ESP_OK) nvs_commit(nvs_handle);
     nvs_close(nvs_handle);
-    ESP_LOGI(TAG, "HFP host address cleared from NVS.");
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Slot %d HFP addr saved: %02x:%02x:%02x:%02x:%02x:%02x",
+                 slot, addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+    }
     return ret;
+}
+
+esp_err_t config_storage_clear_slot_hfp_addr(uint8_t slot)
+{
+    if (slot > 1) return ESP_ERR_INVALID_ARG;
+    const char *key = (slot == 0) ? NVS_KEY_HFP_ADDR_0 : NVS_KEY_HFP_ADDR_1;
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    nvs_erase_key(nvs_handle, key);
+    if (slot == 0) {
+        nvs_erase_key(nvs_handle, NVS_KEY_HFP_ADDR);
+    }
+    nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+    ESP_LOGI(TAG, "Slot %d HFP address cleared from NVS.", slot);
+    return ESP_OK;
+}
+
+esp_err_t config_storage_save_hfp_addr(esp_bd_addr_t addr)
+{
+    uint8_t slot = 0;
+    config_storage_get_active_slot(&slot);
+    return config_storage_save_slot_hfp_addr(slot, addr);
+}
+
+esp_err_t config_storage_load_hfp_addr(esp_bd_addr_t addr)
+{
+    uint8_t slot = 0;
+    config_storage_get_active_slot(&slot);
+    return config_storage_load_slot_hfp_addr(slot, addr);
+}
+
+esp_err_t config_storage_clear_hfp_addr(void)
+{
+    uint8_t slot = 0;
+    config_storage_get_active_slot(&slot);
+    return config_storage_clear_slot_hfp_addr(slot);
 }
 
 #define NVS_KEY_TX_POWER   "tx_power"
