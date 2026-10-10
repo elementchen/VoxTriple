@@ -60,6 +60,8 @@ let currentSleepTimeoutMin = 5;
 let currentActiveSlot = 0;    // 当前处于活跃状态的电脑槽位 (0: 电脑一, 1: 电脑二)
 let selectedOtaPath = "";
 
+const CURRENT_CLIENT_VERSION = "1.0.18-beta1";
+
 // ── DOM Initialization ───────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     // 串口连接按钮
@@ -95,9 +97,32 @@ document.addEventListener("DOMContentLoaded", () => {
     // 轮询串口设备 (每 3 秒)
     setInterval(pollPorts, 3000);
     pollPorts();
+
+    // 检查客户端软件在线更新（有新版本才显示左上角更新小按钮）
+    checkClientAppUpdate();
+    setTimeout(checkClientAppUpdate, 1500);
 });
 
-// ── Client App Upgrade Link ───────────────────────────────────────────────
+// ── Client App Upgrade Check & Link ───────────────────────────────────────
+async function checkClientAppUpdate() {
+    if (window.pywebview && window.pywebview.api && window.pywebview.api.check_client_update) {
+        try {
+            const res = await window.pywebview.api.check_client_update(CURRENT_CLIENT_VERSION);
+            const btnUpgrade = document.getElementById("btn-app-upgrade");
+            if (btnUpgrade) {
+                if (res && res.has_new) {
+                    btnUpgrade.style.display = "inline-flex";
+                    btnUpgrade.title = `发现客户端新版本 v${res.latest}，点击前往下载更新`;
+                } else {
+                    btnUpgrade.style.display = "none";
+                }
+            }
+        } catch (e) {
+            console.warn("Check client update error:", e);
+        }
+    }
+}
+
 function openClientReleasePage() {
     if (window.pywebview && window.pywebview.api && window.pywebview.api.open_browser_url) {
         window.pywebview.api.open_browser_url("https://github.com/elementchen/VoxTriple_Classic/releases");
@@ -482,31 +507,14 @@ function toggleMicFromDevice() {
 }
 
 function onMicToggle() {
-    // 麦克风硬件指示与开关双向联动
+    // 麦克风硬件指示与开关双向联动（仅切换高亮，文字保持 MIC）
     const slot = document.getElementById("virtualMicSlot");
     const micToggle = document.getElementById("mic-toggle");
     if (slot && micToggle) {
-        const icon = slot.querySelector(".mic-slot-icon");
-        const statusText = document.getElementById("mic-status-text");
-        const holes = slot.querySelectorAll(".grille-hole");
         if (micToggle.checked) {
-            if (icon) icon.style.color = "var(--accent-orange)";
-            if (statusText) {
-                statusText.textContent = "MIC ON";
-                statusText.style.color = "var(--accent-orange)";
-            }
-            holes.forEach(h => h.style.backgroundColor = "var(--accent-orange)");
-            slot.style.borderColor = "rgba(249, 115, 22, 0.4)";
-            slot.style.backgroundColor = "rgba(249, 115, 22, 0.08)";
+            slot.classList.add("active");
         } else {
-            if (icon) icon.style.color = "#6b7280";
-            if (statusText) {
-                statusText.textContent = "MIC OFF";
-                statusText.style.color = "#6b7280";
-            }
-            holes.forEach(h => h.style.backgroundColor = "#6b7280");
-            slot.style.borderColor = "transparent";
-            slot.style.backgroundColor = "rgba(0, 0, 0, 0.03)";
+            slot.classList.remove("active");
         }
     }
 }
@@ -804,7 +812,7 @@ async function postConnectUpdateCheck() {
     const btnUpdate = document.getElementById("btn-update-trigger");
     
     if (labelStatus) {
-        labelStatus.textContent = "(检测中...)";
+        labelStatus.textContent = " (检测中...)";
         labelStatus.style.color = "var(--fg-muted)";
     }
     
@@ -813,7 +821,7 @@ async function postConnectUpdateCheck() {
     if (res && res.ok) {
         if (res.has_new) {
             if (labelStatus) {
-                labelStatus.textContent = `(有新版 v${res.latest})`;
+                labelStatus.textContent = ` (有更新: v${res.latest})`;
                 labelStatus.style.color = "var(--accent-orange)";
             }
             if (btnUpdate) {
@@ -823,7 +831,7 @@ async function postConnectUpdateCheck() {
             }
         } else {
             if (labelStatus) {
-                labelStatus.textContent = "(最新)";
+                labelStatus.textContent = " (已是最新版本)";
                 labelStatus.style.color = "var(--status-green)";
             }
             if (btnUpdate) btnUpdate.style.display = "none";

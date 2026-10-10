@@ -216,8 +216,8 @@ class Api:
             log.warning(f"check_update network request failed/timeout: {e}")
             
         if self._github_version:
-            curr = self.spp._config_cache.get("version", "1.0.10")
-            has_new = self._github_version > curr
+            curr = self.spp._config_cache.get("version", "1.0.18-beta1")
+            has_new = self._is_newer_version(self._github_version, curr)
             return {
                 "ok": True,
                 "latest": self._github_version,
@@ -230,6 +230,56 @@ class Api:
                 "ok": False,
                 "message": "Failed to fetch updates from GitHub.\n获取 GitHub 在线更新版本失败，请检查网络！"
             }
+
+    def check_client_update(self, current_version: str) -> dict:
+        """Check if a newer client application release exists on GitHub."""
+        future = run_coro(self._check_github_version())
+        try:
+            future.result(timeout=4.0)
+        except Exception as e:
+            log.warning(f"check_client_update network request failed/timeout: {e}")
+            
+        if self._github_version:
+            has_new = self._is_newer_version(self._github_version, current_version)
+            return {
+                "ok": True,
+                "latest": self._github_version,
+                "current": current_version,
+                "has_new": has_new
+            }
+        return {
+            "ok": False,
+            "has_new": False
+        }
+
+    @staticmethod
+    def _is_newer_version(latest_str: str, current_str: str) -> bool:
+        """Compare two version strings semantically (e.g. 1.0.18-beta1 vs 1.0.17)."""
+        import re
+        def parse_v(v_str):
+            if not v_str:
+                return [0]
+            clean = str(v_str).strip().lstrip("vV")
+            parts = re.split(r"[.\-_]", clean)
+            nums = []
+            for p in parts:
+                try:
+                    nums.append(int(p))
+                except ValueError:
+                    if "beta" in p.lower():
+                        nums.append(-1)
+                    elif "rc" in p.lower():
+                        nums.append(-2)
+                    elif "alpha" in p.lower():
+                        nums.append(-3)
+            return nums
+
+        l_nums = parse_v(latest_str)
+        c_nums = parse_v(current_str)
+        max_len = max(len(l_nums), len(c_nums))
+        l_nums.extend([0] * (max_len - len(l_nums)))
+        c_nums.extend([0] * (max_len - len(c_nums)))
+        return l_nums > c_nums
 
     def open_browser_url(self, url: str = None) -> bool:
         """Open release or target URL in default system browser."""

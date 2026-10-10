@@ -416,6 +416,7 @@ button {
 .settings-panel {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 12px;
 }
 
@@ -573,12 +574,12 @@ button {
     padding: 4px 0;
 }
 
-/* 拟物化铝合金竖向外壳（浅灰阳极氧化铝质感、微倒角、侧键） */
+/* 拟物化铝合金竖向外壳（浅灰阳极氧化铝质感、微倒角、侧键，加宽10%左右） */
 .virtual-device-body-vertical {
-    width: 106px;
+    width: 118px;
     background: linear-gradient(170deg, #eaecef 0%, #d8dce2 50%, #c6ccd5 100%);
     border-radius: 24px;
-    padding: 12px 10px 14px;
+    padding: 12px 14px 14px;
     border: 1px solid #b4b9c2;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
     display: flex;
@@ -601,7 +602,7 @@ button {
     box-shadow: 1px 0 2px rgba(0, 0, 0, 0.25);
 }
 
-/* 顶部麦克风区域（约占一个按键高度 70px，可点击交互切换麦克风开关） */
+/* 顶部麦克风区域（约占一个按键高度 70px，透明占位与铝合金同底色，支持点击交互） */
 .virtual-mic-slot-vertical {
     display: flex;
     flex-direction: column;
@@ -609,33 +610,33 @@ button {
     justify-content: center;
     gap: 4px;
     height: 70px;
-    width: 82px;
+    width: 90px;
     border-radius: 8px;
     margin-bottom: 8px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid transparent;
+    background: transparent;
+    border: none;
 }
 
 .virtual-mic-slot-vertical:hover {
-    background: rgba(249, 115, 22, 0.08);
-    border-color: rgba(249, 115, 22, 0.3);
+    background: transparent;
+    border: none;
     transform: translateY(-1px);
 }
 
-.mic-grille {
-    display: flex;
-    gap: 3px;
-    align-items: center;
+.virtual-mic-slot-vertical:hover .mic-slot-icon,
+.virtual-mic-slot-vertical:hover .mic-status-text {
+    color: var(--accent-orange);
 }
 
-.grille-hole {
-    width: 2.5px;
-    height: 2.5px;
-    border-radius: 50%;
-    background: #6b7280;
-    transition: background-color 0.2s ease;
+.virtual-mic-slot-vertical.active .mic-slot-icon {
+    color: var(--accent-orange);
+    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.4));
+}
+
+.virtual-mic-slot-vertical.active .mic-status-text {
+    color: var(--accent-orange);
 }
 
 .mic-glyph-wrap {
@@ -646,15 +647,15 @@ button {
 
 .mic-slot-icon {
     color: #4b5563;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .mic-status-text {
-    font-size: 8px;
+    font-size: 8.5px;
     font-weight: 800;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.8px;
     color: #6b7280;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 /* 下凹按键槽（Button Well） */
@@ -666,7 +667,7 @@ button {
     box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 -1px 2px rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
 }
 
 /* 纯白方块 3D 拟物键帽（正方形 78px × 78px！） */

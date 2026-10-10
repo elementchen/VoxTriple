@@ -17,7 +17,7 @@
                     <span class="brand-title">KeyMapper</span>
                     <div class="brand-sub-row">
                         <span class="brand-sub">VoxTriple · <span id="app-version">v1.0.18-beta1</span></span>
-                        <button class="btn-app-upgrade-icon" id="btn-app-upgrade" onclick="openClientReleasePage()" title="Check and Download Latest Client App / 检查并下载客户端最新版">
+                        <button class="btn-app-upgrade-icon" id="btn-app-upgrade" onclick="openClientReleasePage()" title="Check and Download Latest Client App / 检查并下载客户端最新版" style="display: none;">
                             <svg viewBox="0 0 24 24" width="13" height="13">
                                 <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
                             </svg>
@@ -154,21 +154,11 @@
 
                     <!-- ============ 中栏：1:1铝合金竖向真实ESP32键盘机身（空间开阔，正方形键帽） ============ -->
                     <div class="device-panel">
-                        <div class="panel-header center-header">
-                            <h2 class="panel-title">ESP32 KEYBOARD</h2>
-                            <span class="panel-subtitle">Physical 1:1 Layout</span>
-                        </div>
-
                         <!-- 铝合金竖向仿真机身 -->
                         <div class="vertical-device-wrapper">
                             <div class="virtual-device-body-vertical" id="virtualKeyboard">
-                                <!-- 顶部麦克风区域（占约一个按键高度，支持点击联动麦克风开关） -->
+                                <!-- 顶部麦克风区域（占约一个按键高度，透明占位，支持点击联动麦克风开关） -->
                                 <div class="virtual-mic-slot-vertical" id="virtualMicSlot" onclick="toggleMicFromDevice()" title="点击切换麦克风开启/关闭状态">
-                                    <div class="mic-grille">
-                                        <span class="grille-hole"></span>
-                                        <span class="grille-hole"></span>
-                                        <span class="grille-hole"></span>
-                                    </div>
                                     <div class="mic-glyph-wrap">
                                         <svg class="mic-slot-icon" viewBox="0 0 24 24" width="22" height="22">
                                             <rect x="9" y="3" width="6" height="12" rx="3" fill="currentColor"></rect>
@@ -176,7 +166,7 @@
                                             <path d="M12 18v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path>
                                         </svg>
                                     </div>
-                                    <span class="mic-status-text" id="mic-status-text">MIC ON</span>
+                                    <span class="mic-status-text" id="mic-status-text">MIC</span>
                                 </div>
 
                                 <!-- 下凹按键槽与 4 个紧凑正方形纯白键帽（KEY 1 ~ KEY 4） -->
