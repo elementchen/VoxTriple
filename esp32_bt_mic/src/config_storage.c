@@ -246,6 +246,44 @@ esp_err_t config_storage_save_slot_hfp_addr(uint8_t slot, const esp_bd_addr_t ad
     return ret;
 }
 
+#define NVS_KEY_S0_OS      "s0_os"
+#define NVS_KEY_S1_OS      "s1_os"
+
+esp_err_t config_storage_save_slot_os_type(uint8_t slot, uint8_t os_type)
+{
+    if (slot > 1) return ESP_ERR_INVALID_ARG;
+    const char *key = (slot == 0) ? NVS_KEY_S0_OS : NVS_KEY_S1_OS;
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) return ret;
+
+    ret = nvs_set_u8(nvs_handle, key, os_type);
+    if (ret == ESP_OK) nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+    ESP_LOGI(TAG, "Slot %d OS type saved: %d (%s)", slot, os_type, 
+             (os_type == OS_TYPE_APPLE) ? "Apple" : (os_type == OS_TYPE_WINDOWS) ? "Windows" : "Unknown");
+    return ret;
+}
+
+esp_err_t config_storage_load_slot_os_type(uint8_t slot, uint8_t *os_type)
+{
+    if (slot > 1 || !os_type) return ESP_ERR_INVALID_ARG;
+    const char *key = (slot == 0) ? NVS_KEY_S0_OS : NVS_KEY_S1_OS;
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
+    if (ret != ESP_OK) {
+        *os_type = OS_TYPE_UNKNOWN;
+        return ret;
+    }
+
+    ret = nvs_get_u8(nvs_handle, key, os_type);
+    nvs_close(nvs_handle);
+    if (ret != ESP_OK) {
+        *os_type = OS_TYPE_UNKNOWN;
+    }
+    return ret;
+}
+
 esp_err_t config_storage_clear_slot_hfp_addr(uint8_t slot)
 {
     if (slot > 1) return ESP_ERR_INVALID_ARG;
@@ -258,9 +296,12 @@ esp_err_t config_storage_clear_slot_hfp_addr(uint8_t slot)
     if (slot == 0) {
         nvs_erase_key(nvs_handle, NVS_KEY_HFP_ADDR);
     }
+    const char *os_key = (slot == 0) ? NVS_KEY_S0_OS : NVS_KEY_S1_OS;
+    nvs_erase_key(nvs_handle, os_key);
+
     nvs_commit(nvs_handle);
     nvs_close(nvs_handle);
-    ESP_LOGI(TAG, "Slot %d HFP address cleared from NVS.", slot);
+    ESP_LOGI(TAG, "Slot %d HFP address and OS type cleared from NVS.", slot);
     return ESP_OK;
 }
 

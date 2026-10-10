@@ -60,6 +60,12 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
             uint8_t slot0_paired = config_storage_is_slot_paired(0) ? 1 : 0;
             uint8_t slot1_paired = config_storage_is_slot_paired(1) ? 1 : 0;
 
+            uint8_t slot0_os = OS_TYPE_UNKNOWN;
+            uint8_t slot1_os = OS_TYPE_UNKNOWN;
+            config_storage_load_slot_os_type(0, &slot0_os);
+            config_storage_load_slot_os_type(1, &slot1_os);
+            uint8_t query_os = (query_slot == 0) ? slot0_os : slot1_os;
+
             const board_profile_t *profile = board_profile_get_current();
             uint8_t board_model = profile ? (uint8_t)profile->model : 0;
             const char *board_name = profile ? profile->model_name : "WEMOS 18650";
@@ -70,17 +76,36 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
                      "{\"status\":\"ok\",\"version\":\"%s\",\"btn1_vk\":%d,\"btn1_mod\":%d,\"btn2_vk\":%d,\"btn2_mod\":%d,"
                      "\"btn3_vk\":%d,\"btn3_mod\":%d,\"btn4_vk\":%d,\"btn4_mod\":%d,\"tx_power\":%d,\"sleep_mode\":%d,\"mic_enabled\":%d,"
                      "\"board_model\":%d,\"board_name\":\"%s\",\"sleep_timeout_min\":%d,\"active_slot\":%d,"
-                     "\"query_slot\":%d,\"slot0_paired\":%d,\"slot1_paired\":%d}\n",
+                     "\"query_slot\":%d,\"slot0_paired\":%d,\"slot1_paired\":%d,\"slot0_os\":%d,\"slot1_os\":%d,\"query_os\":%d}\n",
                      app_desc->version, vk1, mod1, vk2, mod2, vk3, mod3, vk4, mod4, tx_power, sleep_mode, mic_enabled,
                      board_model, board_name, sleep_timeout_min, active_slot,
-                     query_slot, slot0_paired, slot1_paired);
+                     query_slot, slot0_paired, slot1_paired, slot0_os, slot1_os, query_os);
             respond_cb(resp, strlen(resp));
             
+        } else if (strcmp(cmd, "set_host_os") == 0) {
+            uint8_t target_slot = multi_host_get_current_slot();
+            cJSON *slot_item = cJSON_GetObjectItem(root, "slot");
+            if (slot_item && cJSON_IsNumber(slot_item) && slot_item->valueint <= 1) {
+                target_slot = slot_item->valueint;
+            }
+            cJSON *os_item = cJSON_GetObjectItem(root, "os_type");
+            if (os_item && cJSON_IsNumber(os_item)) {
+                config_storage_save_slot_os_type(target_slot, os_item->valueint);
+            }
+            const char *resp = "{\"status\":\"ok\"}\n";
+            respond_cb(resp, strlen(resp));
+
         } else if (strcmp(cmd, "set_all_config") == 0) {
             uint8_t target_slot = multi_host_get_current_slot();
             cJSON *slot_item = cJSON_GetObjectItem(root, "slot");
             if (slot_item && cJSON_IsNumber(slot_item) && slot_item->valueint <= 1) {
                 target_slot = slot_item->valueint;
+            }
+
+            // 0. OS Type (optional)
+            cJSON *os_item = cJSON_GetObjectItem(root, "os_type");
+            if (os_item && cJSON_IsNumber(os_item)) {
+                config_storage_save_slot_os_type(target_slot, os_item->valueint);
             }
 
             // 1. Buttons

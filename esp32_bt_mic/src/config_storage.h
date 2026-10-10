@@ -90,6 +90,13 @@ esp_err_t config_storage_load_slot_sleep_timeout(uint8_t slot, uint8_t *minutes)
 esp_err_t config_storage_save_slot_mic_enabled(uint8_t slot, uint8_t enabled);
 esp_err_t config_storage_load_slot_mic_enabled(uint8_t slot, uint8_t *enabled);
 
+#define OS_TYPE_UNKNOWN  0
+#define OS_TYPE_APPLE    1
+#define OS_TYPE_WINDOWS  2
+
+esp_err_t config_storage_save_slot_os_type(uint8_t slot, uint8_t os_type);
+esp_err_t config_storage_load_slot_os_type(uint8_t slot, uint8_t *os_type);
+
 /**
  * @brief Save Classic BT TX power level to NVS
  * @param level  Power level (0-7, maps to ESP_PWR_LVL_N12..ESP_PWR_LVL_P9)

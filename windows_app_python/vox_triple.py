@@ -91,6 +91,22 @@ class Api:
         if not cfg:
             return None
             
+        local_host_os = 1 if sys.platform == "darwin" else 2
+        query_os = cfg.get("query_os", 0)
+        target_slot = cfg.get("query_slot", 0)
+
+        # 若当前槽位尚未记录系统类型，上位机自动将当前系统类型同步保存至 ESP32
+        if query_os == 0 and self._connected:
+            try:
+                run_coro(self.spp.write_host_os(target_slot, local_host_os))
+                query_os = local_host_os
+                if target_slot == 0:
+                    cfg["slot0_os"] = local_host_os
+                else:
+                    cfg["slot1_os"] = local_host_os
+            except Exception:
+                pass
+
         # Format mapping list to JSON compatible
         config = {
             "version": cfg.get("version", "1.0.18-beta1"),
@@ -101,9 +117,12 @@ class Api:
             "board_name": cfg.get("board_name", "WEMOS 18650"),
             "sleep_timeout_min": cfg.get("sleep_timeout_min", 5),
             "active_slot": cfg.get("active_slot", 0),
-            "query_slot": cfg.get("query_slot", 0),
+            "query_slot": target_slot,
             "slot0_paired": cfg.get("slot0_paired", 0),
             "slot1_paired": cfg.get("slot1_paired", 0),
+            "slot0_os": cfg.get("slot0_os", 0),
+            "slot1_os": cfg.get("slot1_os", 0),
+            "query_os": query_os,
             "mappings": cfg.get("buttons", [])
         }
         return config

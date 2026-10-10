@@ -444,11 +444,24 @@ class SppClient:
             "active_slot": self._config_cache.get("active_slot", 0),
             "query_slot": self._config_cache.get("query_slot", slot if slot is not None else self._config_cache.get("active_slot", 0)),
             "slot0_paired": self._config_cache.get("slot0_paired", 0),
-            "slot1_paired": self._config_cache.get("slot1_paired", 0)
+            "slot1_paired": self._config_cache.get("slot1_paired", 0),
+            "slot0_os": self._config_cache.get("slot0_os", 0),
+            "slot1_os": self._config_cache.get("slot1_os", 0),
+            "query_os": self._config_cache.get("query_os", 0)
         }
         return cfg
 
-    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1, sleep_timeout_min: int = 5, slot: int = None) -> bool:
+    async def write_host_os(self, slot: int, os_type: int) -> bool:
+        """Set the identified OS type (1: Apple, 2: Windows) on the device for the given slot."""
+        resp = await self._send_cmd({"cmd": "set_host_os", "slot": slot, "os_type": os_type})
+        if resp and resp.get("status") == "ok":
+            self._config_cache[f"slot{slot}_os"] = os_type
+            if self._config_cache.get("active_slot", 0) == slot:
+                self._config_cache["query_os"] = os_type
+            return True
+        return False
+
+    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1, sleep_timeout_min: int = 5, slot: int = None, os_type: int = None) -> bool:
         """Write all configurations at once into ESP32 via set_all_config single atomic command."""
         cmd_dict = {
             "cmd": "set_all_config",
@@ -459,6 +472,8 @@ class SppClient:
         }
         if slot is not None:
             cmd_dict["slot"] = slot
+        if os_type is not None:
+            cmd_dict["os_type"] = os_type
         for i in range(min(len(mapping), 4)):
             cmd_dict[f"btn{i+1}_vk"] = mapping[i]["vk"]
             cmd_dict[f"btn{i+1}_mod"] = mapping[i]["mod"]

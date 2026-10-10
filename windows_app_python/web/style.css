@@ -1053,3 +1053,50 @@ input:checked + .switch-slider:before {
     box-shadow: 0 0 6px rgba(255, 159, 67, 0.4);
 }
 
+/* ── 操作系统识别微标样式 ── */
+.section-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.os-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: all 0.25s ease;
+    user-select: none;
+}
+
+.os-badge.os-windows {
+    background: #e8f3ff;
+    color: #0078d4;
+    border: 1px solid rgba(0, 120, 212, 0.2);
+}
+
+.os-badge.os-apple {
+    background: #f2f2f5;
+    color: #1d1d1f;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.os-badge.os-unknown {
+    background: #f5f5f7;
+    color: #86868b;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.os-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+}
+
+
