@@ -4,33 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoxTriple Config Client</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
         <!-- 1. 顶部 Header 栏：品牌卡片 + 状态与控制条 -->
         <header class="topbar">
-            <!-- 品牌标识卡片（展示客户端软件版本及客户端升级交互） -->
+            <!-- 品牌标识卡片（展示客户端软件版本及客户端升级小图标） -->
             <div class="brand-card">
                 <img src="logo.png" alt="Logo" class="brand-img">
                 <div class="brand-info">
                     <span class="brand-title">KeyMapper</span>
                     <div class="brand-sub-row">
                         <span class="brand-sub">VoxTriple · <span id="app-version">v1.0.18-beta1</span></span>
-                        <button class="btn-app-upgrade" id="btn-app-upgrade" onclick="openClientReleasePage()" title="Check and Download Latest Client App / 检查客户端软件升级">
-                            <svg viewBox="0 0 24 24" width="10" height="10">
-                                <path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                        <button class="btn-app-upgrade-icon" id="btn-app-upgrade" onclick="openClientReleasePage()" title="Check and Download Latest Client App / 检查并下载客户端最新版">
+                            <svg viewBox="0 0 24 24" width="13" height="13">
+                                <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
                             </svg>
-                            <span>UPGRADE</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 设备控制条（融合连接状态于单一按钮，精简去除冗余标签） -->
+            <!-- 设备控制条（全红/全绿高对比度连接按钮） -->
             <div class="statusbar">
                 <!-- 串口选择 -->
                 <div class="port-control">
@@ -47,7 +43,7 @@
                     </button>
                 </div>
 
-                <!-- 整合连接状态与操作的连接按钮 -->
+                <!-- 整合连接状态与操作的纯色高对比度按钮（全红断开 / 全绿连接） -->
                 <button class="btn-connect" id="btn-connect">
                     <span class="btn-status-dot" id="btn-status-dot"></span>
                     <span class="btn-connect-text" id="btn-connect-text">CONNECT</span>
@@ -78,148 +74,170 @@
             </div>
         </header>
 
-        <!-- 2. 主核心区域：OpenDesign 2-Panel 对调布局（左：示意图与按键选择，右：按键捕获） -->
+        <!-- 2. 主核心区域：三栏布局（左：节能设置，中：竖向ESP32键盘，右：按键捕获） -->
         <main class="main-layout">
             <section class="panel keymap-panel">
-                <div class="keymap-split">
+                <div class="keymap-split-three">
 
-                    <!-- ============ 左侧栏：虚拟硬件键盘示意图与按键选择 ============ -->
-                    <div class="matrix-panel">
+                    <!-- ============ 左栏：节能与硬件设置（竖向排列） ============ -->
+                    <div class="settings-panel">
                         <div class="panel-header">
-                            <h2 class="panel-title">VIRTUAL KEY MATRIX</h2>
-                            <span class="panel-subtitle">Select a keycap to edit · Physical press animated</span>
+                            <h2 class="panel-title">SETTINGS</h2>
+                            <span class="panel-subtitle">Power & Hardware</span>
                         </div>
 
-                        <!-- 硬件机身与键帽仿真容器 -->
-                        <div class="keyboard-container">
-                            <div class="virtual-device-body" id="virtualKeyboard">
-                                <!-- 4个物理键帽与麦克风指示标识 -->
-                                <div class="device-keys-row">
+                        <div class="settings-list">
+                            <!-- 麦克风开关卡片 -->
+                            <div class="setting-item-card">
+                                <div class="setting-info">
+                                    <span class="setting-name">Microphone</span>
+                                    <span class="setting-desc">Bluetooth Audio Input</span>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox" id="mic-toggle" onchange="onMicToggle()">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- 休眠模式开关卡片 -->
+                            <div class="setting-item-card">
+                                <div class="setting-info">
+                                    <span class="setting-name">Sleep Mode</span>
+                                    <span class="setting-desc">Auto deep sleep</span>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox" id="sleep-toggle" onchange="onSleepToggle()">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- 休眠等待时间卡片 -->
+                            <div class="setting-item-card setting-item-column">
+                                <div class="setting-info">
+                                    <span class="setting-name">Sleep Timeout</span>
+                                    <span class="setting-desc">Inactivity duration</span>
+                                </div>
+                                <div class="select-wrapper sleep-select-full">
+                                    <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
+                                        <option value="1">1 min (分钟)</option>
+                                        <option value="2">2 min (分钟)</option>
+                                        <option value="3">3 min (分钟)</option>
+                                        <option value="5" selected>5 min (分钟)</option>
+                                        <option value="10">10 min (分钟)</option>
+                                        <option value="15">15 min (分钟)</option>
+                                        <option value="20">20 min (分钟)</option>
+                                        <option value="30">30 min (分钟)</option>
+                                        <option value="60">60 min (分钟)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 发射功率卡片 -->
+                            <div class="setting-item-card setting-item-column">
+                                <div class="setting-header-row">
+                                    <span class="setting-name">TX Power</span>
+                                    <span class="tx-badge" id="tx-power-val">-3 dBm</span>
+                                </div>
+                                <div class="power-bar-segments" id="tx-power-bar">
+                                    <div class="power-segment" data-level="0" onclick="setTxPower(0)"></div>
+                                    <div class="power-segment" data-level="1" onclick="setTxPower(1)"></div>
+                                    <div class="power-segment" data-level="2" onclick="setTxPower(2)"></div>
+                                    <div class="power-segment" data-level="3" onclick="setTxPower(3)"></div>
+                                    <div class="power-segment" data-level="4" onclick="setTxPower(4)"></div>
+                                    <div class="power-segment" data-level="5" onclick="setTxPower(5)"></div>
+                                    <div class="power-segment" data-level="6" onclick="setTxPower(6)"></div>
+                                    <div class="power-segment" data-level="7" onclick="setTxPower(7)"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 写入到硬件主按钮 -->
+                        <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
+                            <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
+                                <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
+                            </svg>
+                            <span>WRITE TO ESP32</span>
+                        </button>
+                    </div>
+
+                    <!-- ============ 中栏：竖向真实 ESP32 键盘样子（上至下：MIC、KEY1~4） ============ -->
+                    <div class="device-panel">
+                        <div class="panel-header center-header">
+                            <h2 class="panel-title">ESP32 KEYBOARD</h2>
+                            <span class="panel-subtitle">Vertical Physical Layout</span>
+                        </div>
+
+                        <!-- 竖向仿真机身 -->
+                        <div class="vertical-device-wrapper">
+                            <div class="virtual-device-body-vertical" id="virtualKeyboard">
+                                <!-- 顶部麦克风 -->
+                                <div class="virtual-mic-slot-vertical" id="virtualMicSlot" title="Integrated Mic (PTT on Button 1)">
+                                    <div class="mic-grille">
+                                        <span class="grille-hole"></span>
+                                        <span class="grille-hole"></span>
+                                        <span class="grille-hole"></span>
+                                    </div>
+                                    <div class="mic-slot-tag">
+                                        <svg class="mic-slot-icon" viewBox="0 0 24 24" width="13" height="13">
+                                            <rect x="9" y="3" width="6" height="12" rx="3" fill="currentColor"></rect>
+                                            <path d="M5 11a7 7 0 0 0 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                            <path d="M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                        </svg>
+                                        <span>MIC</span>
+                                    </div>
+                                </div>
+
+                                <!-- 竖向 4 个按键（KEY 1 ~ KEY 4） -->
+                                <div class="device-keys-column">
                                     <!-- Key 1 -->
                                     <div class="virtual-keycap active" data-idx="0" id="key-cap-0" onclick="selectKey(0)">
                                         <div class="keycap-inner">
-                                            <span class="keycap-num">KEY 1</span>
+                                            <div class="keycap-top-row">
+                                                <span class="keycap-num">KEY 1</span>
+                                                <span class="keycap-mods" id="cap-mods-0"></span>
+                                            </div>
                                             <span class="keycap-value" id="cap-val-0">--</span>
-                                            <span class="keycap-mods" id="cap-mods-0"></span>
                                         </div>
                                     </div>
 
                                     <!-- Key 2 -->
                                     <div class="virtual-keycap" data-idx="1" id="key-cap-1" onclick="selectKey(1)">
                                         <div class="keycap-inner">
-                                            <span class="keycap-num">KEY 2</span>
+                                            <div class="keycap-top-row">
+                                                <span class="keycap-num">KEY 2</span>
+                                                <span class="keycap-mods" id="cap-mods-1"></span>
+                                            </div>
                                             <span class="keycap-value" id="cap-val-1">--</span>
-                                            <span class="keycap-mods" id="cap-mods-1"></span>
                                         </div>
-                                    </div>
-
-                                    <!-- 麦克风物理硬件指示区 -->
-                                    <div class="virtual-mic-slot" id="virtualMicSlot" title="Integrated Mic (PTT on Button 1)">
-                                        <svg class="mic-slot-icon" viewBox="0 0 24 24" width="20" height="20">
-                                            <rect x="9" y="3" width="6" height="12" rx="3" fill="currentColor"></rect>
-                                            <path d="M5 11a7 7 0 0 0 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                                            <path d="M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                                        </svg>
-                                        <span class="mic-slot-label">MIC</span>
                                     </div>
 
                                     <!-- Key 3 -->
                                     <div class="virtual-keycap" data-idx="2" id="key-cap-2" onclick="selectKey(2)">
                                         <div class="keycap-inner">
-                                            <span class="keycap-num">KEY 3</span>
+                                            <div class="keycap-top-row">
+                                                <span class="keycap-num">KEY 3</span>
+                                                <span class="keycap-mods" id="cap-mods-2"></span>
+                                            </div>
                                             <span class="keycap-value" id="cap-val-2">--</span>
-                                            <span class="keycap-mods" id="cap-mods-2"></span>
                                         </div>
                                     </div>
 
                                     <!-- Key 4 -->
                                     <div class="virtual-keycap" data-idx="3" id="key-cap-3" onclick="selectKey(3)">
                                         <div class="keycap-inner">
-                                            <span class="keycap-num">KEY 4</span>
+                                            <div class="keycap-top-row">
+                                                <span class="keycap-num">KEY 4</span>
+                                                <span class="keycap-mods" id="cap-mods-3"></span>
+                                            </div>
                                             <span class="keycap-value" id="cap-val-3">--</span>
-                                            <span class="keycap-mods" id="cap-mods-3"></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- 硬件级设置控制条（Microphone, Sleep, Sleep Timeout, TX Power） -->
-                            <div class="kbd-extras-row">
-                                <!-- 麦克风启用开关 -->
-                                <div class="kbd-extra-item">
-                                    <div class="extra-texts">
-                                        <span class="extra-title">Microphone</span>
-                                        <span class="extra-sub">BT Audio Input</span>
-                                    </div>
-                                    <label class="switch-toggle">
-                                        <input type="checkbox" id="mic-toggle" onchange="onMicToggle()">
-                                        <span class="switch-slider"></span>
-                                    </label>
-                                </div>
-
-                                <!-- 休眠模式启用开关 -->
-                                <div class="kbd-extra-item">
-                                    <div class="extra-texts">
-                                        <span class="extra-title">Sleep Mode</span>
-                                        <span class="extra-sub">Auto deep sleep</span>
-                                    </div>
-                                    <label class="switch-toggle">
-                                        <input type="checkbox" id="sleep-toggle" onchange="onSleepToggle()">
-                                        <span class="switch-slider"></span>
-                                    </label>
-                                </div>
-
-                                <!-- 休眠等待时间选择器 -->
-                                <div class="kbd-extra-item">
-                                    <div class="extra-texts">
-                                        <span class="extra-title">Timeout</span>
-                                        <span class="extra-sub">Idle duration</span>
-                                    </div>
-                                    <div class="select-wrapper sleep-select-inline">
-                                        <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
-                                            <option value="1">1 min</option>
-                                            <option value="2">2 min</option>
-                                            <option value="3">3 min</option>
-                                            <option value="5" selected>5 min</option>
-                                            <option value="10">10 min</option>
-                                            <option value="15">15 min</option>
-                                            <option value="20">20 min</option>
-                                            <option value="30">30 min</option>
-                                            <option value="60">60 min</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- TX Power 功率等级选择器 -->
-                                <div class="kbd-extra-item kbd-extra-tx">
-                                    <div class="extra-texts">
-                                        <span class="extra-title">TX Power</span>
-                                        <span class="tx-badge" id="tx-power-val">-3 dBm</span>
-                                    </div>
-                                    <div class="power-bar-segments" id="tx-power-bar">
-                                        <div class="power-segment" data-level="0" onclick="setTxPower(0)"></div>
-                                        <div class="power-segment" data-level="1" onclick="setTxPower(1)"></div>
-                                        <div class="power-segment" data-level="2" onclick="setTxPower(2)"></div>
-                                        <div class="power-segment" data-level="3" onclick="setTxPower(3)"></div>
-                                        <div class="power-segment" data-level="4" onclick="setTxPower(4)"></div>
-                                        <div class="power-segment" data-level="5" onclick="setTxPower(5)"></div>
-                                        <div class="power-segment" data-level="6" onclick="setTxPower(6)"></div>
-                                        <div class="power-segment" data-level="7" onclick="setTxPower(7)"></div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-
-                        <!-- 保存到设备主按钮 -->
-                        <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
-                            <svg class="save-icon" viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
-                            </svg>
-                            <span>WRITE TO ESP32 / 写入到硬件</span>
-                        </button>
                     </div>
 
-                    <!-- ============ 右侧栏：按键捕获与修饰键配置 ============ -->
+                    <!-- ============ 右栏：按键捕获与修饰键配置 ============ -->
                     <div class="config-panel">
                         <div class="panel-header">
                             <div class="panel-title-wrapper">
@@ -261,7 +279,7 @@
                 </div>
             </section>
 
-            <!-- 3. 下半区：OTA 固件升级面板（展示 ESP32 固件版本与固件升级） -->
+            <!-- 3. 下半区：OTA 固件升级面板（ESP32 固件版本展示与刷写） -->
             <section class="panel ota-panel" id="ota-panel">
                 <div class="ota-head">
                     <div class="ota-title-wrapper">

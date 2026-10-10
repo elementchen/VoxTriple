@@ -231,7 +231,10 @@ function renderConfig(config) {
 
     // 麦克风与休眠模式开关
     const micToggle = document.getElementById("mic-toggle");
-    if (micToggle) micToggle.checked = (config.mic_enabled === 1);
+    if (micToggle) {
+        micToggle.checked = (config.mic_enabled === 1);
+        onMicToggle();
+    }
     const sleepToggle = document.getElementById("sleep-toggle");
     if (sleepToggle) sleepToggle.checked = (config.sleep_mode === 1);
 
@@ -471,16 +474,22 @@ async function setTxPower(level) {
     setTxPowerUi(level);
 }
 
-// ── Mic & Sleep Toggles ──────────────────────────────────────────────────
 function onMicToggle() {
     // 麦克风硬件指示联动
     const slot = document.getElementById("virtualMicSlot");
     const micToggle = document.getElementById("mic-toggle");
     if (slot && micToggle) {
+        const icon = slot.querySelector(".mic-slot-icon");
+        const tag = slot.querySelector(".mic-slot-tag");
+        const holes = slot.querySelectorAll(".grille-hole");
         if (micToggle.checked) {
-            slot.style.color = "var(--accent-orange)";
+            if (icon) icon.style.color = "var(--accent-orange)";
+            if (tag) tag.style.color = "var(--accent-orange)";
+            holes.forEach(h => h.style.backgroundColor = "var(--accent-orange)");
         } else {
-            slot.style.color = "var(--fg-muted)";
+            if (icon) icon.style.color = "#8a909a";
+            if (tag) tag.style.color = "#8a909a";
+            holes.forEach(h => h.style.backgroundColor = "#1b1d20");
         }
     }
 }
