@@ -384,6 +384,22 @@ function renderConfig(config) {
     refreshCurrentKeyEditor();
 }
 
+// ── 取消当前按键捕获 ────────────────────────────────────────────────────────
+function cancelKeyCapture() {
+    if (capturingIdx !== -1) {
+        document.removeEventListener("keydown", onCapturedKeydown);
+        const prevIdx = capturingIdx;
+        capturingIdx = -1;
+        const captureView = document.getElementById("captureView");
+        if (captureView) captureView.classList.remove("listening");
+        // 恢复原有显示
+        if (prevIdx >= 0 && prevIdx < 4) {
+            refreshCurrentKeyEditor();
+            updateKeyCapVisual(prevIdx);
+        }
+    }
+}
+
 // ── Key Selection & Switch ───────────────────────────────────────────────
 function selectKey(idx) {
     if (!isConnected) {
@@ -391,6 +407,10 @@ function selectKey(idx) {
         return;
     }
     if (idx < 0 || idx > 3) return;
+
+    // ★ 关键修复：点击任何按键前，先取消并重置之前的捕获监听，杜绝串键与混乱
+    cancelKeyCapture();
+
     selectedKeyIdx = idx;
 
     // 更新 4 个键帽高亮内发光样式
@@ -420,7 +440,7 @@ function selectKey(idx) {
     // 刷新右侧编辑内容
     refreshCurrentKeyEditor();
 
-    // ★ 点击按键后自动进入 Capture 状态，无需再次点击小小的 capture 按钮
+    // ★ 点击按键后自动进入当前选定按键的 Capture 状态
     triggerCurrentKeyCapture();
 }
 
@@ -691,9 +711,10 @@ function triggerCurrentKeyCapture() {
         alert("请先连接硬件设备后再捕获按键！");
         return;
     }
-    
-    if (capturingIdx !== -1) return; // 正在捕获中
-    
+    if (selectedKeyIdx < 0 || selectedKeyIdx > 3) return;
+
+    // 先解绑任何可能遗留的 keydown，确保一对一纯净绑定
+    document.removeEventListener("keydown", onCapturedKeydown);
     capturingIdx = selectedKeyIdx;
     
     const captureView = document.getElementById("captureView");
@@ -702,7 +723,7 @@ function triggerCurrentKeyCapture() {
     
     if (captureView) captureView.classList.add("listening");
     if (display) display.textContent = "?";
-    if (sub) sub.textContent = "PRESS ANY KEY NOW...";
+    if (sub) sub.textContent = "PRESS ANY KEY NOW (ESC to cancel)...";
     
     // 监听键盘原生键击
     document.addEventListener("keydown", onCapturedKeydown);
@@ -711,23 +732,31 @@ function triggerCurrentKeyCapture() {
 function onCapturedKeydown(e) {
     e.preventDefault();
     e.stopPropagation();
-    
+
+    // 如果按下 ESC，取消本次录制并恢复原样
+    if (e.code === "Escape" || e.key === "Escape") {
+        cancelKeyCapture();
+        return;
+    }
+
     const code = e.code;
     const vk = JS_CODE_TO_VK[code];
-    
+
     if (vk !== undefined) {
         // 立即解绑
         document.removeEventListener("keydown", onCapturedKeydown);
-        
-        const btnIdx = capturingIdx;
+
+        const targetIdx = capturingIdx;
         capturingIdx = -1;
-        
-        // 保持现有修饰键，更新主键码
-        currentConfigs[btnIdx].vk = vk;
-        
-        // 更新界面
-        refreshCurrentKeyEditor();
-        updateKeyCapVisual(btnIdx);
+
+        if (targetIdx >= 0 && targetIdx < 4) {
+            // 保持现有修饰键，更新主键码
+            currentConfigs[targetIdx].vk = vk;
+
+            // 更新界面
+            refreshCurrentKeyEditor();
+            updateKeyCapVisual(targetIdx);
+        }
     } else {
         alert(`未识别或不支持的按键码: ${code}`);
     }
@@ -787,6 +816,13 @@ async function switchHostSlot(targetSlot) {
 }
 
 function updateHostSlotUi(slot) {
+    // 动态主题色切换：Pair 1 为活力高质感橘色，Pair 2 为清爽科技青色 #14B8A6
+    if (slot === 1) {
+        document.body.classList.add("theme-pair-2");
+    } else {
+        document.body.classList.remove("theme-pair-2");
+    }
+
     const pill0 = document.getElementById("host-pill-0");
     const pill1 = document.getElementById("host-pill-1");
     if (pill0 && pill1) {
@@ -809,20 +845,22 @@ function updateHostSlotUi(slot) {
 
 function updatePairWatermarkIcon(slot) {
     const iconEl = document.getElementById("pair-watermark-os-icon");
-    if (!iconEl) return;
+    const pairRight = document.getElementById("pair-watermark-right");
+    if (!iconEl || !pairRight) return;
 
     const isPaired = (slot === 0) ? currentSlotPaired[0] : currentSlotPaired[1];
     const osType = (slot === 0) ? currentSlotOs[0] : currentSlotOs[1];
 
-    if (!isConnected || !isPaired || !osType) {
-        // 未连接、或者该频道未配对、或者未识别系统：透明占位，不显示图标
-        iconEl.style.visibility = "hidden";
+    if (!isConnected || !isPaired) {
+        // 未连接或该频道没有缓存的配对：整个右侧容器保持占位隐藏，杜绝任何画面抖动
+        pairRight.classList.add("unpaired-hidden");
         iconEl.innerHTML = "";
         return;
     }
 
-    // 已配对且已识别系统：展示浅灰系统Logo
-    iconEl.style.visibility = "visible";
+    // 该频道存在配对缓存：展示右侧容器（系统Logo + UNPAIR按钮）
+    pairRight.classList.remove("unpaired-hidden");
+
     if (osType === 1) { // Apple (macOS)
         iconEl.innerHTML = `<svg viewBox="0 0 170 170" width="18" height="18" fill="currentColor">
             <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.7-7.85-12.01-14.42-5.74-8.81-10.23-18.7-13.48-29.68-3.24-10.97-4.87-21.78-4.87-32.43 0-16.32 4.11-29.74 12.33-40.27 8.22-10.53 18.7-15.86 31.44-15.99 6.29 0 12.82 1.58 19.59 4.75 6.77 3.17 11.22 4.88 13.34 5.12 2.7-.49 7.4-2.31 14.1-5.48 6.7-3.16 12.78-4.66 18.24-4.5 14.15.52 25.13 6.13 32.93 16.83-12.63 7.64-18.76 18.04-18.39 31.22.37 10.37 4.26 19.06 11.66 26.06 7.41 7 16.14 10.88 26.2 11.64-2.22 6.64-4.87 13.06-7.96 19.26zM119.22 33.15c0-7.72 2.76-14.97 8.29-21.75 5.53-6.77 12.28-10.9 20.25-12.4 1.1 6.96-.34 14.11-4.33 21.46-3.99 7.34-9.87 12.08-17.64 14.22-.88-.49-2.07-.86-3.57-1.12-1.5-.27-2.5-.41-3-.41z"/>
@@ -831,6 +869,8 @@ function updatePairWatermarkIcon(slot) {
         iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
             <path d="M0 3.449L9.75 2.1v9.451H0V3.449zm10.949-1.551L24 0v11.551H10.949V1.898zM0 12.45h9.75V21.9L0 20.551V12.45zm10.949 0H24V24l-13.051-1.898V12.45z"/>
         </svg>`;
+    } else {
+        iconEl.innerHTML = "";
     }
 }
 

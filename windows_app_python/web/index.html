@@ -52,7 +52,6 @@
 
                 <!-- 双设备配对状态展示组件 (Pair 1 / Pair 2 仅作状态指示) -->
                 <div class="host-switch-section" id="host-switch-section" style="display: none;">
-                    <span class="control-label">PAIR</span>
                     <div class="host-switch-pills">
                         <div class="host-pill active" id="host-pill-0" title="Pair 1 (Green: Paired, Orange: Unpaired)">
                             <span class="host-status-dot empty" id="host-dot-0"></span>Pair 1
@@ -72,24 +71,22 @@
 
                     <!-- ============ 左栏：节能与硬件设置（未连接时通过 panel-hidden 隐藏但固定占位） ============ -->
                     <div class="settings-panel panel-hidden" id="settings-panel">
-                        <!-- 当前配对频道水印展示与右侧 UNPAIR 按钮 -->
+                        <!-- 当前配对频道大标题靠左展示，右侧系统Logo与UNPAIR按钮固定占位靠右 -->
                         <div class="pair-watermark-box" id="pair-watermark-box">
-                            <div class="pair-watermark-info">
-                                <span class="pair-watermark-os-icon" id="pair-watermark-os-icon" style="visibility: hidden;"></span>
-                                <span class="pair-watermark-text" id="pair-watermark-text">PAIR 1</span>
+                            <span class="pair-watermark-text" id="pair-watermark-text">PAIR 1</span>
+                            <div class="pair-watermark-right unpaired-hidden" id="pair-watermark-right">
+                                <span class="pair-watermark-os-icon" id="pair-watermark-os-icon"></span>
+                                <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="Unpair current slot and restart device" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" width="11" height="11">
+                                        <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
+                                    </svg>
+                                    UNPAIR
+                                </button>
                             </div>
-                            <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="Unpair current slot and restart device" tabindex="-1">
-                                <svg viewBox="0 0 24 24" width="11" height="11">
-                                    <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
-                                </svg>
-                                UNPAIR
-                            </button>
                         </div>
 
-                        <div class="panel-header">
-                            <h2 class="panel-title">SETTINGS</h2>
-                            <span class="panel-subtitle">Hardware</span>
-                        </div>
+                        <!-- 呼吸感垂直间隔占位（去除了冗余文字标题，保持高度与呼吸感恒定不抖动） -->
+                        <div class="settings-header-spacer"></div>
 
                         <div class="settings-list">
                             <!-- 麦克风开关卡片 -->
@@ -116,13 +113,13 @@
                                 </label>
                             </div>
 
-                            <!-- 休眠等待时间卡片 -->
-                            <div class="setting-item-card setting-item-column">
+                            <!-- 休眠等待时间卡片 (与其他设置卡片风格一致水平单行) -->
+                            <div class="setting-item-card">
                                 <div class="setting-info">
                                     <span class="setting-name">Sleep Timeout</span>
                                     <span class="setting-desc">Inactivity duration</span>
                                 </div>
-                                <div class="select-wrapper sleep-select-full">
+                                <div class="select-wrapper sleep-select-inline">
                                     <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
                                         <option value="1">1 min</option>
                                         <option value="2">2 min</option>

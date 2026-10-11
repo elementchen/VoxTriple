@@ -17,9 +17,15 @@
     --fg-muted: #717682;
     --fg-light: #9ca3af;
     
-    --accent-orange: #f97316;
-    --accent-orange-hover: #ea580c;
-    --accent-soft: #fff4ea;
+    /* 默认主题色：Pair 1 为高质感鲜明橘色 */
+    --accent-theme: #f97316;
+    --accent-theme-hover: #ea580c;
+    --accent-theme-soft: #fff4ea;
+    --accent-theme-shadow: rgba(249, 115, 22, 0.3);
+    --accent-theme-glow: rgba(249, 115, 22, 0.45);
+    --keycap-active-grad: linear-gradient(180deg, #ff8122 0%, #ea580c 100%);
+    --keycap-active-border: #ea580c;
+    --keycap-active-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
     
     --status-green: #16a34a;
     --status-red: #ef4444;
@@ -37,7 +43,19 @@
     --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.04);
     --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
     --shadow-keycap: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    --shadow-keycap-active: 0 0 0 2.5px var(--accent-orange), 0 3px 12px rgba(249, 115, 22, 0.35);
+    --shadow-keycap-active: 0 0 0 2.5px var(--accent-theme), 0 3px 12px var(--accent-theme-shadow);
+}
+
+/* Pair 2 主题色：清爽科技青色 #14B8A6，与 Pair 1 橘色形成鲜明反差 */
+body.theme-pair-2 {
+    --accent-theme: #14b8a6;
+    --accent-theme-hover: #0d9488;
+    --accent-theme-soft: #f0fdfa;
+    --accent-theme-shadow: rgba(20, 184, 166, 0.3);
+    --accent-theme-glow: rgba(20, 184, 166, 0.45);
+    --keycap-active-grad: linear-gradient(180deg, #2dd4bf 0%, #0d9488 100%);
+    --keycap-active-border: #0d9488;
+    --keycap-active-shadow: 0 4px 14px rgba(20, 184, 166, 0.45);
 }
 
 *, *::before, *::after {
@@ -147,10 +165,10 @@ button {
 }
 
 .btn-app-upgrade-icon:hover {
-    background: var(--accent-orange);
-    border-color: var(--accent-orange);
+    background: var(--accent-theme);
+    border-color: var(--accent-theme);
     color: #ffffff;
-    box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
+    box-shadow: 0 2px 6px var(--accent-theme-shadow);
     transform: scale(1.08);
 }
 
@@ -451,7 +469,7 @@ button {
     transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* 当前配对频道水印展示条（左侧大粗体浅浅灰色水印，右侧精致 UNPAIR 按钮） */
+/* 当前配对频道大标题靠左展示，右侧系统Logo与UNPAIR按钮固定占位靠右 */
 .pair-watermark-box {
     display: flex;
     align-items: center;
@@ -466,11 +484,31 @@ button {
     box-shadow: none;
 }
 
-.pair-watermark-info {
+.pair-watermark-text {
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #cbd2dc;
+    text-transform: uppercase;
+    line-height: 1;
+    font-family: inherit;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.pair-watermark-right {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    color: #cbd2dc; /* 更加浅淡、轻盈透亮的水印浅灰！ */
+    gap: 8px;
+    justify-content: flex-end;
+    min-height: 26px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* 当未配对时，保持占位但隐藏，杜绝任何画面晃动跳跃 */
+.pair-watermark-right.unpaired-hidden {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .pair-watermark-os-icon {
@@ -480,19 +518,14 @@ button {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
-    color: inherit;
+    color: var(--fg-muted);
     line-height: 1;
 }
 
-.pair-watermark-text {
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    color: inherit;
-    text-transform: uppercase;
-    line-height: 1;
-    font-family: inherit;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+/* 呼吸感垂直间隔占位（去除了冗余小标题文字，保持恒定高度不抖动） */
+.settings-header-spacer {
+    height: 16px;
+    flex-shrink: 0;
 }
 
 .settings-list {
@@ -501,7 +534,7 @@ button {
     gap: 10px;
 }
 
-/* Settings 区块底部的保存配置按钮（与上方拉开显著间距，醒目桔色高亮） */
+/* Settings 区块底部的保存配置按钮（与上方拉开显著间距，醒目主题高亮） */
 .settings-bottom-action {
     display: flex;
     width: 100%;
@@ -512,7 +545,7 @@ button {
     width: 100%;
     height: 38px;
     border-radius: var(--r-control);
-    background: var(--accent-orange); /* 鲜明充满质感的桔色！ */
+    background: var(--accent-theme);
     color: #ffffff;
     font-size: 11px;
     font-weight: 800;
@@ -521,14 +554,14 @@ button {
     align-items: center;
     justify-content: center;
     gap: 7px;
-    box-shadow: 0 3px 10px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 3px 10px var(--accent-theme-shadow);
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     cursor: pointer;
 }
 
 .settings-bottom-action .save-action-btn:not([disabled]):hover {
-    background: var(--accent-orange-hover);
-    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.45);
+    background: var(--accent-theme-hover);
+    box-shadow: 0 4px 14px var(--accent-theme-shadow);
     transform: translateY(-1px);
 }
 
@@ -580,16 +613,29 @@ button {
     align-items: center;
 }
 
-.sleep-select-full select {
+.sleep-select-inline {
+    width: 82px;
+    flex-shrink: 0;
+}
+
+.sleep-select-inline select {
     width: 100%;
+    height: 26px;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--r-control);
-    padding: 5px 8px;
+    padding: 2px 8px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--fg-default);
     cursor: pointer;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: all 0.15s ease;
+}
+
+.sleep-select-inline select:hover {
+    border-color: #94a3b8;
 }
 
 /* 8格分段式功率选择器 */
@@ -611,7 +657,7 @@ button {
 }
 
 .power-segment.active {
-    background-color: var(--accent-orange);
+    background-color: var(--accent-theme);
 }
 
 .power-segment:hover {
@@ -621,7 +667,7 @@ button {
 .tx-badge {
     font-size: 11px;
     font-weight: 800;
-    color: var(--accent-orange);
+    color: var(--accent-theme);
 }
 
 /* 开关 Toggle */
@@ -662,7 +708,7 @@ button {
 }
 
 .switch-toggle input:checked + .switch-slider {
-    background-color: var(--accent-orange);
+    background-color: var(--accent-theme);
 }
 
 .switch-toggle input:checked + .switch-slider:before {
@@ -784,13 +830,13 @@ button {
     transition: all 0.2s ease;
 }
 
-/* 开启状态：鲜明亮丽的橘色，发光，隐藏禁止符号 */
+/* 开启状态：主题色发光，隐藏禁止符号 */
 .virtual-mic-slot-vertical.active {
-    color: var(--accent-orange);
+    color: var(--accent-theme);
 }
 
 .virtual-mic-slot-vertical.active .mic-slot-icon {
-    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.45));
+    filter: drop-shadow(0 0 6px var(--accent-theme-glow));
 }
 
 .virtual-mic-slot-vertical.active .mic-disabled-slash {
@@ -843,11 +889,11 @@ button {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
-/* 选中高亮状态：充满高级感的橘色底 + 纯白字！ */
+/* 选中高亮状态：充满高级感的主题渐变底 + 纯白字！ */
 .virtual-keycap.active {
-    background: linear-gradient(180deg, #ff8122 0%, #ea580c 100%);
-    border-color: #ea580c;
-    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
+    background: var(--keycap-active-grad);
+    border-color: var(--keycap-active-border);
+    box-shadow: var(--keycap-active-shadow);
     transform: translateY(-1px);
 }
 
@@ -861,7 +907,8 @@ button {
 .virtual-keycap.active.physical-pressed {
     transform: translateY(2px) scale(0.97) !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 2px 6px rgba(0, 0, 0, 0.25) !important;
-    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%) !important;
+    background: var(--keycap-active-grad) !important;
+    filter: brightness(0.92);
 }
 
 .keycap-inner {
@@ -989,14 +1036,14 @@ button {
 }
 
 .capture-view.listening {
-    border-color: var(--accent-orange);
-    background: var(--accent-soft);
-    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.14);
+    border-color: var(--accent-theme);
+    background: var(--accent-theme-soft);
+    box-shadow: 0 4px 16px var(--accent-theme-shadow);
 }
 
 .capture-view.listening:hover {
-    border-color: var(--accent-orange);
-    background: var(--accent-soft);
+    border-color: var(--accent-theme);
+    background: var(--accent-theme-soft);
     transform: none;
 }
 
@@ -1027,7 +1074,7 @@ button {
 }
 
 .capture-view.listening .capture-key-display {
-    color: var(--accent-orange);
+    color: var(--accent-theme);
 }
 
 .capture-hint {
