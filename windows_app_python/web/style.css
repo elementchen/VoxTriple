@@ -46,16 +46,16 @@
     --shadow-keycap-active: 0 0 0 2.5px var(--accent-theme), 0 3px 12px var(--accent-theme-shadow);
 }
 
-/* Pair 2 主题色：清爽科技青色 #14B8A6，与 Pair 1 橘色形成鲜明反差 */
+/* Pair 2 主题色：活泼经典的罗技紫 #6039B2，与 Pair 1 活力橘形成对比鲜明的数码品牌质感 */
 body.theme-pair-2 {
-    --accent-theme: #14b8a6;
-    --accent-theme-hover: #0d9488;
-    --accent-theme-soft: #f0fdfa;
-    --accent-theme-shadow: rgba(20, 184, 166, 0.3);
-    --accent-theme-glow: rgba(20, 184, 166, 0.45);
-    --keycap-active-grad: linear-gradient(180deg, #2dd4bf 0%, #0d9488 100%);
-    --keycap-active-border: #0d9488;
-    --keycap-active-shadow: 0 4px 14px rgba(20, 184, 166, 0.45);
+    --accent-theme: #6039b2;
+    --accent-theme-hover: #4e2b9c;
+    --accent-theme-soft: #f4f0fc;
+    --accent-theme-shadow: rgba(96, 57, 178, 0.3);
+    --accent-theme-glow: rgba(96, 57, 178, 0.45);
+    --keycap-active-grad: linear-gradient(180deg, #7952cf 0%, #532e9f 100%);
+    --keycap-active-border: #532e9f;
+    --keycap-active-shadow: 0 4px 14px rgba(96, 57, 178, 0.45);
 }
 
 *, *::before, *::after {
