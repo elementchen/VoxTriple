@@ -17,7 +17,7 @@
                     <span class="brand-title">KeyMapper</span>
                     <div class="brand-sub-row">
                         <span class="brand-sub">VoxTriple · <span id="app-version">v1.0.19-beta</span></span>
-                        <button class="btn-app-upgrade-icon" id="btn-app-upgrade" onclick="openClientUpdateModal(true)" title="Check Client Software Update / 检查客户端软件更新" data-i18n-title="client_upgrade_title">
+                        <button class="btn-app-upgrade-icon" id="btn-app-upgrade" onclick="openClientUpdateModal(true)" title="Check Client Software Update / 检查客户端软件更新">
                             <svg viewBox="0 0 24 24" width="13" height="13">
                                 <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
                             </svg>
@@ -27,17 +27,17 @@
                 </div>
             </div>
 
-            <!-- 设备控制条（全红/全绿高对比度连接按钮 + 靠右语言切换下拉选单） -->
+            <!-- 设备控制条（全红/全绿高对比度连接按钮） -->
             <div class="statusbar">
                 <!-- 串口选择 -->
                 <div class="port-control">
-                    <span class="control-label" data-i18n="port_label">PORT</span>
+                    <span class="control-label" id="lbl-port">PORT</span>
                     <div class="select-wrapper">
                         <select id="port-select">
-                            <option value="" data-i18n="port_no_devices">No Devices</option>
+                            <option value="">No Devices</option>
                         </select>
                     </div>
-                    <button class="btn-refresh" id="btn-refresh" onclick="pollPorts()" title="Refresh Port List" data-i18n-title="port_refresh" tabindex="-1">
+                    <button class="btn-refresh" id="btn-refresh" onclick="pollPorts()" title="Refresh Port List" tabindex="-1">
                         <svg viewBox="0 0 24 24" width="12" height="12">
                             <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.07 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                         </svg>
@@ -70,39 +70,43 @@
                     <div class="select-wrapper lang-select-wrapper">
                         <select id="lang-select" onchange="onLanguageChange(this.value)">
                             <option value="zh">CN</option>
-                            <option value="en">EN</option>
+                            <option value="en" selected>EN</option>
                         </select>
                     </div>
                 </div>
             </div>
         </header>
 
+        <!-- 2. 主核心区域：视觉打通的三栏大面板（左：节能设置，中：铝合金竖向ESP32键盘，右：按键捕获与右下角保存） -->
         <main class="main-layout">
-            <!-- ============ 左栏：节能与硬件设置（未连接时通过 panel-hidden 隐藏但固定占位） ============ -->
-            <div class="settings-panel panel-hidden" id="settings-panel">
+            <section class="panel keymap-panel">
+                <div class="keymap-split-three">
+
+                    <!-- ============ 左栏：节能与硬件设置（未连接时通过 panel-hidden 隐藏但固定占位） ============ -->
+                    <div class="settings-panel panel-hidden" id="settings-panel">
                         <!-- 当前配对频道大标题靠左展示，右侧系统Logo与UNPAIR按钮固定占位靠右 -->
                         <div class="pair-watermark-box" id="pair-watermark-box">
                             <span class="pair-watermark-text" id="pair-watermark-text">PAIR 1</span>
                             <div class="pair-watermark-right unpaired-hidden" id="pair-watermark-right">
                                 <span class="pair-watermark-os-icon" id="pair-watermark-os-icon"></span>
-                                <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="Unpair current slot and restart device" data-i18n-title="unpair_title" tabindex="-1">
+                                <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="Unpair current slot and restart device" tabindex="-1">
                                     <svg viewBox="0 0 24 24" width="11" height="11">
                                         <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
                                     </svg>
-                                    <span id="btn-reset-bt-text" data-i18n="unpair_btn">UNPAIR</span>
+                                    <span id="lbl-unpair">UNPAIR</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- 呼吸感垂直间隔占位（去除了冗余小标题文字，保持高度与呼吸感恒定不抖动） -->
+                        <!-- 呼吸感垂直间隔占位（去除了冗余文字标题，保持高度与呼吸感恒定不抖动） -->
                         <div class="settings-header-spacer"></div>
 
                         <div class="settings-list">
                             <!-- 麦克风开关卡片 -->
                             <div class="setting-item-card">
                                 <div class="setting-info">
-                                    <span class="setting-name" data-i18n="mic_name">Microphone</span>
-                                    <span class="setting-desc" data-i18n="mic_desc">Bluetooth Audio Input</span>
+                                    <span class="setting-name" id="lbl-mic-name">Microphone</span>
+                                    <span class="setting-desc" id="lbl-mic-desc">Bluetooth Audio Input</span>
                                 </div>
                                 <label class="switch-toggle">
                                     <input type="checkbox" id="mic-toggle" onchange="onMicToggle()">
@@ -113,8 +117,8 @@
                             <!-- 休眠模式开关卡片 -->
                             <div class="setting-item-card">
                                 <div class="setting-info">
-                                    <span class="setting-name" data-i18n="sleep_name">Sleep Mode</span>
-                                    <span class="setting-desc" data-i18n="sleep_desc">Auto deep sleep</span>
+                                    <span class="setting-name" id="lbl-sleep-name">Sleep Mode</span>
+                                    <span class="setting-desc" id="lbl-sleep-desc">Auto deep sleep</span>
                                 </div>
                                 <label class="switch-toggle">
                                     <input type="checkbox" id="sleep-toggle" onchange="onSleepToggle()">
@@ -125,8 +129,8 @@
                             <!-- 休眠等待时间卡片 (与其他设置卡片风格一致水平单行) -->
                             <div class="setting-item-card">
                                 <div class="setting-info">
-                                    <span class="setting-name" data-i18n="sleep_timeout_name">Sleep Timeout</span>
-                                    <span class="setting-desc" data-i18n="sleep_timeout_desc">Inactivity duration</span>
+                                    <span class="setting-name" id="lbl-sleep-timeout-name">Sleep Timeout</span>
+                                    <span class="setting-desc" id="lbl-sleep-timeout-desc">Inactivity duration</span>
                                 </div>
                                 <div class="select-wrapper sleep-select-inline">
                                     <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
@@ -146,7 +150,7 @@
                             <!-- 信号强度卡片 -->
                             <div class="setting-item-card setting-item-column">
                                 <div class="setting-header-row">
-                                    <span class="setting-name" data-i18n="signal_name">Signal Strength</span>
+                                    <span class="setting-name" id="lbl-signal-name">Signal Strength</span>
                                     <span class="tx-badge" id="tx-power-val">Standard</span>
                                 </div>
                                 <div class="power-bar-segments" id="tx-power-bar">
@@ -168,7 +172,7 @@
                                 <svg class="save-icon" viewBox="0 0 24 24" width="15" height="15">
                                     <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
                                 </svg>
-                                <span id="btn-write-text" data-i18n="save_btn">WRITE TO ESP32</span>
+                                <span id="lbl-save-btn">SAVE TO ESP32</span>
                             </button>
                         </div>
                     </div>
@@ -248,22 +252,22 @@
                     <div class="config-panel panel-hidden" id="config-panel">
                         <div class="config-top-content">
                             <div class="panel-header">
-                                <h2 class="panel-title" data-i18n="key_mapping_title">KEY MAPPING</h2>
-                                <span class="panel-subtitle" id="mapping-tips" data-i18n="key_mapping_tips">Listening · Press key</span>
+                                <h2 class="panel-title" id="lbl-key-map-title">KEY MAPPING</h2>
+                                <span class="panel-subtitle" id="mapping-tips">Listening · Press key</span>
                             </div>
 
                             <!-- 焦点捕获卡片（点击虚线框整块区域均可触发录制） -->
-                            <div class="capture-view" id="captureView" onclick="triggerCurrentKeyCapture()" title="Click to record key" data-i18n-title="capture_box_title">
+                            <div class="capture-view" id="captureView" onclick="triggerCurrentKeyCapture()" title="点击区域录制按键">
                                 <div class="capture-header">
                                     <span class="capture-key-index" id="currentKeyIndex">KEY 1</span>
                                 </div>
                                 <div class="capture-key-display" id="keyDisplay">--</div>
-                                <div class="capture-hint" id="captureSub" data-i18n="capture_default_hint">Click box to record · Press key</div>
+                                <div class="capture-hint" id="captureSub">Click box to record · Press key</div>
                             </div>
 
                             <!-- 2x4 修饰键胶囊网格 -->
                             <div class="modifiers-section">
-                                <div class="modifiers-label" data-i18n="modifiers_label">MODIFIERS</div>
+                                <div class="modifiers-label" id="lbl-modifiers-label">MODIFIERS</div>
                                 <div class="modifier-grid" id="modifierGrid">
                                     <div class="mod-pill" data-mask="0x01">L·Ctrl</div>
                                     <div class="mod-pill" data-mask="0x02">L·Shift</div>
@@ -288,16 +292,16 @@
                         <svg class="ota-icon" viewBox="0 0 24 24" width="18" height="18">
                             <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
                         </svg>
-                        <h2 class="ota-title" data-i18n="ota_title">FIRMWARE UPGRADE (OTA)</h2>
+                        <h2 class="ota-title" id="lbl-ota-title">FIRMWARE UPGRADE (OTA)</h2>
                         
                         <!-- ESP32 硬件固件版本专属展示徽章（固定占位隐藏） -->
                         <div class="firmware-badge panel-hidden" id="firmware-section">
-                            <span class="control-label" data-i18n="ota_board_fw">BOARD FW</span>
+                            <span class="control-label">BOARD FW</span>
                             <span class="firmware-ver" id="firmware-ver">v--</span>
                             <span class="firmware-status-label" id="firmware-status-label"></span>
                         </div>
                     </div>
-                    <span class="ota-subtitle" id="selected-file-name" data-i18n="ota_subtitle">Flash official bin or cloud release</span>
+                    <span class="ota-subtitle" id="selected-file-name">Flash official bin or cloud release</span>
                 </div>
 
                 <div class="ota-body">
@@ -307,13 +311,13 @@
                             <svg viewBox="0 0 24 24" width="16" height="16">
                                 <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                             </svg>
-                            <span data-i18n="ota_btn_local">CHOOSE LOCAL BIN</span>
+                            <span id="lbl-ota-local">CHOOSE LOCAL BIN</span>
                         </button>
                         <button class="btn-ota-action btn-ota-cloud" onclick="triggerSmartUpdate()">
                             <svg viewBox="0 0 24 24" width="16" height="16">
                                 <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
                             </svg>
-                            <span data-i18n="ota_btn_cloud">CLOUD UPDATE</span>
+                            <span id="lbl-ota-cloud">CLOUD UPDATE</span>
                         </button>
                     </div>
 
@@ -322,7 +326,7 @@
                         <div class="progress-bar-bg">
                             <div class="progress-fill" id="progress-fill"></div>
                         </div>
-                        <span class="progress-status-text" id="progress-pct" data-i18n="ota_ready">Ready</span>
+                        <span class="progress-status-text" id="progress-pct">Ready</span>
                     </div>
                 </div>
             </section>
@@ -340,8 +344,8 @@
                         </svg>
                     </div>
                     <div class="modal-title-col">
-                        <h3 class="modal-title" data-i18n="client_update_title">Client Software Update</h3>
-                        <span class="modal-subtitle" data-i18n="client_update_sub">客户端软件在线升级</span>
+                        <h3 class="modal-title">Client Software Update</h3>
+                        <span class="modal-subtitle">客户端软件在线升级</span>
                     </div>
                 </div>
                 <button class="modal-close-btn" onclick="closeClientUpdateModal()" title="Close">✕</button>
@@ -350,19 +354,19 @@
             <div class="modal-body">
                 <div class="update-version-banner">
                     <div class="version-tag current-tag">
-                        <span class="v-label" data-i18n="modal_curr_label">CURRENT</span>
+                        <span class="v-label">CURRENT / 当前</span>
                         <span class="v-val" id="modal-curr-ver">v1.0.19-beta</span>
                     </div>
                     <div class="version-arrow">➜</div>
                     <div class="version-tag latest-tag">
-                        <span class="v-label" data-i18n="modal_latest_label">LATEST</span>
+                        <span class="v-label">LATEST / 最新</span>
                         <span class="v-val" id="modal-latest-ver">Checking...</span>
                     </div>
                 </div>
 
                 <div class="release-notes-box">
                     <div class="notes-header">
-                        <span class="notes-title" data-i18n="modal_notes_title">RELEASE NOTES</span>
+                        <span class="notes-title">RELEASE NOTES / 更新日志</span>
                         <span class="notes-file-size" id="modal-file-size"></span>
                     </div>
                     <div class="notes-content" id="modal-release-notes">
@@ -387,8 +391,8 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn-modal-cancel" id="btn-modal-close" onclick="closeClientUpdateModal()" data-i18n="modal_btn_later">稍后提醒</button>
-                <button class="btn-modal-action" id="btn-modal-action" onclick="onClientUpdateAction()" data-i18n="modal_btn_download">立即下载更新</button>
+                <button class="btn-modal-cancel" id="btn-modal-close" onclick="closeClientUpdateModal()">稍后提醒</button>
+                <button class="btn-modal-action" id="btn-modal-action" onclick="onClientUpdateAction()">立即下载更新</button>
             </div>
         </div>
     </div>

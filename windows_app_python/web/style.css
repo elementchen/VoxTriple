@@ -359,7 +359,7 @@ button {
 
 /* 语言切换下拉选单（靠右对齐） */
 .lang-switch-section {
-    margin-left: auto; /* 靠右对齐 */
+    margin-left: auto;
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -369,11 +369,6 @@ button {
     height: 32px;
     border: 1px solid var(--border-soft);
     flex-shrink: 0;
-    transition: all 0.18s ease;
-}
-
-.lang-switch-section:hover {
-    border-color: var(--border-color);
 }
 
 .lang-icon {
