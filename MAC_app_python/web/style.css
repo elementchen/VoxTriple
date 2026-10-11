@@ -1,78 +1,71 @@
 /* ==========================================================================
-   VoxTriple Webview Frontend - OpenDesign 2-Panel Aesthetics (macOS Edition)
+   VoxTriple Webview Frontend - 3-Column Seamless Physical Hardware Layout (macOS Edition)
+   1:1 Real 3D Anodized Aluminum Enclosure, Square Keycaps, Seamless Panel
    ========================================================================== */
 
 :root {
-    /* Color Palette & Tokens (from OpenDesign) */
-    --app-bg: #efefef;
+    /* Color Palette */
+    --app-bg: #ececee;
     --card-bg: #ffffff;
-    --container-bg: #f5f5f7;
+    --container-bg: #f4f4f7;
     --container-sub: #f8f8fa;
-    --border-color: #e2e2e7;
-    --border-soft: #ececee;
+    --border-color: #dcdce2;
+    --border-soft: #e8e8ed;
     
     --fg-strong: #111111;
-    --fg-default: #333333;
-    --fg-muted: #888888;
-    --fg-light: #aaaaaa;
+    --fg-default: #2d3139;
+    --fg-muted: #717682;
+    --fg-light: #9ca3af;
     
     --accent-orange: #f97316;
-    --accent-soft: #fff3e8;
-    --accent-hover: #ea580c;
+    --accent-orange-hover: #ea580c;
+    --accent-soft: #fff4ea;
     
-    --btn-dark: #18181b;
-    --btn-dark-hover: #27272a;
-    --btn-gray: #f2f2f5;
-    --btn-gray-hover: #e5e5ea;
-    
-    --status-green: #22c55e;
+    --status-green: #16a34a;
     --status-red: #ef4444;
     
-    /* Typography */
-    --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    /* Native Modern macOS System Typography */
+    --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
     
     /* Radii */
-    --r-card: 20px;
+    --r-card: 18px;
     --r-panel: 14px;
-    --r-control: 10px;
+    --r-control: 8px;
     --r-pill: 9999px;
     
     /* Shadows */
-    --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.04);
+    --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.04);
     --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
-    --shadow-keycap: 0 4px 10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    --shadow-keycap-active: 0 0 0 2px var(--accent-orange), 0 4px 14px rgba(249, 115, 22, 0.25);
-    --shadow-keycap-pressed: 0 1px 2px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-keycap: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --shadow-keycap-active: 0 0 0 2.5px var(--accent-orange), 0 3px 12px rgba(249, 115, 22, 0.35);
 }
 
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: var(--font-main);
 }
 
 body {
     background: var(--app-bg);
     color: var(--fg-strong);
-    font-family: var(--font-display);
     font-size: 13px;
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     user-select: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding: 24px 24px 40px;
+    overflow: hidden; /* 彻底禁止滚动条，尺寸固定自适应 */
+    padding: 12px 18px 12px; /* 紧凑缓冲，适配窗口高度 */
 }
 
-/* 允许标题栏可拖拽窗口（避让 macOS 左上角红黄绿交通灯） */
 .app-container {
-    max-width: 960px;
+    max-width: 1040px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 9px;
 }
 
 button {
@@ -85,21 +78,12 @@ button {
 }
 
 /* ==========================================================================
-   1. 顶部 Header 栏（品牌卡片 + 状态连接条）
+   1. 顶部 Header 栏（品牌卡片 + 状态与设备控制条）
    ========================================================================== */
 .topbar {
     display: flex;
     gap: 12px;
     align-items: stretch;
-    -webkit-app-region: drag; /* 支持拖动窗口 */
-}
-
-/* 按钮及交互元素禁止拖拽以响应点击 */
-.topbar button, 
-.topbar select, 
-.topbar a, 
-.topbar input {
-    -webkit-app-region: no-drag;
 }
 
 /* 品牌卡片 */
@@ -107,18 +91,18 @@ button {
     flex: 0 0 220px;
     background: var(--card-bg);
     border-radius: var(--r-card);
-    padding: 10px 18px 10px 16px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .brand-img {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
     display: block;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
@@ -126,25 +110,52 @@ button {
 .brand-info {
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 .brand-title {
-    font-weight: 700;
-    font-size: 18px;
+    font-weight: 800;
+    font-size: 17px;
     line-height: 1.1;
     color: var(--fg-strong);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.3px;
+}
+
+.brand-sub-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .brand-sub {
-    margin-top: 3px;
-    font-family: var(--font-mono);
     font-size: 10.5px;
     color: var(--fg-muted);
-    letter-spacing: 0.02em;
+    font-weight: 500;
 }
 
-/* 状态控制胶囊条 */
+/* 客户端升级小图标按钮 */
+.btn-app-upgrade-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+    border-radius: 5px;
+    background: var(--container-bg);
+    border: 1px solid var(--border-color);
+    color: var(--fg-muted);
+    transition: all 0.15s ease;
+}
+
+.btn-app-upgrade-icon:hover {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
+    transform: scale(1.08);
+}
+
+/* 状态与控制条 */
 .statusbar {
     flex: 1 1 auto;
     background: var(--card-bg);
@@ -156,52 +167,11 @@ button {
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(0, 0, 0, 0.02);
     min-width: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* 绝对单行排布，禁止换行撑高 */
+    overflow: hidden;
 }
 
-.status-divider {
-    width: 1px;
-    height: 18px;
-    background: var(--border-color);
-    margin: 0 2px;
-}
-
-/* 连接状态胶囊 */
-.conn-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 0 12px;
-    height: 30px;
-    border-radius: var(--r-control);
-    background: var(--container-bg);
-    color: var(--fg-strong);
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.conn-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--fg-light);
-    transition: background-color 0.25s ease;
-}
-
-.conn-pill[data-state="connected"] .conn-dot,
-.conn-dot.connected {
-    background: var(--status-green);
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-}
-
-.conn-pill[data-state="disconnected"] .conn-dot,
-.conn-dot.disconnected {
-    background: var(--fg-light);
-}
-
-/* 串口控制 */
+/* 串口选择 */
 .port-control {
     display: inline-flex;
     align-items: center;
@@ -209,27 +179,38 @@ button {
     background: var(--container-bg);
     border-radius: var(--r-control);
     padding: 0 8px 0 10px;
-    height: 30px;
+    height: 32px;
+    border: 1px solid var(--border-soft);
+    max-width: 175px;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .control-label {
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 800;
     color: var(--fg-muted);
     letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.select-wrapper {
+    min-width: 0;
 }
 
 .select-wrapper select {
     border: none;
     outline: none;
     background: transparent;
-    font-family: var(--font-mono);
     font-size: 11.5px;
     font-weight: 600;
     color: var(--fg-default);
     cursor: pointer;
     padding-right: 4px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .btn-refresh {
@@ -238,7 +219,7 @@ button {
     justify-content: center;
     width: 20px;
     height: 20px;
-    border-radius: 6px;
+    border-radius: 5px;
     color: var(--fg-muted);
     transition: all 0.2s ease;
 }
@@ -249,88 +230,128 @@ button {
     transform: rotate(90deg);
 }
 
-/* 连接按钮 */
+/* USB 连接状态按钮 */
 .btn-connect {
-    height: 30px;
-    padding: 0 14px;
+    width: 126px;
+    min-width: 126px;
+    max-width: 126px;
+    height: 32px;
     border-radius: var(--r-control);
-    background: var(--btn-gray);
-    color: var(--fg-strong);
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    transition: all 0.15s ease;
+    background-color: #18181b; /* 未连接：深黑色 */
+    color: #ffffff;            /* 纯白字 */
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.18s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #71717a;
+    transition: background-color 0.18s ease;
 }
 
 .btn-connect:hover {
-    background: var(--btn-gray-hover);
-    transform: translateY(-0.5px);
+    background-color: #27272a;
 }
 
+/* 已连接状态：全绿色白字 */
 .btn-connect.connected-state {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    background-color: #16a34a; /* 全绿 */
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
 }
 
+.btn-connect.connected-state .btn-status-dot {
+    background-color: #ffffff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+
+/* 已连接悬停：提示可点击断开，呈现全红警示 */
 .btn-connect.connected-state:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background-color: #dc2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
 }
 
-/* 固件与外设胶囊项 */
-.firmware-badge, 
-.board-badge, 
-.sleep-badge {
+/* 双设备切换 HOST Pills */
+.host-switch-section {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     background: var(--container-bg);
     border-radius: var(--r-control);
-    padding: 0 10px;
-    height: 30px;
+    padding: 2px 6px 2px 10px;
+    height: 32px;
+    border: 1px solid var(--border-soft);
 }
 
-.firmware-ver {
-    font-family: var(--font-mono);
-    font-size: 11.5px;
+.host-switch-pills {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.host-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 700;
-    color: var(--fg-default);
+    color: var(--fg-muted);
+    background: transparent;
+    transition: all 0.15s ease;
 }
 
-.firmware-status-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--status-green);
+.host-pill:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--fg-strong);
 }
 
-.btn-pill-action {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: 12px;
-    padding: 0 8px;
-    font-family: var(--font-mono);
-    font-weight: 800;
-    font-size: 9.5px;
-    height: 22px;
-    box-shadow: 0 2px 6px rgba(249, 115, 22, 0.25);
+.host-pill.active {
+    background: var(--card-bg);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-.btn-pill-action:hover {
-    background-color: var(--accent-hover);
-    transform: scale(0.97);
+.host-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.host-status-dot.paired {
+    background: #16a34a;
+    box-shadow: 0 0 5px rgba(22, 163, 74, 0.6);
+}
+
+.host-status-dot.empty {
+    background: #f97316;
+    box-shadow: 0 0 4px rgba(249, 115, 22, 0.4);
 }
 
 /* 遗忘蓝牙连接按钮 */
 .btn-reset-bt {
     background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.24);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
     border-radius: var(--r-control);
     padding: 0 10px;
-    font-family: var(--font-mono);
     font-weight: 700;
     font-size: 10.5px;
-    height: 30px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -340,35 +361,17 @@ button {
 .btn-reset-bt:hover {
     background: rgba(239, 68, 68, 0.2);
     border-color: rgba(239, 68, 68, 0.4);
-    color: #fca5a5;
-    transform: scale(0.98);
-}
-
-/* 固件在线升级触发按钮 */
-.btn-update-trigger {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: var(--r-control);
-    padding: 0 12px;
-    font-family: var(--font-mono);
-    font-weight: 800;
-    font-size: 10.5px;
-    height: 30px;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
-}
-
-.btn-update-trigger:hover {
-    background-color: var(--accent-hover);
+    color: #dc2626;
     transform: scale(0.98);
 }
 
 /* ==========================================================================
-   2. 主核心区域：OpenDesign 2-Panel 分屏布局
+   2. 主核心区域：视觉打通的三栏大面板（左：设置，中：铝合金机身，右：按键捕获与保存）
    ========================================================================== */
 .main-layout {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
 }
 
 .panel {
@@ -379,17 +382,29 @@ button {
 }
 
 .keymap-panel {
-    padding: 0;
+    padding: 20px 24px;
     overflow: hidden;
 }
 
-.keymap-split {
-    display: grid;
-    grid-template-columns: 290px 1fr;
-    min-height: 490px;
+/* 占位固定隐藏类：保留尺寸与布局空间，避免界面跳动 */
+.panel-hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
-/* 面板通用标题 */
+/* 视觉完全打通：固定 3 栏对称网格（240px - 1fr - 240px），中间产品图绝对居中且位置锁死 */
+.keymap-split-three {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    align-items: center;
+    justify-items: center;
+    gap: 16px;
+    min-height: 545px;
+    width: 100%;
+}
+
+/* 通用面板标题 */
 .panel-header {
     display: flex;
     justify-content: space-between;
@@ -397,335 +412,211 @@ button {
     margin-bottom: 12px;
 }
 
+.center-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+
+.panel-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .panel-title {
-    font-family: var(--font-mono);
     color: var(--fg-muted);
     font-size: 10.5px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.2px;
 }
 
 .panel-subtitle {
-    font-family: var(--font-mono);
     font-size: 10px;
     color: #9aa0a6;
+    font-weight: 500;
 }
 
-/* ── 左侧栏：按键配置与捕获面板 ── */
-.config-panel {
-    padding: 22px 22px 20px;
-    border-right: 1px solid var(--border-color);
+/* ──────────────────────────────────────────────────────────────────────────
+   【左栏】：节能与硬件设置面板 (settings-panel) - 固定 240px 占位居中
+   ────────────────────────────────────────────────────────────────────────── */
+.settings-panel {
+    width: 240px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    background: #fafafc;
+    justify-content: center;
+    gap: 12px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* 捕获焦点大卡片 */
-.capture-view {
-    background: var(--card-bg);
-    border-radius: var(--r-panel);
-    padding: 16px;
+/* 当前配对频道水印文本（纯文字直接展示，大粗体浅浅灰色，无单独背景框） */
+.pair-watermark-box {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 205px;
-    border: 1.5px dashed var(--border-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    transition: all 0.25s ease;
-}
-
-.capture-view.listening {
-    border-color: var(--accent-orange);
-    background: var(--accent-soft);
-    box-shadow: 0 4px 18px rgba(249, 115, 22, 0.15);
-}
-
-.capture-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 2px;
+    user-select: none;
+    box-shadow: none;
+    color: #cbd2dc;
 }
 
-.capture-key-index {
-    font-family: var(--font-mono);
-    color: var(--fg-muted);
-    font-size: 11px;
-    font-weight: 700;
+.pair-watermark-os-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: inherit;
+    line-height: 1;
+}
+
+.pair-watermark-text {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: inherit;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    line-height: 1;
+    font-family: inherit;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
-.btn-capture {
-    padding: 6px 14px;
-    background: var(--btn-dark);
-    color: #ffffff;
-    border-radius: 8px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    transition: all 0.15s ease;
-}
-
-.btn-capture:hover {
-    background: var(--btn-dark-hover);
-    transform: translateY(-0.5px);
-}
-
-.btn-capture.active,
-.capture-view.listening .btn-capture {
-    background: var(--accent-orange);
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
-}
-
-.capture-key-display {
-    text-align: center;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 38px;
-    color: var(--fg-strong);
-    margin: auto 0;
-    letter-spacing: -0.01em;
-    word-break: break-all;
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.capture-view.listening .capture-key-display {
-    color: var(--accent-orange);
-}
-
-.capture-hint {
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    color: var(--fg-muted);
-    text-align: center;
-}
-
-/* 2x4 修饰键网格 */
-.modifiers-section {
+.settings-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
-.modifiers-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--fg-muted);
-    letter-spacing: 0.8px;
+/* Settings 区块底部的保存配置按钮 */
+.settings-bottom-action {
+    display: flex;
+    width: 100%;
+    margin-top: 18px;
 }
 
-.modifier-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-}
-
-.mod-pill {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+.settings-bottom-action .save-action-btn {
+    width: 100%;
+    height: 38px;
     border-radius: var(--r-control);
-    padding: 8px 10px;
-    font-family: var(--font-mono);
+    background: var(--accent-orange);
+    color: #ffffff;
     font-size: 11px;
-    font-weight: 600;
-    color: var(--fg-default);
-    text-align: center;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 3px 10px rgba(249, 115, 22, 0.3);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     cursor: pointer;
-    transition: all 0.15s ease;
+}
+
+.settings-bottom-action .save-action-btn:not([disabled]):hover {
+    background: var(--accent-orange-hover);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.45);
+    transform: translateY(-1px);
+}
+
+.settings-bottom-action .save-action-btn[disabled] {
+    background: #e4e4e8;
+    color: #9c9ca3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.setting-item-card {
+    background: #fafafc;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-panel);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-.mod-pill:hover {
-    background: #f4f4f7;
-    border-color: #d1d1d6;
-    transform: translateY(-0.5px);
-}
-
-.mod-pill.active {
-    background: var(--btn-dark);
-    color: #ffffff;
-    border-color: var(--btn-dark);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-/* ── 右侧栏：虚拟硬件键盘矩阵面板 ── */
-.matrix-panel {
-    padding: 22px 24px 20px;
-    display: flex;
+.setting-item-column {
     flex-direction: column;
-    justify-content: space-between;
-    gap: 16px;
-    background: var(--card-bg);
+    align-items: stretch;
+    gap: 8px;
 }
 
-.keyboard-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-/* 拟物化机身底座 */
-.virtual-device-body {
-    background: linear-gradient(180deg, #f0f0f3 0%, #e8e8ec 100%);
-    border-radius: 24px;
-    padding: 20px 22px;
-    box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.8), inset 0 -2px 6px rgba(0, 0, 0, 0.05), 0 6px 16px rgba(0, 0, 0, 0.04);
-    border: 1px solid #dfdfdf;
-}
-
-.device-keys-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto 1fr 1fr;
-    gap: 14px;
-    align-items: center;
-}
-
-/* 立体质感 3D 键帽 */
-.virtual-keycap {
-    background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
-    border-radius: 14px;
-    padding: 14px 10px;
-    box-shadow: var(--shadow-keycap);
-    cursor: pointer;
-    border: 1.5px solid #ebebee;
-    transition: all 0.18s cubic-bezier(0.25, 1, 0.5, 1);
-    position: relative;
-    user-select: none;
-    min-height: 82px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.virtual-keycap:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-    border-color: #d8d8de;
-}
-
-.virtual-keycap.active {
-    box-shadow: var(--shadow-keycap-active);
-    border-color: var(--accent-orange);
-    background: #ffffff;
-}
-
-/* 物理按键下沉按下动画 */
-.virtual-keycap.physical-pressed {
-    transform: translateY(3px) scale(0.97);
-    box-shadow: var(--shadow-keycap-pressed);
-    background: #f0f0f4;
-}
-
-.keycap-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.keycap-num {
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    font-weight: 700;
-    color: var(--fg-muted);
-    letter-spacing: 0.5px;
-}
-
-.keycap-value {
-    font-family: var(--font-mono);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--fg-strong);
-    letter-spacing: -0.02em;
-    margin: 2px 0;
-}
-
-.virtual-keycap.active .keycap-value {
-    color: var(--accent-orange);
-}
-
-.keycap-mods {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--accent-orange);
-    min-height: 12px;
-}
-
-/* 麦克风物理指示槽 */
-.virtual-mic-slot {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 0 8px;
-    color: var(--fg-muted);
-}
-
-.mic-slot-icon {
-    color: var(--fg-muted);
-    transition: color 0.2s ease;
-}
-
-.mic-slot-label {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    color: var(--fg-light);
-}
-
-/* 硬件级设置控制条（下半部） */
-.kbd-extras-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.3fr;
-    gap: 12px;
-    background: var(--container-bg);
-    border-radius: var(--r-panel);
-    padding: 12px 16px;
-    align-items: center;
-}
-
-.kbd-extra-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding-right: 8px;
-    border-right: 1px solid var(--border-color);
-}
-
-.kbd-extra-tx {
-    border-right: none;
-    padding-right: 0;
-}
-
-.extra-texts {
+.setting-info {
     display: flex;
     flex-direction: column;
 }
 
-.extra-title {
+.setting-name {
     font-size: 12px;
     font-weight: 700;
     color: var(--fg-strong);
 }
 
-.extra-sub {
-    font-size: 10px;
+.setting-desc {
+    font-size: 9.5px;
     color: var(--fg-muted);
-    font-family: var(--font-mono);
+    font-weight: 500;
+}
+
+.setting-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sleep-select-full select {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-control);
+    padding: 5px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg-default);
+    cursor: pointer;
+}
+
+/* 8格分段式功率选择器 */
+.power-bar-segments {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2px;
+}
+
+.power-segment {
+    flex: 1;
+    height: 16px;
+    background-color: #e2e2e7;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.power-segment.active {
+    background-color: var(--accent-orange);
+}
+
+.power-segment:hover {
+    transform: scaleY(1.18);
 }
 
 .tx-badge {
-    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--accent-orange);
 }
 
@@ -774,41 +665,387 @@ button {
     transform: translateX(16px);
 }
 
-/* 8格分段式功率选择器 */
-.power-bar-segments {
+/* ──────────────────────────────────────────────────────────────────────────
+   【中栏】：1:1 真实铝合金机身 (device-panel)
+   ────────────────────────────────────────────────────────────────────────── */
+.device-panel {
     display: flex;
-    gap: 3px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.vertical-device-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* 拟物化铝合金竖向外壳 */
+.virtual-device-body-vertical {
+    width: 106px;
+    background: linear-gradient(170deg, #eaecef 0%, #d8dce2 50%, #c6ccd5 100%);
+    border-radius: 20px;
+    padding: 10px 8px 8px;
+    border: 1px solid #b4b9c2;
+    box-shadow: 
+        0 0 0 2px #f4f6fa,
+        0 0 0 3px #c6ccd5,
+        0 20px 42px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    user-select: none;
+}
+
+/* 右侧物理小侧键凸起 */
+.virtual-device-body-vertical::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    top: 50px;
+    width: 4px;
+    height: 18px;
+    background: #b0b5be;
+    border-radius: 2px;
+    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.25);
+}
+
+/* 顶部麦克风区域 */
+.virtual-mic-slot-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 68px;
+    width: 90px;
+    border-radius: 8px;
+    margin-bottom: 7px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    background: transparent;
+    border: none;
+    color: #6b7280;
+}
+
+.mic-glyph-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+}
+
+.mic-slot-icon {
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+/* 关闭状态禁止符号（圆圈+斜杠） */
+.mic-disabled-slash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: inherit;
+    opacity: 0.92;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    display: block;
+}
+
+.mic-status-text {
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+/* 开启状态：鲜明亮丽的橘色发光 */
+.virtual-mic-slot-vertical.active {
+    color: var(--accent-orange);
+}
+
+.virtual-mic-slot-vertical.active .mic-slot-icon {
+    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.45));
+}
+
+.virtual-mic-slot-vertical.active .mic-disabled-slash {
+    display: none;
+}
+
+.virtual-mic-slot-vertical:hover {
+    color: #111827 !important;
+    background: transparent;
+    border: none;
+    transform: translateY(-1px);
+}
+
+.virtual-mic-slot-vertical:hover .mic-slot-icon {
+    filter: none;
+}
+
+/* 下凹按键槽 */
+.device-keys-column {
+    width: 90px;
+    background: #464a52;
+    border-radius: 10px;
+    padding: 7px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35), inset 0 -1px 1px rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+/* 纯白方块 3D 拟物键帽（正方形 76px × 76px） */
+.virtual-keycap {
+    width: 76px;
+    height: 76px;
+    background: linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%);
+    border-radius: 6px;
+    padding: 6px 7px;
+    cursor: pointer;
+    border: 1px solid #dcdfe6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.virtual-keycap:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* 选中高亮状态：橘色底 + 纯白字 */
+.virtual-keycap.active {
+    background: linear-gradient(180deg, #ff8122 0%, #ea580c 100%);
+    border-color: #ea580c;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
+    transform: translateY(-1px);
+}
+
+/* 物理按键下沉按下动画 */
+.virtual-keycap.physical-pressed {
+    transform: translateY(2px) scale(0.97) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.12) !important;
+    background: #e6e7eb !important;
+}
+
+.virtual-keycap.active.physical-pressed {
+    transform: translateY(2px) scale(0.97) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%) !important;
+}
+
+.keycap-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.keycap-top-row {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
 }
 
-.power-segment {
-    width: 9px;
-    height: 18px;
-    background-color: #dcdce0;
-    border-radius: 2px;
+.keycap-num {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #9ca3af;
+    line-height: 1;
+}
+
+.virtual-keycap.active .keycap-num {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.keycap-mods {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--accent-orange);
+    line-height: 1;
+}
+
+.virtual-keycap.active .keycap-mods {
+    color: #ffffff;
+}
+
+.keycap-value {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1f2937;
+    letter-spacing: -0.2px;
+    margin: auto 0;
+    word-break: break-all;
+}
+
+.virtual-keycap.active .keycap-value {
+    color: #ffffff;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   【右栏】：按键映射具体设置面板 (config-panel)
+   ────────────────────────────────────────────────────────────────────────── */
+.config-panel {
+    width: 240px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.config-top-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 焦点捕获卡片 */
+.capture-view {
+    background: #fafafc;
+    border-radius: var(--r-panel);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 165px;
+    border: 1.5px dashed var(--border-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+    transition: all 0.22s ease;
+    cursor: pointer;
+}
+
+.capture-view:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.capture-view.listening {
+    border-color: var(--accent-orange);
+    background: var(--accent-soft);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.14);
+}
+
+.capture-view.listening:hover {
+    border-color: var(--accent-orange);
+    background: var(--accent-soft);
+    transform: none;
+}
+
+.capture-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.capture-key-index {
+    color: var(--fg-muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.capture-key-display {
+    text-align: center;
+    font-weight: 800;
+    font-size: 30px;
+    color: var(--fg-strong);
+    margin: auto 0;
+    letter-spacing: -0.5px;
+    word-break: break-all;
+    transition: color 0.2s ease;
+}
+
+.capture-view.listening .capture-key-display {
+    color: var(--accent-orange);
+}
+
+.capture-hint {
+    font-size: 9.5px;
+    color: var(--fg-muted);
+    text-align: center;
+    font-weight: 500;
+}
+
+/* 2x4 修饰键网格 */
+.modifiers-section {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.modifiers-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fg-muted);
+    letter-spacing: 0.8px;
+}
+
+.modifier-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+}
+
+.mod-pill {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-control);
+    padding: 7px 8px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--fg-default);
+    text-align: center;
     cursor: pointer;
     transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-.power-segment.active {
-    background-color: var(--accent-orange);
+.mod-pill:hover {
+    background: #f4f4f7;
+    border-color: #c8c8cf;
+    transform: translateY(-0.5px);
 }
 
-.power-segment:hover {
-    transform: scaleY(1.15);
+.mod-pill.active {
+    background: #18181b;
+    color: #ffffff;
+    border-color: #18181b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* 保存到设备主按钮 */
+/* 保存按钮 */
 .save-action-btn {
     width: 100%;
-    height: 44px;
+    height: 42px;
     border-radius: var(--r-panel);
-    background: var(--btn-dark);
+    background: #18181b;
     color: #ffffff;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -819,7 +1056,7 @@ button {
 
 .save-action-btn:not([disabled]):hover {
     background: var(--accent-orange);
-    box-shadow: 0 6px 18px rgba(249, 115, 22, 0.35);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
     transform: translateY(-1px);
 }
 
@@ -834,36 +1071,71 @@ button {
    3. 下半区：OTA 固件升级面板
    ========================================================================== */
 .ota-panel {
-    padding: 18px 22px 20px;
+    padding: 12px 20px 14px;
+    height: 106px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .ota-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
 }
 
 .ota-title-wrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    height: 28px;
 }
 
 .ota-icon {
-    color: var(--accent-orange);
+    color: #4b5563;
 }
 
 .ota-title {
-    font-family: var(--font-mono);
     font-size: 11.5px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--fg-strong);
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
+}
+
+.firmware-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--container-bg);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-control);
+    padding: 0 9px;
+    height: 24px;
+    box-sizing: border-box;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.firmware-ver {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--fg-default);
+}
+
+.firmware-status-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--status-green);
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .ota-subtitle {
-    font-family: var(--font-mono);
     font-size: 10.5px;
     color: var(--fg-muted);
 }
@@ -871,8 +1143,9 @@ button {
 .ota-body {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 12px;
     align-items: center;
+    height: 38px;
 }
 
 .ota-actions-grid {
@@ -882,38 +1155,39 @@ button {
 }
 
 .btn-ota-action {
-    height: 42px;
+    height: 38px;
     border-radius: var(--r-control);
-    font-family: var(--font-mono);
     font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 7px;
     transition: all 0.15s ease;
 }
 
 .btn-ota-local {
-    background: var(--btn-gray);
+    background: var(--container-bg);
     color: var(--fg-strong);
     border: 1px solid var(--border-color);
 }
 
 .btn-ota-local:hover {
-    background: var(--btn-gray-hover);
+    background: #e9e9ee;
     transform: translateY(-0.5px);
 }
 
 .btn-ota-cloud {
-    background: var(--accent-orange);
-    color: #ffffff;
-    box-shadow: 0 3px 10px rgba(249, 115, 22, 0.25);
+    background: var(--container-bg);
+    color: var(--fg-strong);
+    border: 1px solid var(--border-color);
+    box-shadow: none;
 }
 
 .btn-ota-cloud:hover {
-    background: var(--accent-hover);
+    background: #e9e9ee;
+    border-color: #c8c8cf;
     transform: translateY(-0.5px);
 }
 
@@ -921,61 +1195,54 @@ button {
 .ota-progress-box {
     background: var(--container-bg);
     border-radius: var(--r-control);
-    padding: 10px 14px;
+    padding: 0 14px;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
     border: 1px solid var(--border-soft);
+    box-sizing: border-box;
 }
 
 .progress-bar-bg {
+    flex: 1;
+    min-width: 0;
     height: 6px;
     background: #e2e2e7;
     border-radius: 3px;
     overflow: hidden;
-    width: 100%;
 }
 
 .progress-fill {
     height: 100%;
     background: var(--accent-orange);
     width: 0%;
-    transition: width 0.25s ease-out;
-}
-
-.progress-status-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    transition: width 0.15s ease-out;
 }
 
 .progress-status-text {
-    font-family: var(--font-mono);
+    width: 125px;
+    flex-shrink: 0;
+    text-align: right;
     font-size: 10.5px;
-    font-weight: 600;
+    font-weight: 700;
+    font-family: var(--font-mono);
     color: var(--fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
 }
 
 /* ==========================================================================
    4. 响应式与小屏幕适配
    ========================================================================== */
-@media (max-width: 860px) {
-    .keymap-split {
+@media (max-width: 900px) {
+    .keymap-split-three {
         grid-template-columns: 1fr;
-    }
-    .config-panel {
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
     }
     .ota-body {
         grid-template-columns: 1fr;
-    }
-    .kbd-extras-row {
-        grid-template-columns: 1fr;
-    }
-    .kbd-extra-item {
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 8px;
     }
 }
