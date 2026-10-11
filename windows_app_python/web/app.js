@@ -1,4 +1,4 @@
-﻿// ==========================================================================
+// ==========================================================================
 // VoxTriple Webview Frontend App Logic (OpenDesign 2-Panel - Windows Edition)
 // ==========================================================================
 
@@ -313,7 +313,7 @@ function renderConfig(config) {
 
     // 固件版本
     const fwEl = document.getElementById("firmware-ver");
-    if (fwEl) fwEl.textContent = "v" + (config.version || "1.0.18");
+    if (fwEl) fwEl.textContent = "v" + (config.version || "1.0.19-beta");
 
     // 麦克风与休眠模式开关
     const micToggle = document.getElementById("mic-toggle");

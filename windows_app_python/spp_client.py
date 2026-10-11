@@ -457,7 +457,7 @@ class SppClient:
             "tx_power": self._config_cache.get("tx_power", 4),
             "sleep": self._config_cache.get("sleep_mode", 1),
             "mic_enabled": self._config_cache.get("mic_enabled", 1),
-            "version": self._config_cache.get("version", "1.0.18"),
+            "version": self._config_cache.get("version", "1.0.19-beta"),
             "board_model": self._config_cache.get("board_model", 0),
             "board_name": self._config_cache.get("board_name", "WEMOS 18650"),
             "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5),
