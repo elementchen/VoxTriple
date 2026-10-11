@@ -213,6 +213,8 @@ void system_reset_bt_pairing(void)
     esp_restart();
 }
 
+#include "multi_host.h"
+
 /**
  * @brief Button monitoring task with debounce
  */
@@ -228,6 +230,7 @@ static void button_task_func(void *arg)
     while (s_btn_task_running) {
         uint32_t now = pdTICKS_TO_MS(xTaskGetTickCount());
 
+        /* 单键消抖与按键处理 */
         for (int i = 0; i < BUTTON_NUM; i++) {
             /* Active-low with internal pull-up: 0 = pressed, 1 = released */
             bool pressed = (gpio_get_level(s_button_pins[i]) == 0);
@@ -282,10 +285,10 @@ static void button_task_func(void *arg)
                     if (i == 0) {
                         gpio_set_level(s_indicator_led_gpio, 1); // Turn LED OFF (Active Low) when Button 1 is released
                     }
+
                     if (classic_hidd_is_connected()) {
                         classic_hidd_release_key();
                     }
-
                     state[i] = BTN_STATE_IDLE;
                 }
                 break;
@@ -378,3 +381,18 @@ void button_handler_deinit(void)
         s_btn_task_handle = NULL;
     }
 }
+
+void button_handler_update_sleep_timeout(uint8_t timeout_min)
+{
+    if (timeout_min < MIN_INACTIVITY_MIN || timeout_min > MAX_INACTIVITY_MIN) {
+        timeout_min = DEFAULT_INACTIVITY_MIN;
+    }
+    uint32_t inactivity_ms = (uint32_t)timeout_min * 60 * 1000;
+    if (s_inactivity_timer) {
+        xTimerChangePeriod(s_inactivity_timer, pdMS_TO_TICKS(inactivity_ms), 0);
+        xTimerReset(s_inactivity_timer, 0);
+    }
+    ESP_LOGI(TAG, "Inactivity sleep timeout updated dynamically to %d min (%lu ms)",
+             timeout_min, (unsigned long)inactivity_ms);
+}
+

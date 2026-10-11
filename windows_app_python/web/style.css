@@ -1,792 +1,606 @@
 /* ==========================================================================
-   Figma 1:1 Pixel-Perfect Light Theme Styles (Frameless Window Update)
+   VoxTriple Webview Frontend - 3-Column Seamless Physical Hardware Layout
+   1:1 Real 3D Anodized Aluminum Enclosure, Square Keycaps, Seamless Panel
    ========================================================================== */
 
 :root {
-    --bg-app: #f4f5f6;
-    --bg-card: #ffffff;
-    --border-color: #eaeaea;
-    --text-primary: #121212;
-    --text-muted: #969696;
-    --text-inactive: #b4b4b8;
-    --accent-orange: #ff6b00;
-    --accent-orange-bg: #fff0e6;
-    --accent-black: #121212;
-    --btn-gray: #f0f0f2;
-    --btn-gray-hover: #e5e5e7;
-    --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.02), 0 2px 8px rgba(0, 0, 0, 0.02);
-    --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
-    --border-radius-lg: 16px;
-    --border-radius-md: 10px;
-    --border-radius-sm: 6px;
+    /* Color Palette */
+    --app-bg: #ececee;
+    --card-bg: #ffffff;
+    --container-bg: #f4f4f7;
+    --container-sub: #f8f8fa;
+    --border-color: #dcdce2;
+    --border-soft: #e8e8ed;
+    
+    --fg-strong: #111111;
+    --fg-default: #2d3139;
+    --fg-muted: #717682;
+    --fg-light: #9ca3af;
+    
+    --accent-orange: #f97316;
+    --accent-orange-hover: #ea580c;
+    --accent-soft: #fff4ea;
+    
+    --status-green: #16a34a;
+    --status-red: #ef4444;
+    
+    /* Native Modern System Typography (原版现代饱满无衬线字体) */
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    
+    /* Radii */
+    --r-card: 18px;
+    --r-panel: 14px;
+    --r-control: 8px;
+    --r-pill: 9999px;
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.04);
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
+    --shadow-keycap: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --shadow-keycap-active: 0 0 0 2.5px var(--accent-orange), 0 3px 12px rgba(249, 115, 22, 0.35);
 }
 
-* {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    user-select: none;
-    -webkit-user-drag: none;
+    font-family: var(--font-main);
 }
 
 body {
-    background-color: var(--bg-app);
-    color: var(--text-primary);
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background: var(--app-bg);
+    color: var(--fg-strong);
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    overflow: hidden; /* 彻底禁止滚动条，尺寸固定自适应 */
+    padding: 12px 18px 12px; /* 紧凑缓冲，适配窗口高度缩减 */
 }
 
 .app-container {
-    width: 100%;
-    height: 100%;
-    padding: 16px;
+    max-width: 1040px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 9px;
 }
 
-/* ── 1. 自定义无边框窗口标题栏 (可拖拽) ─────────────────────────────────── */
-.custom-titlebar {
-    display: flex;
-    justify-content: flex-end; /* logo靠右对齐 */
-    align-items: center;
-    height: 40px;
-    width: 100%;
+button {
+    font-family: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
     background: transparent;
-    padding: 0 16px;
+    transition: all 0.18s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.logo-card {
+/* ==========================================================================
+   1. 顶部 Header 栏（品牌卡片 + 状态与设备控制条）
+   ========================================================================== */
+.topbar {
     display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.logo-img {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    object-fit: contain;
-}
-
-.logo-title {
-    font-size: 15px;
-    font-weight: 750;
-    color: #121212;
-    letter-spacing: -0.3px;
-}
-
-.logo-version {
-    font-size: 10px;
-    color: var(--text-inactive);
-    font-weight: 600;
-    background-color: #e8e8ec;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 6px;
-}
-
-/* 底部居中：最近按键监测反馈 */
-.bottom-monitor-bar {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 4px;
-}
-
-.live-monitor {
-    background-color: var(--bg-card);
-    border-radius: 20px;
-    padding: 8px 24px;
-    display: flex;
-    align-items: center;
     gap: 12px;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(0, 0, 0, 0.04);
+    align-items: stretch;
 }
 
-.monitor-label {
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--text-inactive);
-    letter-spacing: 0.8px;
-}
-
-.monitor-value {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--accent-orange);
-    letter-spacing: 0.5px;
-    background: var(--accent-orange-bg);
-    padding: 3px 12px;
-    border-radius: 12px;
-    min-width: 80px;
-    text-align: center;
-    transition: transform 0.1s ease;
-}
-
-
-
-/* ── 2. 设备连接控制横栏 (第二行) ──────────────────────────────────────── */
-.device-connection-bar {
-    background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    height: 56px;
-    width: 100%;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(0, 0, 0, 0.01);
-}
-
-.status-indicator {
+/* 品牌卡片 */
+.brand-card {
+    flex: 0 0 220px;
+    background: var(--card-bg);
+    border-radius: var(--r-card);
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 120px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+.brand-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: block;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.status-dot.connected {
-    background-color: #2ed573;
-    box-shadow: 0 0 10px rgba(46, 213, 115, 0.4);
-}
-
-.status-dot.disconnected {
-    background-color: #a4a4a8;
-}
-
-.status-text {
-    font-size: 13px;
-    font-weight: 600;
-    color: #555;
-}
-
-.divider {
-    width: 1px;
-    height: 24px;
-    background-color: var(--border-color);
-    margin: 0 16px;
-}
-
-.port-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.control-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--text-inactive);
-    letter-spacing: 0.8px;
-}
-
-.select-wrapper {
-    position: relative;
-}
-
-select {
-    appearance: none;
-    background: #f4f4f6;
-    border: none;
-    border-radius: var(--border-radius-md);
-    padding: 6px 30px 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-primary);
-    cursor: pointer;
-    min-width: 140px;
-    outline: none;
-    transition: background 0.15s;
-}
-
-select:hover {
-    background: #eaeaec;
-}
-
-.select-wrapper::after {
-    content: "";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 4px solid transparent;
-    border-top-color: #555;
-    pointer-events: none;
-}
-
-/* 新增：串口刷新按钮 */
-.btn-refresh {
-    background: #f4f4f6;
-    border: none;
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    color: #555;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.25s ease;
-}
-
-.btn-refresh:hover {
-    background: #eaeaec;
-    transform: rotate(180deg);
-}
-
-.btn {
-    border: none;
-    border-radius: var(--border-radius-md);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.15s ease;
-    height: 32px;
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-connect {
-    background-color: var(--accent-black);
-    color: #fff;
-    margin-left: 12px;
-    border-radius: 16px;
-    padding: 0 20px;
-}
-
-.btn-connect:hover {
-    opacity: 0.9;
-    transform: scale(0.98);
-}
-
-.btn-connect.connected-state {
-    background-color: #ff3b30;
-}
-
-.btn-write-config-large {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(255, 107, 0, 0.25);
-    border-radius: 20px;
-    padding: 0 24px;
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.8px;
-    height: 40px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-write-config-large:not([disabled]):hover {
-    opacity: 0.9;
-    transform: scale(0.98);
-}
-
-.btn-write-config-large[disabled] {
-    background-color: var(--btn-gray);
-    color: var(--text-inactive);
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
-.write-btn-wrapper {
-    padding: 0;
-    margin-top: 12px;
-    width: 100%;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-.firmware-section {
+.brand-info {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
-}
-
-.firmware-version {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.firmware-status-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.firmware-status-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.btn-update-trigger {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.2);
-    border-radius: 16px;
-    padding: 0 16px;
-    font-weight: 800;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    height: 32px;
-    margin-left: 12px;
-    display: none; /* 默认隐藏，有更新时动态显示 */
-    align-items: center;
-    justify-content: center;
-}
-
-/* ── 开发板型号选择与切换 ── */
-.board-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
     gap: 2px;
 }
 
-.board-control-wrapper {
+.brand-title {
+    font-weight: 800;
+    font-size: 17px;
+    line-height: 1.1;
+    color: var(--fg-strong);
+    letter-spacing: -0.3px;
+}
+
+.brand-sub-row {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
-.board-select-wrapper select {
-    min-width: 124px;
-    padding: 4px 24px 4px 10px;
-    font-size: 11px;
-    height: 26px;
-    background: #f4f4f6;
-    border-radius: var(--border-radius-md);
+.brand-sub {
+    font-size: 10.5px;
+    color: var(--fg-muted);
+    font-weight: 500;
 }
 
-.btn-board-switch {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: 13px;
-    padding: 0 10px;
-    font-size: 10px;
-    font-weight: 800;
-    height: 24px;
-    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
+/* 客户端升级小图标按钮（纯图标，小巧精致） */
+.btn-app-upgrade-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+    border-radius: 5px;
+    background: var(--container-bg);
+    border: 1px solid var(--border-color);
+    color: var(--fg-muted);
     transition: all 0.15s ease;
 }
 
-.btn-board-switch:hover {
-    opacity: 0.9;
-    transform: scale(0.98);
+.btn-app-upgrade-icon:hover {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
+    transform: scale(1.08);
 }
 
-.btn-update-trigger:hover {
-    opacity: 0.9;
-    transform: scale(0.98);
-}
-
-.board-section {
+/* 状态与控制条（严禁换行 flex-wrap: nowrap，确保连接前后高度绝对锁定 50px 不变） */
+.statusbar {
+    flex: 1 1 auto;
+    background: var(--card-bg);
+    border-radius: var(--r-card);
+    padding: 8px 14px;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    min-width: 0;
+    flex-wrap: nowrap; /* 绝对单行排布，禁止换行撑高 */
+    overflow: hidden;
 }
 
-.board-control-wrapper {
-    display: flex;
+/* 串口选择 */
+.port-control {
+    display: inline-flex;
     align-items: center;
     gap: 6px;
+    background: var(--container-bg);
+    border-radius: var(--r-control);
+    padding: 0 8px 0 10px;
+    height: 32px;
+    border: 1px solid var(--border-soft);
+    max-width: 175px;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
-.board-select-wrapper select {
-    min-width: 125px;
-    padding: 4px 26px 4px 10px;
-    font-size: 11px;
-    height: 28px;
-}
-
-.btn-board-switch {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: 14px;
-    padding: 0 10px;
-    font-weight: 800;
+.control-label {
     font-size: 10px;
-    height: 28px;
-    display: none;
+    font-weight: 800;
+    color: var(--fg-muted);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.select-wrapper {
+    min-width: 0;
+}
+
+.select-wrapper select {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--fg-default);
+    cursor: pointer;
+    padding-right: 4px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-refresh {
+    display: flex;
     align-items: center;
     justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    color: var(--fg-muted);
+    transition: all 0.2s ease;
+}
+
+.btn-refresh:hover {
+    color: var(--fg-strong);
+    background: rgba(0, 0, 0, 0.06);
+    transform: rotate(90deg);
+}
+
+/* USB 连接状态按钮（固定宽度 126px 防止挤压右侧 HOST，未连全黑，已连全绿，断开悬停全红） */
+.btn-connect {
+    width: 126px;
+    min-width: 126px;
+    max-width: 126px;
+    height: 32px;
+    border-radius: var(--r-control);
+    background-color: #18181b; /* 未连接：深黑色 */
+    color: #ffffff;            /* 纯白字 */
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.18s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
+    border: none;
 }
 
-.btn-board-switch:hover {
-    opacity: 0.9;
-    transform: scale(0.96);
+.btn-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #71717a;
+    transition: background-color 0.18s ease;
 }
 
-/* ── 休眠等待时间选择控件 ── */
-.sleep-timeout-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
+.btn-connect:hover {
+    background-color: #27272a;
 }
 
-.sleep-timeout-control-wrapper {
-    display: flex;
+/* 已连接状态：全绿色白字 */
+.btn-connect.connected-state {
+    background-color: #16a34a; /* 全绿 */
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
+}
+
+.btn-connect.connected-state .btn-status-dot {
+    background-color: #ffffff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+
+/* 已连接悬停：提示可点击断开，呈现全红警示 */
+.btn-connect.connected-state:hover {
+    background-color: #dc2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+}
+
+/* 双设备切换 HOST Pills */
+.host-switch-section {
+    display: inline-flex;
     align-items: center;
     gap: 6px;
+    background: var(--container-bg);
+    border-radius: var(--r-control);
+    padding: 2px 6px 2px 10px;
+    height: 32px;
+    border: 1px solid var(--border-soft);
 }
 
-.sleep-timeout-select-wrapper select {
-    min-width: 86px;
-    padding: 4px 26px 4px 10px;
+.host-switch-pills {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.host-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
     font-size: 11px;
-    height: 28px;
+    font-weight: 700;
+    color: var(--fg-muted);
+    background: transparent;
+    transition: all 0.15s ease;
 }
 
-.btn-sleep-timeout-apply {
-    background-color: var(--accent-orange);
-    color: #ffffff;
-    border-radius: 14px;
-    padding: 0 10px;
-    font-weight: 800;
-    font-size: 10px;
-    height: 28px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
+.host-pill:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--fg-strong);
 }
 
-.btn-sleep-timeout-apply:hover {
-    opacity: 0.9;
-    transform: scale(0.96);
+.host-pill.active {
+    background: var(--card-bg);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* ── 遗忘蓝牙连接重置按钮 ── */
-.reset-bt-section {
-    display: flex;
-    align-items: center;
+.host-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
 }
 
+.host-status-dot.paired {
+    background: #16a34a;
+    box-shadow: 0 0 5px rgba(22, 163, 74, 0.6);
+}
+
+.host-status-dot.empty {
+    background: #f97316;
+    box-shadow: 0 0 4px rgba(249, 115, 22, 0.4);
+}
+
+/* 遗忘蓝牙连接按钮 */
 .btn-reset-bt {
-    background: rgba(239, 68, 68, 0.12);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.28);
-    border-radius: 14px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--r-control);
     padding: 0 10px;
     font-weight: 700;
-    font-size: 10px;
-    height: 28px;
-    display: flex;
+    font-size: 10.5px;
+    height: 32px;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    gap: 5px;
     white-space: nowrap;
 }
 
 .btn-reset-bt:hover {
-    background: rgba(239, 68, 68, 0.25);
-    border-color: rgba(239, 68, 68, 0.5);
-    color: #fca5a5;
-    transform: scale(0.96);
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #dc2626;
+    transform: scale(0.98);
 }
 
-/* ── 3. 主排版 ─────────────────────────────────────────────────────────── */
+/* ==========================================================================
+   2. 主核心区域：视觉打通的三栏大面板（左：设置，中：铝合金机身，右：按键捕获与保存）
+   ========================================================================== */
 .main-layout {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    flex-grow: 1;
+    gap: 12px;
 }
 
-.section {
-    background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
-    padding: 20px;
+.panel {
+    background: var(--card-bg);
+    border-radius: var(--r-card);
     box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(0, 0, 0, 0.01);
+    border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
-.section-header {
+.keymap-panel {
+    padding: 20px 24px;
+    overflow: hidden;
+}
+
+/* 占位固定隐藏类：保留尺寸与布局空间，避免界面跳动 */
+.panel-hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 视觉完全打通：固定 3 栏对称网格（240px - 1fr - 240px），中间产品图绝对居中且位置锁死 */
+.keymap-split-three {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    align-items: center; /* 左右和中间各自在其占位区域上下居中对齐 */
+    justify-items: center;
+    gap: 16px;
+    min-height: 545px; /* 增加 60 像素，赋予产品示意图充裕的呼吸空间并消除窗口底部多余空白 */
+    width: 100%;
+}
+
+/* 通用面板标题 */
+.panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
 }
 
-.section-title {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--text-inactive);
-    letter-spacing: 1px;
-}
-
-.section-tips {
-    font-size: 11px;
-    color: var(--text-inactive);
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
-
-/* ── 按键网格 & 卡片 ────────────────────────────────────────────────────── */
-.key-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-}
-
-.key-card {
-    background: #f8f9fa;
-    border-radius: var(--border-radius-lg);
-    padding: 16px;
-    border: 1px solid #f0f0f2;
-    transition: all 0.2s ease;
-    display: flex;
+.center-header {
     flex-direction: column;
-    height: 210px;
-}
-
-.key-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.02);
-    border-color: #e5e5ea;
-}
-
-.key-card.capturing-state {
-    border-color: var(--accent-orange);
-    box-shadow: 0 0 12px rgba(255, 107, 0, 0.1);
-    background: #fffcfb;
-}
-
-/* 物理按键敲击时弹跳闪烁动画 */
-@keyframes pulse-physical {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.04); border-color: var(--accent-orange); box-shadow: 0 0 16px rgba(255, 107, 0, 0.15); background: #fffcfb; }
-    100% { transform: scale(1); }
-}
-
-.key-card.physical-pressed {
-    animation: pulse-physical 0.25s ease-out;
-}
-
-.key-card-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-}
-
-.key-card-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-inactive);
-    letter-spacing: 0.5px;
-}
-
-.btn-capture {
-    background-color: var(--accent-black);
-    color: #fff;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    font-size: 9px;
-    font-weight: 800;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background 0.15s;
-    letter-spacing: 0.5px;
-}
-
-.btn-capture:hover {
-    opacity: 0.85;
-}
-
-.key-card.capturing-state .btn-capture {
-    background-color: var(--accent-orange);
-}
-
-.key-display {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.5px;
-}
-
-.key-card.active-display .key-display {
-    color: var(--accent-orange);
-}
-
-.modifiers-container {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.mods-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 4px;
-}
-
-.mod-pill {
-    flex: 1;
-    text-align: center;
-    background: transparent;
-    color: var(--text-inactive);
-    font-size: 10px;
-    font-weight: 600;
-    padding: 4px 0;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    border: 1px solid transparent;
-}
-
-.mod-pill:hover {
-    color: #666;
-    background-color: #eaeaea;
-}
-
-.mod-pill.active {
-    color: var(--accent-orange);
-    font-weight: 700;
-    background-color: var(--accent-orange-bg);
-}
-
-/* ── 下半区排版 ─────────────────────────────────────────────────────────── */
-.bottom-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 16px;
-    height: 270px;
-}
-
-/* 左半：硬件级设置控制面板 */
-.left-settings {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.setting-card {
-    background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
-    padding: 16px 20px;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(0, 0, 0, 0.01);
-}
-
-.mic-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 70px;
-}
-
-.setting-icon-desc {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.setting-svg {
-    color: var(--text-inactive);
-}
-
-.setting-texts {
-    display: flex;
-    flex-direction: column;
     gap: 2px;
+    margin-bottom: 10px;
 }
 
-.setting-name {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.setting-sub {
-    font-size: 10px;
-    color: var(--text-inactive);
-    font-weight: 500;
-}
-
-.power-card-main {
-    flex-grow: 1;
+.panel-title-wrapper {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 184px;
-}
-
-.power-section-header {
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--text-inactive);
-    letter-spacing: 1.2px;
-    margin-bottom: 6px;
-}
-
-.power-row {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-}
-
-.power-row-tx {
-    display: flex;
-    flex-direction: column;
     gap: 8px;
 }
 
-.tx-text-header {
+.panel-title {
+    color: var(--fg-muted);
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+.panel-subtitle {
+    font-size: 10px;
+    color: #9aa0a6;
+    font-weight: 500;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   【左栏】：节能与硬件设置面板 (settings-panel) - 固定 240px 占位居中
+   ────────────────────────────────────────────────────────────────────────── */
+.settings-panel {
+    width: 240px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* 当前配对频道水印文本（纯文字直接展示，大粗体浅浅灰色，无单独背景框） */
+.pair-watermark-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 2px;
+    user-select: none;
+    box-shadow: none;
+    color: #cbd2dc; /* 更加浅淡、轻盈透亮的水印浅灰！ */
+}
+
+.pair-watermark-os-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: inherit;
+    line-height: 1;
+}
+
+.pair-watermark-text {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: inherit;
+    text-transform: uppercase;
+    line-height: 1;
+    font-family: inherit;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Settings 区块底部的保存配置按钮（与上方拉开显著间距，醒目桔色高亮） */
+.settings-bottom-action {
+    display: flex;
+    width: 100%;
+    margin-top: 18px;
+}
+
+.settings-bottom-action .save-action-btn {
+    width: 100%;
+    height: 38px;
+    border-radius: var(--r-control);
+    background: var(--accent-orange); /* 鲜明充满质感的桔色！ */
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 3px 10px rgba(249, 115, 22, 0.3);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    cursor: pointer;
+}
+
+.settings-bottom-action .save-action-btn:not([disabled]):hover {
+    background: var(--accent-orange-hover);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.45);
+    transform: translateY(-1px);
+}
+
+.settings-bottom-action .save-action-btn[disabled] {
+    background: #e4e4e8;
+    color: #9c9ca3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.setting-item-card {
+    background: #fafafc;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-panel);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.setting-item-column {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.setting-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.setting-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--fg-strong);
+}
+
+.setting-desc {
+    font-size: 9.5px;
+    color: var(--fg-muted);
+    font-weight: 500;
+}
+
+.setting-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.tx-val-badge {
+.sleep-select-full select {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-control);
+    padding: 5px 8px;
     font-size: 11px;
-    font-weight: 800;
-    color: var(--accent-orange);
-    letter-spacing: 0.3px;
+    font-weight: 600;
+    color: var(--fg-default);
+    cursor: pointer;
 }
 
-/* 8格分段条 */
+/* 8格分段式功率选择器 */
 .power-bar-segments {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
-    height: 8px;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2px;
 }
 
 .power-segment {
-    background-color: #e5e5ea;
-    border-radius: 4px;
+    flex: 1;
+    height: 16px;
+    background-color: #e2e2e7;
+    border-radius: 2px;
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -796,15 +610,22 @@ select:hover {
 }
 
 .power-segment:hover {
-    transform: scaleY(1.2);
+    transform: scaleY(1.18);
 }
 
-/* ── 橙色 Switch 控件 ────────────────────────────────────────────────────── */
+.tx-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent-orange);
+}
+
+/* 开关 Toggle */
 .switch-toggle {
     position: relative;
     display: inline-block;
-    width: 44px;
-    height: 24px;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
 }
 
 .switch-toggle input {
@@ -816,163 +637,662 @@ select:hover {
 .switch-slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #e5e5ea;
-    transition: .25s ease;
-    border-radius: 24px;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #d1d1d6;
+    transition: .25s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: var(--r-pill);
 }
 
 .switch-slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
     background-color: white;
-    transition: .25s ease;
+    transition: .25s cubic-bezier(0.25, 1, 0.5, 1);
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-input:checked + .switch-slider {
+.switch-toggle input:checked + .switch-slider {
     background-color: var(--accent-orange);
 }
 
-input:checked + .switch-slider:before {
-    transform: translateX(20px);
+.switch-toggle input:checked + .switch-slider:before {
+    transform: translateX(16px);
 }
 
-/* ── 右半区: OTA升级 ────────────────────────────────────────────────────────── */
-.right-ota {
-    flex-grow: 1;
-}
-
-.ota-card {
-    height: 100%;
-    background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
-    padding: 20px;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(0, 0, 0, 0.01);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.ota-sub-header {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.upload-dropzone {
-    border: 1.5px dashed #d1d1d6;
-    background: #fafafb;
-    border-radius: var(--border-radius-md);
-    padding: 16px;
+/* ──────────────────────────────────────────────────────────────────────────
+   【中栏】：1:1 真实铝合金阳极氧化机身 (device-panel) - 键隙对称、正下方保存按钮
+   ────────────────────────────────────────────────────────────────────────── */
+.device-panel {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.vertical-device-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* 产品示意图正下方的操作系统识别图标（小巧精致，无文字，位置完全锁定固定） */
+.device-os-indicator-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    margin-top: 10px;
+}
+
+/* 拟物化铝合金竖向外壳（按键周围与外壳四周间隔完全一致，外侧一圈浅灰白色倒角高光） */
+.virtual-device-body-vertical {
+    width: 106px;
+    background: linear-gradient(170deg, #eaecef 0%, #d8dce2 50%, #c6ccd5 100%);
+    border-radius: 20px;
+    padding: 10px 8px 8px;
+    border: 1px solid #b4b9c2;
+    box-shadow: 
+        0 0 0 2px #f4f6fa, /* 铝合金外圈浅浅的灰白倒角切面高光！ */
+        0 0 0 3px #c6ccd5, /* 倒角外边界阴影线条 */
+        0 20px 42px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    user-select: none;
+}
+
+/* 右侧物理小侧键凸起 */
+.virtual-device-body-vertical::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    top: 50px;
+    width: 4px;
+    height: 18px;
+    background: #b0b5be;
+    border-radius: 2px;
+    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.25);
+}
+
+/* 顶部麦克风区域（约占一个按键高度，透明占位，与外壳同色） */
+.virtual-mic-slot-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 68px;
+    width: 90px;
+    border-radius: 8px;
+    margin-bottom: 7px;
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    background: transparent;
+    border: none;
+    color: #6b7280; /* 关闭状态：灰色 */
+}
+
+.mic-glyph-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+}
+
+.mic-slot-icon {
+    color: inherit;
     transition: all 0.2s ease;
-    height: 94px;
 }
 
-.upload-dropzone:hover {
-    border-color: var(--accent-orange);
-    background: #fffcfb;
+/* 关闭状态禁止符号（圆圈+斜杠）：覆盖在灰色麦克风图标上 */
+.mic-disabled-slash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: inherit;
+    opacity: 0.92;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    display: block;
 }
 
-.upload-svg {
-    color: var(--text-inactive);
-    transition: color 0.2s;
+.mic-status-text {
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: inherit;
+    transition: all 0.2s ease;
 }
 
-.upload-dropzone:hover .upload-svg {
+/* 开启状态：鲜明亮丽的橘色，发光，隐藏禁止符号 */
+.virtual-mic-slot-vertical.active {
     color: var(--accent-orange);
 }
 
-.upload-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-primary);
+.virtual-mic-slot-vertical.active .mic-slot-icon {
+    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.45));
 }
 
-.upload-sub {
-    font-size: 10px;
-    color: var(--text-inactive);
-    font-weight: 500;
-    text-align: center;
-    max-width: 260px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.virtual-mic-slot-vertical.active .mic-disabled-slash {
+    display: none;
 }
 
-.ota-progress-section {
-    margin-top: 4px;
+/* 鼠标悬停 (mouse over)：高对比度纯正质感黑色，界限分明！ */
+.virtual-mic-slot-vertical:hover {
+    color: #111827 !important;
+    background: transparent;
+    border: none;
+    transform: translateY(-1px);
 }
 
-.progress-texts {
+.virtual-mic-slot-vertical:hover .mic-slot-icon {
+    filter: none;
+}
+
+/* 下凹按键槽（Button Well）：浅一点点的精致深灰色，四周留白与按键间距皆为 7px */
+.device-keys-column {
+    width: 90px;
+    background: #464a52; /* 浅一点点的精致深灰色！ */
+    border-radius: 10px;
+    padding: 7px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35), inset 0 -1px 1px rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+/* 纯白方块 3D 拟物键帽（正方形 76px × 76px） */
+.virtual-keycap {
+    width: 76px;
+    height: 76px;
+    background: linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%);
+    border-radius: 6px;
+    padding: 6px 7px;
+    cursor: pointer;
+    border: 1px solid #dcdfe6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.virtual-keycap:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* 选中高亮状态：充满高级感的橘色底 + 纯白字！ */
+.virtual-keycap.active {
+    background: linear-gradient(180deg, #ff8122 0%, #ea580c 100%);
+    border-color: #ea580c;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
+    transform: translateY(-1px);
+}
+
+/* 物理按键下沉按下动画（如实反应真实的 press 持续按压与 release 释放） */
+.virtual-keycap.physical-pressed {
+    transform: translateY(2px) scale(0.97) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.12) !important;
+    background: #e6e7eb !important;
+}
+
+.virtual-keycap.active.physical-pressed {
+    transform: translateY(2px) scale(0.97) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%) !important;
+}
+
+.keycap-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.keycap-top-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
 }
 
-.progress-label {
-    font-size: 11px;
+/* 左上角数字标号（1、2、3、4） */
+.keycap-num {
+    font-size: 9.5px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #9ca3af;
+    line-height: 1;
 }
 
-.progress-percent {
-    font-size: 11px;
+.virtual-keycap.active .keycap-num {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.keycap-mods {
+    font-size: 8px;
     font-weight: 700;
-    color: var(--text-inactive);
+    color: var(--accent-orange);
+    line-height: 1;
 }
 
-.progress-bar-bg {
-    height: 4px;
-    background-color: #f0f0f2;
-    border-radius: 2px;
-    overflow: hidden;
+.virtual-keycap.active .keycap-mods {
+    color: #ffffff;
 }
 
-.progress-bar-fill {
-    height: 100%;
-    background-color: var(--accent-orange);
-    width: 0%;
-    transition: width 0.25s ease-out;
+/* 按键映射文字：字号保持不变（14px），变回醒目的粗体（800） */
+.keycap-value {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800; /* 变回粗体 */
+    color: #1f2937;
+    letter-spacing: -0.2px;
+    margin: auto 0;
+    word-break: break-all;
 }
 
-.btn-flash {
-    width: 100%;
-    background-color: #f2f2f7;
-    color: var(--text-inactive);
-    border-radius: var(--border-radius-md);
-    font-weight: 700;
-    height: 38px;
-    letter-spacing: 0.5px;
-    border: none;
-    outline: none;
+.virtual-keycap.active .keycap-value {
+    color: #ffffff; /* 纯白文字！ */
+    font-weight: 800; /* 同样粗体 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   【右栏】：按键映射具体设置面板 (config-panel) - 固定 240px 占位居中
+   ────────────────────────────────────────────────────────────────────────── */
+.config-panel {
+    width: 240px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.config-top-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 操作系统类型识别徽章（小巧正方形胶囊，纯图标） */
+.os-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 24px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.os-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.os-apple {
+    background: rgba(0, 0, 0, 0.06);
+    color: #111111;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.os-windows {
+    background: rgba(0, 120, 215, 0.1);
+    color: #0078d7;
+    border: 1px solid rgba(0, 120, 215, 0.2);
+}
+
+/* 焦点捕获卡片（整块虚线区域可点击触发录制） */
+.capture-view {
+    background: #fafafc;
+    border-radius: var(--r-panel);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 165px;
+    border: 1.5px dashed var(--border-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+    transition: all 0.22s ease;
     cursor: pointer;
+}
+
+.capture-view:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.capture-view.listening {
+    border-color: var(--accent-orange);
+    background: var(--accent-soft);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.14);
+}
+
+.capture-view.listening:hover {
+    border-color: var(--accent-orange);
+    background: var(--accent-soft);
+    transform: none;
+}
+
+.capture-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.capture-key-index {
+    color: var(--fg-muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* 按键映射大字主显示（恢复之前饱满大气的原生无衬线粗体字体） */
+.capture-key-display {
+    text-align: center;
+    font-weight: 800;
+    font-size: 30px;
+    color: var(--fg-strong);
+    margin: auto 0;
+    letter-spacing: -0.5px;
+    word-break: break-all;
+    transition: color 0.2s ease;
+}
+
+.capture-view.listening .capture-key-display {
+    color: var(--accent-orange);
+}
+
+.capture-hint {
+    font-size: 9.5px;
+    color: var(--fg-muted);
+    text-align: center;
+    font-weight: 500;
+}
+
+/* 2x4 修饰键网格 */
+.modifiers-section {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.modifiers-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fg-muted);
+    letter-spacing: 0.8px;
+}
+
+.modifier-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+}
+
+.mod-pill {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-control);
+    padding: 7px 8px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--fg-default);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.mod-pill:hover {
+    background: #f4f4f7;
+    border-color: #c8c8cf;
+    transform: translateY(-0.5px);
+}
+
+.mod-pill.active {
+    background: #18181b;
+    color: #ffffff;
+    border-color: #18181b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 右下角：保存写入硬件大按钮 */
+.config-bottom-action {
+    margin-top: 6px;
+}
+
+.save-action-btn {
+    width: 100%;
+    height: 42px;
+    border-radius: var(--r-panel);
+    background: #18181b;
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.save-action-btn:not([disabled]):hover {
+    background: var(--accent-orange);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+    transform: translateY(-1px);
+}
+
+.save-action-btn[disabled] {
+    background: #e4e4e8;
+    color: #9c9ca3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ==========================================================================
+   3. 下半区：OTA 固件升级面板（ESP32 固件版本展示与刷写）
+   高度与内部所有元素尺寸彻底固定，杜绝动态内容撑高
+   ========================================================================== */
+.ota-panel {
+    padding: 12px 20px 14px;
+    height: 106px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ota-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+.ota-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 28px;
+}
+
+.ota-icon {
+    color: #4b5563; /* 深灰色，低调沉稳，不再用桔色 */
+}
+
+.ota-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--fg-strong);
+    letter-spacing: 0.6px;
+}
+
+/* ESP32 固件版本专属胶囊徽章（位于 OTA 标题旁，尺寸锁定，固定占位隐藏） */
+.firmware-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--container-bg);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-control);
+    padding: 0 9px;
+    height: 24px;
+    box-sizing: border-box;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.firmware-ver {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--fg-default);
+}
+
+.firmware-status-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--status-green);
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.ota-subtitle {
+    font-size: 10.5px;
+    color: var(--fg-muted);
+}
+
+.ota-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+    height: 38px;
+}
+
+.ota-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.btn-ota-action {
+    height: 38px;
+    border-radius: var(--r-control);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
     transition: all 0.15s ease;
 }
 
-.btn-flash:not([disabled]) {
-    background-color: var(--accent-orange);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15);
+.btn-ota-local {
+    background: var(--container-bg);
+    color: var(--fg-strong);
+    border: 1px solid var(--border-color);
 }
 
-.btn-flash:not([disabled]):hover {
-    opacity: 0.9;
-    transform: scale(0.99);
+.btn-ota-local:hover {
+    background: #e9e9ee;
+    transform: translateY(-0.5px);
+}
+
+/* Cloud Update 按钮：改为低调典雅的灰色，不再刺眼 */
+.btn-ota-cloud {
+    background: var(--container-bg);
+    color: var(--fg-strong);
+    border: 1px solid var(--border-color);
+    box-shadow: none;
+}
+
+.btn-ota-cloud:hover {
+    background: #e9e9ee;
+    border-color: #c8c8cf;
+    transform: translateY(-0.5px);
+}
+
+/* 进度条：单行横向排布，右侧固定文字占位杜绝进度条跳动 */
+.ota-progress-box {
+    background: var(--container-bg);
+    border-radius: var(--r-control);
+    padding: 0 14px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
+    border: 1px solid var(--border-soft);
+    box-sizing: border-box;
+}
+
+.progress-bar-bg {
+    flex: 1;
+    min-width: 0;
+    height: 6px;
+    background: #e2e2e7;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-orange);
+    width: 0%;
+    transition: width 0.15s ease-out;
+}
+
+.progress-status-text {
+    width: 125px;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 10.5px;
+    font-weight: 700;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    color: var(--fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+}
+
+/* ==========================================================================
+   4. 响应式与小屏幕适配
+   ========================================================================== */
+@media (max-width: 900px) {
+    .keymap-split-three {
+        grid-template-columns: 1fr;
+    }
+    .ota-body {
+        grid-template-columns: 1fr;
+    }
 }

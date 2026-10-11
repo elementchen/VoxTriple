@@ -4,61 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoxTriple Config Client</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- 1. 全等宽自定义窗口标题栏（支持拖拽 & 最右侧关闭按钮） -->
-        <div class="custom-titlebar">
-            <div class="logo-card">
-                <img src="logo.png" alt="Logo" class="logo-img">
-                <span class="logo-title">KeyMapper</span>
-                <span class="logo-version" id="app-version">v1.0.15</span>
-            </div>
-        </div>
-
-        <!-- 2. 全等宽设备连接控制横栏 -->
-        <div class="device-connection-bar">
-            <div class="status-indicator">
-                <span class="status-dot disconnected" id="status-dot"></span>
-                <span class="status-text" id="status-text">Disconnected</span>
-            </div>
-            
-            <div class="divider"></div>
-            
-            <div class="port-section">
-                <span class="control-label">PORT</span>
-                <div class="select-wrapper">
-                    <select id="port-select">
-                        <option value="">No Devices</option>
-                    </select>
+        <!-- 1. 顶部 Header 栏：品牌卡片 + 状态连接胶囊栏 -->
+        <header class="topbar">
+            <!-- 品牌标识卡片 -->
+            <div class="brand-card">
+                <img src="logo.png" alt="Logo" class="brand-img">
+                <div class="brand-info">
+                    <span class="brand-title">KeyMapper</span>
+                    <span class="brand-sub">VoxTriple Classic · <span id="app-version">v1.0.17</span></span>
                 </div>
-                <!-- 旋转刷新按钮 -->
-                <button class="btn-refresh" id="btn-refresh" onclick="pollPorts()" title="Refresh Port List">
-                    <svg viewBox="0 0 24 24" width="12" height="12">
-                        <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.07 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-                    </svg>
-                </button>
             </div>
-            
-            <button class="btn btn-connect" id="btn-connect">CONNECT</button>
-            
-            <div class="divider"></div>
-            
-            <div class="firmware-section" id="firmware-section" style="display: none;">
-                <span class="control-label">FIRMWARE</span>
-                <div class="firmware-status-wrapper">
-                    <span class="firmware-version" id="firmware-ver">v--</span>
+
+            <!-- 状态与设备控制条 -->
+            <div class="statusbar">
+                <!-- 连接状态胶囊 -->
+                <div class="conn-pill" id="conn-pill" data-state="disconnected">
+                    <span class="conn-dot" id="status-dot"></span>
+                    <span class="conn-text" id="status-text">Disconnected</span>
+                </div>
+
+                <div class="status-divider"></div>
+
+                <!-- 串口选择 -->
+                <div class="port-control">
+                    <span class="control-label">PORT</span>
+                    <div class="select-wrapper">
+                        <select id="port-select">
+                            <option value="">No Devices</option>
+                        </select>
+                    </div>
+                    <button class="btn-refresh" id="btn-refresh" onclick="pollPorts()" title="Refresh Port List">
+                        <svg viewBox="0 0 24 24" width="12" height="12">
+                            <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.07 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- 连接按钮 -->
+                <button class="btn-connect" id="btn-connect">CONNECT</button>
+
+                <!-- 固件版本信息（连接后显示） -->
+                <div class="firmware-badge" id="firmware-section" style="display: none;">
+                    <span class="control-label">FW</span>
+                    <span class="firmware-ver" id="firmware-ver">v--</span>
                     <span class="firmware-status-label" id="firmware-status-label"></span>
                 </div>
-            </div>
 
-            <div class="divider" id="sleep-timeout-divider" style="display: none;"></div>
 
-            <div class="sleep-timeout-section" id="sleep-timeout-section" style="display: none;">
-                <span class="control-label">SLEEP</span>
-                <div class="sleep-timeout-control-wrapper">
-                    <div class="select-wrapper sleep-timeout-select-wrapper">
+                <!-- 深度休眠时间选择（连接后显示） -->
+                <div class="sleep-badge" id="sleep-timeout-section" style="display: none;">
+                    <span class="control-label">SLEEP</span>
+                    <div class="select-wrapper sleep-select-wrapper">
                         <select id="sleep-timeout-select" onchange="onSleepTimeoutChange()">
                             <option value="1">1 min</option>
                             <option value="2">2 min</option>
@@ -71,234 +74,223 @@
                             <option value="60">60 min</option>
                         </select>
                     </div>
-                    <button class="btn btn-sleep-timeout-apply" id="btn-sleep-timeout-apply" onclick="applySleepTimeout()" style="display: none;" title="Save &amp; Apply Sleep Timeout">APPLY</button>
+                    <button class="btn-pill-action" id="btn-sleep-timeout-apply" onclick="applySleepTimeout()" style="display: none;" title="Apply Sleep Timeout">APPLY</button>
                 </div>
-            </div>
-            
-            <div class="divider" id="reset-bt-divider" style="display: none;"></div>
 
-            <div class="reset-bt-section" id="reset-bt-section" style="display: none;">
-                <button class="btn btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="遗忘蓝牙连接：清空当前配对并重启，以便配对新电脑（按键与板型等设置均保留）">
-                    <svg viewBox="0 0 24 24" width="12" height="12" style="margin-right: 3px; vertical-align: -1px;">
-                        <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
-                    </svg>FORGET BT
-                </button>
-            </div>
-            
-            <!-- 仅在有固件更新时动态显示的智能升级按钮 -->
-            <button class="btn btn-update-trigger" id="btn-update-trigger" style="display: none;" title="Start Smart Firmware Upgrade">UPDATE</button>
-        </div>
+                <!-- 遗忘蓝牙连接按钮（连接后显示） -->
+                <div class="reset-bt-wrapper" id="reset-bt-section" style="display: none;">
+                    <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="遗忘蓝牙配对：清空设备配对并重启">
+                        <svg viewBox="0 0 24 24" width="11" height="11">
+                            <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
+                        </svg>
+                        FORGET BT
+                    </button>
+                </div>
 
-        <!-- 3. 键盘按键映射配置区域 -->
+                <!-- 固件升级触发按钮（仅有新固件时显示） -->
+                <button class="btn-update-trigger" id="btn-update-trigger" style="display: none;" onclick="triggerSmartUpdate()" title="Start Smart Firmware Upgrade">UPDATE</button>
+            </div>
+        </header>
+
+        <!-- 2. 主核心区域：OpenDesign 2-Panel 分屏布局 -->
         <main class="main-layout">
-            <section class="section key-mapping-section">
-                <div class="section-header">
-                    <h2 class="section-title">KEY MAPPING</h2>
-                    <span class="section-tips" id="mapping-tips">Click Capture · press any key</span>
+            <section class="panel keymap-panel">
+                <div class="keymap-split">
+
+                    <!-- ============ 左侧栏：按键捕获与修饰键配置 ============ -->
+                    <div class="config-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">KEY MAPPING</h2>
+                            <span class="panel-subtitle" id="mapping-tips">Click Capture · press key</span>
+                        </div>
+
+                        <!-- 焦点捕获卡片 -->
+                        <div class="capture-view" id="captureView">
+                            <div class="capture-header">
+                                <span class="capture-key-index" id="currentKeyIndex">KEY 1</span>
+                                <button class="btn-capture" id="btnCapture" onclick="startKeyCapture(selectedKeyIdx)">CAPTURE</button>
+                            </div>
+                            <div class="capture-key-display" id="keyDisplay">--</div>
+                            <div class="capture-hint">Press any physical key on keyboard</div>
+                        </div>
+
+                        <!-- 2x4 修饰键胶囊网格 -->
+                        <div class="modifiers-section">
+                            <div class="modifiers-label">MODIFIERS</div>
+                            <div class="modifier-grid" id="modifierGrid">
+                                <div class="mod-pill" data-mask="0x01" onclick="toggleMod(selectedKeyIdx, 0x01)">L·Ctrl</div>
+                                <div class="mod-pill" data-mask="0x02" onclick="toggleMod(selectedKeyIdx, 0x02)">L·Shift</div>
+                                <div class="mod-pill" data-mask="0x04" onclick="toggleMod(selectedKeyIdx, 0x04)">L·Alt</div>
+                                <div class="mod-pill" data-mask="0x08" onclick="toggleMod(selectedKeyIdx, 0x08)">L·Cmd</div>
+                                <div class="mod-pill" data-mask="0x10" onclick="toggleMod(selectedKeyIdx, 0x10)">R·Ctrl</div>
+                                <div class="mod-pill" data-mask="0x20" onclick="toggleMod(selectedKeyIdx, 0x20)">R·Shift</div>
+                                <div class="mod-pill" data-mask="0x40" onclick="toggleMod(selectedKeyIdx, 0x40)">R·Alt</div>
+                                <div class="mod-pill" data-mask="0x80" onclick="toggleMod(selectedKeyIdx, 0x80)">R·Cmd</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ 右侧栏：虚拟硬件键盘仿真矩阵 ============ -->
+                    <div class="matrix-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">VIRTUAL KEY MATRIX</h2>
+                            <span class="panel-subtitle">Select a keycap to edit · Physical press animated</span>
+                        </div>
+
+                        <!-- 硬件机身与键帽仿真容器 -->
+                        <div class="keyboard-container">
+                            <div class="virtual-device-body" id="virtualKeyboard">
+                                <!-- 4个物理键帽与麦克风指示标识 -->
+                                <div class="device-keys-row">
+                                    <!-- Key 1 -->
+                                    <div class="virtual-keycap active" data-idx="0" id="key-cap-0" onclick="selectKey(0)">
+                                        <div class="keycap-inner">
+                                            <span class="keycap-num">KEY 1</span>
+                                            <span class="keycap-value" id="cap-val-0">--</span>
+                                            <span class="keycap-mods" id="cap-mods-0"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Key 2 -->
+                                    <div class="virtual-keycap" data-idx="1" id="key-cap-1" onclick="selectKey(1)">
+                                        <div class="keycap-inner">
+                                            <span class="keycap-num">KEY 2</span>
+                                            <span class="keycap-value" id="cap-val-1">--</span>
+                                            <span class="keycap-mods" id="cap-mods-1"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 麦克风物理硬件指示区 -->
+                                    <div class="virtual-mic-slot" title="Integrated Mic (PTT on Button 1)">
+                                        <svg class="mic-slot-icon" viewBox="0 0 24 24" width="20" height="20">
+                                            <rect x="9" y="3" width="6" height="12" rx="3" fill="currentColor"></rect>
+                                            <path d="M5 11a7 7 0 0 0 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                            <path d="M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                        </svg>
+                                        <span class="mic-slot-label">MIC</span>
+                                    </div>
+
+                                    <!-- Key 3 -->
+                                    <div class="virtual-keycap" data-idx="2" id="key-cap-2" onclick="selectKey(2)">
+                                        <div class="keycap-inner">
+                                            <span class="keycap-num">KEY 3</span>
+                                            <span class="keycap-value" id="cap-val-2">--</span>
+                                            <span class="keycap-mods" id="cap-mods-2"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Key 4 -->
+                                    <div class="virtual-keycap" data-idx="3" id="key-cap-3" onclick="selectKey(3)">
+                                        <div class="keycap-inner">
+                                            <span class="keycap-num">KEY 4</span>
+                                            <span class="keycap-value" id="cap-val-3">--</span>
+                                            <span class="keycap-mods" id="cap-mods-3"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 硬件级设置控制条（Microphone, Sleep, TX Power） -->
+                            <div class="kbd-extras-row">
+                                <!-- 麦克风启用开关 -->
+                                <div class="kbd-extra-item">
+                                    <div class="extra-texts">
+                                        <span class="extra-title">Microphone</span>
+                                        <span class="extra-sub">Bluetooth Audio Input</span>
+                                    </div>
+                                    <label class="switch-toggle">
+                                        <input type="checkbox" id="mic-toggle" onchange="onMicToggle()">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+
+                                <!-- 休眠模式启用开关 -->
+                                <div class="kbd-extra-item">
+                                    <div class="extra-texts">
+                                        <span class="extra-title">Sleep Mode</span>
+                                        <span class="extra-sub">Auto sleep on timeout</span>
+                                    </div>
+                                    <label class="switch-toggle">
+                                        <input type="checkbox" id="sleep-toggle" onchange="onSleepToggle()">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+
+                                <!-- TX Power 功率等级选择器 -->
+                                <div class="kbd-extra-item kbd-extra-tx">
+                                    <div class="extra-texts">
+                                        <span class="extra-title">TX Power</span>
+                                        <span class="tx-badge" id="tx-power-val">-3 dBm</span>
+                                    </div>
+                                    <div class="power-bar-segments" id="tx-power-bar">
+                                        <div class="power-segment" data-level="0" onclick="setTxPower(0)"></div>
+                                        <div class="power-segment" data-level="1" onclick="setTxPower(1)"></div>
+                                        <div class="power-segment" data-level="2" onclick="setTxPower(2)"></div>
+                                        <div class="power-segment" data-level="3" onclick="setTxPower(3)"></div>
+                                        <div class="power-segment" data-level="4" onclick="setTxPower(4)"></div>
+                                        <div class="power-segment" data-level="5" onclick="setTxPower(5)"></div>
+                                        <div class="power-segment" data-level="6" onclick="setTxPower(6)"></div>
+                                        <div class="power-segment" data-level="7" onclick="setTxPower(7)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 保存到设备主按钮 -->
+                        <button class="save-action-btn" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>
+                            <svg class="save-icon" viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM7 5v4h10V5H7zm10 14v-6H7v6h10z"/>
+                            </svg>
+                            <span>WRITE TO ESP32 / 写入到硬件</span>
+                        </button>
+                    </div>
+
                 </div>
-                
-                <div class="key-grid">
-                    <!-- Key 1 -->
-                    <div class="key-card" data-idx="0" id="key-card-0">
-                        <div class="key-card-header">
-                            <span class="key-card-title">KEY 1</span>
-                            <button class="btn-capture" id="btn-capture-0" onclick="startKeyCapture(0)">CAPTURE</button>
-                        </div>
-                        <div class="key-display" id="key-display-0">--</div>
-                        <div class="modifiers-container" id="mods-0">
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x01" onclick="toggleMod(0, 0x01)">L·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x02" onclick="toggleMod(0, 0x02)">L·Shift</span>
-                                <span class="mod-pill" data-mask="0x04" onclick="toggleMod(0, 0x04)">L·Alt</span>
-                                <span class="mod-pill" data-mask="0x08" onclick="toggleMod(0, 0x08)">L·Meta</span>
-                            </div>
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x10" onclick="toggleMod(0, 0x10)">R·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x20" onclick="toggleMod(0, 0x20)">R·Shift</span>
-                                <span class="mod-pill" data-mask="0x40" onclick="toggleMod(0, 0x40)">R·Alt</span>
-                                <span class="mod-pill" data-mask="0x80" onclick="toggleMod(0, 0x80)">R·Meta</span>
-                            </div>
-                        </div>
+            </section>
+
+            <!-- 3. 下半区：OTA 固件升级面板 -->
+            <section class="panel ota-panel">
+                <div class="ota-head">
+                    <div class="ota-title-wrapper">
+                        <svg class="ota-icon" viewBox="0 0 24 24" width="18" height="18">
+                            <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                        </svg>
+                        <h2 class="ota-title">FIRMWARE UPGRADE (OTA)</h2>
+                    </div>
+                    <span class="ota-subtitle" id="selected-file-name">Flash official bin or cloud release</span>
+                </div>
+
+                <div class="ota-body">
+                    <!-- 操作按钮组 -->
+                    <div class="ota-actions-grid">
+                        <button class="btn-ota-action btn-ota-local" onclick="onLocalBinUpgrade()">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                            CHOOSE LOCAL BIN
+                        </button>
+                        <button class="btn-ota-action btn-ota-cloud" onclick="onCloudBinUpgrade()">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                            </svg>
+                            CLOUD UPDATE
+                        </button>
                     </div>
 
-                    <!-- Key 2 -->
-                    <div class="key-card" data-idx="1" id="key-card-1">
-                        <div class="key-card-header">
-                            <span class="key-card-title">KEY 2</span>
-                            <button class="btn-capture" id="btn-capture-1" onclick="startKeyCapture(1)">CAPTURE</button>
+                    <!-- 进度条展示 -->
+                    <div class="ota-progress-box">
+                        <div class="progress-bar-bg">
+                            <div class="progress-fill" id="progress-fill"></div>
                         </div>
-                        <div class="key-display" id="key-display-1">--</div>
-                        <div class="modifiers-container" id="mods-1">
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x01" onclick="toggleMod(1, 0x01)">L·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x02" onclick="toggleMod(1, 0x02)">L·Shift</span>
-                                <span class="mod-pill" data-mask="0x04" onclick="toggleMod(1, 0x04)">L·Alt</span>
-                                <span class="mod-pill" data-mask="0x08" onclick="toggleMod(1, 0x08)">L·Meta</span>
-                            </div>
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x10" onclick="toggleMod(1, 0x10)">R·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x20" onclick="toggleMod(1, 0x20)">R·Shift</span>
-                                <span class="mod-pill" data-mask="0x40" onclick="toggleMod(1, 0x40)">R·Alt</span>
-                                <span class="mod-pill" data-mask="0x80" onclick="toggleMod(1, 0x80)">R·Meta</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Key 3 -->
-                    <div class="key-card" data-idx="2" id="key-card-2">
-                        <div class="key-card-header">
-                            <span class="key-card-title">KEY 3</span>
-                            <button class="btn-capture" id="btn-capture-2" onclick="startKeyCapture(2)">CAPTURE</button>
-                        </div>
-                        <div class="key-display" id="key-display-2">--</div>
-                        <div class="modifiers-container" id="mods-2">
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x01" onclick="toggleMod(2, 0x01)">L·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x02" onclick="toggleMod(2, 0x02)">L·Shift</span>
-                                <span class="mod-pill" data-mask="0x04" onclick="toggleMod(2, 0x04)">L·Alt</span>
-                                <span class="mod-pill" data-mask="0x08" onclick="toggleMod(2, 0x08)">L·Meta</span>
-                            </div>
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x10" onclick="toggleMod(2, 0x10)">R·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x20" onclick="toggleMod(2, 0x20)">R·Shift</span>
-                                <span class="mod-pill" data-mask="0x40" onclick="toggleMod(2, 0x40)">R·Alt</span>
-                                <span class="mod-pill" data-mask="0x80" onclick="toggleMod(2, 0x80)">R·Meta</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Key 4 -->
-                    <div class="key-card" data-idx="3" id="key-card-3">
-                        <div class="key-card-header">
-                            <span class="key-card-title">KEY 4</span>
-                            <button class="btn-capture" id="btn-capture-3" onclick="startKeyCapture(3)">CAPTURE</button>
-                        </div>
-                        <div class="key-display" id="key-display-3">--</div>
-                        <div class="modifiers-container" id="mods-3">
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x01" onclick="toggleMod(3, 0x01)">L·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x02" onclick="toggleMod(3, 0x02)">L·Shift</span>
-                                <span class="mod-pill" data-mask="0x04" onclick="toggleMod(3, 0x04)">L·Alt</span>
-                                <span class="mod-pill" data-mask="0x08" onclick="toggleMod(3, 0x08)">L·Meta</span>
-                            </div>
-                            <div class="mods-row">
-                                <span class="mod-pill" data-mask="0x10" onclick="toggleMod(3, 0x10)">R·Ctrl</span>
-                                <span class="mod-pill" data-mask="0x20" onclick="toggleMod(3, 0x20)">R·Shift</span>
-                                <span class="mod-pill" data-mask="0x40" onclick="toggleMod(3, 0x40)">R·Alt</span>
-                                <span class="mod-pill" data-mask="0x80" onclick="toggleMod(3, 0x80)">R·Meta</span>
-                            </div>
+                        <div class="progress-status-row">
+                            <span class="progress-status-text" id="progress-pct">Ready for upgrade</span>
                         </div>
                     </div>
                 </div>
             </section>
-
-            <!-- 4. 下半部分功能布局 -->
-            <div class="bottom-layout ota-hidden">
-                <!-- 左下：硬件级设置控制面板 -->
-                <div class="left-settings">
-                    <!-- 麦克风控制卡片 -->
-                    <div class="setting-card mic-card">
-                        <div class="setting-icon-desc">
-                            <svg class="setting-svg" viewBox="0 0 24 24" width="24" height="24">
-                                <path fill="currentColor" d="M12 2c1.66 0 3 1.34 3 3v7c0 1.66-1.34 3-3 3s-3-1.34-3-3V5c0-1.66 1.34-3 3-3zm7 10c0 3.53-2.61 6.43-6 6.92V21h-2v-2.08c-3.39-.49-6-3.39-6-6.92h2c0 2.76 2.24 5 5 5s5-2.24 5-5h2z"/>
-                            </svg>
-                            <div class="setting-texts">
-                                <span class="setting-name">Microphone</span>
-                                <span class="setting-sub">Voice trigger input</span>
-                            </div>
-                        </div>
-                        <label class="switch-toggle">
-                            <input type="checkbox" id="mic-toggle" onchange="onMicToggle()">
-                            <span class="switch-slider"></span>
-                        </label>
-                    </div>
-
-                    <!-- 硬件省电与功率设置卡片 -->
-                    <div class="setting-card power-card-main">
-                        <div class="power-section-header">POWER SAVING</div>
-                        
-                        <div class="power-row">
-                            <div class="setting-texts">
-                                <span class="setting-name">Sleep Mode</span>
-                                <span class="setting-sub">Auto sleep after 10 min</span>
-                            </div>
-                            <label class="switch-toggle">
-                                <input type="checkbox" id="sleep-toggle" onchange="onSleepToggle()">
-                                <span class="switch-slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="power-row-tx">
-                            <div class="tx-text-header">
-                                <span class="setting-name">TX Power</span>
-                                <span class="tx-val-badge" id="tx-power-val">-3 dBm</span>
-                            </div>
-                            <!-- 8格分段式功率选择器 -->
-                            <div class="power-bar-segments" id="tx-power-bar">
-                                <div class="power-segment" data-level="0" onclick="setTxPower(0)"></div>
-                                <div class="power-segment" data-level="1" onclick="setTxPower(1)"></div>
-                                <div class="power-segment" data-level="2" onclick="setTxPower(2)"></div>
-                                <div class="power-segment" data-level="3" onclick="setTxPower(3)"></div>
-                                <div class="power-segment" data-level="4" onclick="setTxPower(4)"></div>
-                                <div class="power-segment" data-level="5" onclick="setTxPower(5)"></div>
-                                <div class="power-segment" data-level="6" onclick="setTxPower(6)"></div>
-                                <div class="power-segment" data-level="7" onclick="setTxPower(7)"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 一键保存配置到开发板的写入按钮板块 -->
-                    <div class="write-btn-wrapper">
-                        <button class="btn btn-write-config-large" id="btn-write-config" onclick="saveAllConfigsToDevice()" disabled>WRITE TO ESP32</button>
-                    </div>
-                </div>
-
-                <!-- 右下：OTA固件在线升级模块 -->
-                <div class="right-ota">
-                    <div class="ota-card">
-                        <div class="power-section-header">FIRMWARE UPGRADE</div>
-                        
-                        <div class="ota-buttons-grid">
-                            <!-- 本地 BIN 按钮：点击直接弹出 Finder，选完直接烧录！ -->
-                            <button class="btn btn-ota-action btn-ota-local" onclick="onLocalBinUpgrade()">
-                                <svg class="btn-ota-icon" viewBox="0 0 24 24" width="18" height="18">
-                                    <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                                </svg>
-                                CHOOSE LOCAL BIN
-                            </button>
-                            
-                            <!-- 云端更新按钮：点击直接后台下载并烧录！ -->
-                            <button class="btn btn-ota-action btn-ota-cloud" onclick="onCloudBinUpgrade()">
-                                <svg class="btn-ota-icon" viewBox="0 0 24 24" width="18" height="18">
-                                    <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-                                </svg>
-                                CLOUD UPDATE
-                            </button>
-                        </div>
-
-                        <!-- 进度条区域 -->
-                        <div class="ota-progress-section">
-                            <div class="progress-bar-container">
-                                <div class="progress-fill" id="progress-fill"></div>
-                            </div>
-                            <div class="progress-status-row">
-                                <span class="progress-status-text" id="progress-pct">Ready for upgrade</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
-        
-        <!-- 4. 底部居中状态监视栏（从顶部下移，空间更宽裕且醒目） -->
-        <div class="bottom-monitor-bar">
-            <div class="live-monitor" id="live-monitor-container">
-                <span class="monitor-label">LAST PHYSICAL KEY EVENT</span>
-                <span class="monitor-value" id="monitor-val">NONE</span>
-            </div>
-        </div>
     </div>
-    
+
     <script src="app.js"></script>
 </body>
 </html>

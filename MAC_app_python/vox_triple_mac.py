@@ -92,7 +92,7 @@ class Api:
             
         # Format mapping list to JSON compatible
         config = {
-            "version": self.spp._config_cache.get("version", "1.0.15"),
+            "version": self.spp._config_cache.get("version", "1.0.17"),
             "tx_power": self.spp._config_cache.get("tx_power", 4),
             "sleep_mode": self.spp._config_cache.get("sleep_mode", 1),
             "mic_enabled": self.spp._config_cache.get("mic_enabled", 1),
@@ -199,7 +199,7 @@ class Api:
             log.warning(f"check_update network request failed/timeout: {e}")
             
         if self._github_version:
-            curr = self.spp._config_cache.get("version", "1.0.15")
+            curr = self.spp._config_cache.get("version", "1.0.17")
             has_new = self._github_version > curr
             return {
                 "ok": True,
@@ -300,7 +300,7 @@ class Api:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=4.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                tag = data.get("tag_name", "v1.0.15").strip()
+                tag = data.get("tag_name", "v1.0.17").strip()
                 if tag.startswith("v"):
                     tag = tag[1:]
                 self._github_version = tag
@@ -332,9 +332,9 @@ def main():
         title="VoxTriple Config Client macOS", 
         url=index_path, 
         js_api=api,
-        width=860,
-        height=890,
-        min_size=(830, 850),
+        width=960,
+        height=800,
+        min_size=(900, 720),
         resizable=True,
         frameless=False
     )

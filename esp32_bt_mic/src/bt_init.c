@@ -67,6 +67,25 @@ static void bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
         if (param->auth_cmpl.stat == ESP_BT_STATUS_SUCCESS) {
             ESP_LOGI(TAG, "authentication success: %s", param->auth_cmpl.device_name);
             ESP_LOG_BUFFER_HEX(TAG, param->auth_cmpl.bda, ESP_BD_ADDR_LEN);
+
+            /* 仅在当前槽位尚未记录系统类型时进行首次识别并保存 */
+            uint8_t slot = 0;
+            config_storage_get_active_slot(&slot);
+            uint8_t saved_os = OS_TYPE_UNKNOWN;
+            config_storage_load_slot_os_type(slot, &saved_os);
+
+            if (saved_os == OS_TYPE_UNKNOWN) {
+                const char *name = (const char *)param->auth_cmpl.device_name;
+                uint8_t os = OS_TYPE_WINDOWS; // 默认非 Apple
+                if (name && (strstr(name, "Mac") || strstr(name, "mac") ||
+                             strstr(name, "Apple") || strstr(name, "apple") ||
+                             strstr(name, "iPad") || strstr(name, "iPhone"))) {
+                    os = OS_TYPE_APPLE;
+                }
+                config_storage_save_slot_os_type(slot, os);
+                ESP_LOGI(TAG, "Slot %d auto-detected OS type: %s (%d)", slot,
+                         (os == OS_TYPE_APPLE) ? "Apple" : "Windows", os);
+            }
         } else {
             ESP_LOGE(TAG, "authentication failed, status: %d", param->auth_cmpl.stat);
         }
@@ -175,7 +194,7 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         /* Set Classic BT TX power: load from NVS or default to 0 dBm */
         uint8_t tx_power_level = 4;  /* Default: 0 dBm */
         if (config_storage_load_tx_power(&tx_power_level) != ESP_OK || tx_power_level > 7) {
-            tx_power_level = 7;
+            tx_power_level = 4;
         }
         esp_bredr_tx_power_set((esp_power_level_t)tx_power_level, (esp_power_level_t)tx_power_level);
         ESP_LOGI(TAG, "Classic BT TX power set to level %d", tx_power_level);

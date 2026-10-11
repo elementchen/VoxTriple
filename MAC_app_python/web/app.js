@@ -1,5 +1,5 @@
 // ==========================================================================
-// VoxTriple Webview Frontend App Logic (Figma 1:1 Restored & Aligned)
+// VoxTriple Webview Frontend App Logic (OpenDesign Modernized)
 // ==========================================================================
 
 // ── Virtual Key Code Map (Physical Keyboard mappings under macOS) ─────────
@@ -53,16 +53,29 @@ let currentConfigs = [
     { vk: 0, mod: 0 },
     { vk: 0, mod: 0 }
 ];
+let selectedKeyIdx = 0;       // 当前左侧聚焦编辑的按键下标 (0..3)
 let isConnected = false;
 let capturingIdx = -1;
 let currentSleepTimeoutMin = 5;
 
-// ── Dom Initialization ───────────────────────────────────────────────────
+// ── DOM Initialization ───────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    // Connect Button
-    document.getElementById("btn-connect").addEventListener("click", onConnectClick);
+    // 串口连接按钮
+    const btnConnect = document.getElementById("btn-connect");
+    if (btnConnect) {
+        btnConnect.addEventListener("click", onConnectClick);
+    }
     
-    // File Drag-Drop binding for OTA zone
+    // 修饰键 Pills 点击委托
+    const modPills = document.querySelectorAll(".mod-pill");
+    modPills.forEach(pill => {
+        pill.addEventListener("click", () => {
+            const mask = parseInt(pill.getAttribute("data-mask"));
+            toggleModForCurrent(mask);
+        });
+    });
+
+    // 拖拽升级 bin 文件处理
     const dropzone = document.getElementById("dropzone");
     if (dropzone) {
         dropzone.addEventListener("dragover", (e) => {
@@ -72,20 +85,25 @@ document.addEventListener("DOMContentLoaded", () => {
         dropzone.addEventListener("dragleave", () => {
             dropzone.classList.remove("dragover");
         });
-        dropzone.addEventListener("drop", (e) => {
+        dropzone.addEventListener("drop", async (e) => {
             e.preventDefault();
             dropzone.classList.remove("dragover");
             if (e.dataTransfer.files.length > 0) {
                 const file = e.dataTransfer.files[0];
                 if (file.name.endsWith(".bin")) {
-                    selectedOtaPath = file.path || file.name;
-                    updateOtaSelectedFile(file.name);
+                    const filePath = file.path || file.name;
+                    triggerLocalBinDrop(filePath, file.name);
+                } else {
+                    alert("请拖入有效的 .bin 固件文件！");
                 }
             }
         });
     }
-    
-    // Poll serial ports every 3.0s
+
+    // 初始化按键 0 选中态
+    selectKey(0);
+
+    // 轮询串口设备 (每 3 秒)
     setInterval(pollPorts, 3000);
     pollPorts();
 });
@@ -93,13 +111,18 @@ document.addEventListener("DOMContentLoaded", () => {
 // ── Serial Port Polling ───────────────────────────────────────────────────
 async function pollPorts() {
     if (window.pywebview && window.pywebview.api) {
-        const ports = await window.pywebview.api.get_ports();
-        updatePorts(ports);
+        try {
+            const ports = await window.pywebview.api.get_ports();
+            updatePorts(ports);
+        } catch (err) {
+            console.error("Poll ports error:", err);
+        }
     }
 }
 
 function updatePorts(ports) {
     const select = document.getElementById("port-select");
+    if (!select) return;
     const currentVal = select.value;
     
     select.innerHTML = "";
@@ -126,11 +149,16 @@ async function onConnectClick() {
     
     const btn = document.getElementById("btn-connect");
     const btnWrite = document.getElementById("btn-write-config");
+    const connBadge = document.getElementById("connBadge");
+    const connText = document.getElementById("connText");
     
     if (!isConnected) {
         const portSelect = document.getElementById("port-select");
-        const selectedPort = portSelect.value;
-        if (!selectedPort) return;
+        const selectedPort = portSelect ? portSelect.value : "";
+        if (!selectedPort) {
+            alert("请选择有效的设备串口！");
+            return;
+        }
         
         btn.textContent = "CONNECTING...";
         const ok = await window.pywebview.api.connect_device(selectedPort);
@@ -138,66 +166,52 @@ async function onConnectClick() {
             isConnected = true;
             btn.textContent = "DISCONNECT";
             btn.classList.add("connected-state");
-            document.getElementById("status-dot").className = "status-dot connected";
-            document.getElementById("status-text").textContent = "Connected";
+            if (connBadge) {
+                connBadge.className = "status-badge connected";
+            }
+            if (connText) {
+                connText.textContent = "Connected";
+            }
             
-            // Enable Write Config Button
-            btnWrite.disabled = false;
+            // 启用保存按钮
+            if (btnWrite) btnWrite.disabled = false;
             
-            // Pull configuration cache
+            // 读取设备配置
             const config = await window.pywebview.api.fetch_config();
             if (config) {
                 renderConfig(config);
             }
             
-            // 展示固件版本信息区块
-            const fwSection = document.getElementById("firmware-section");
-            if (fwSection) fwSection.style.display = "flex";
-            
-            // Perform automatic update check (Silent checking on connection)
+            // 检查固件更新
             postConnectUpdateCheck();
         } else {
             btn.textContent = "CONNECT";
-            alert("Connection Failed / 连接失败，请检查串口是否已被占用！");
+            alert("连接失败，请检查串口是否已被占用或设备未插好！");
         }
     } else {
         await window.pywebview.api.disconnect_device();
         isConnected = false;
         btn.textContent = "CONNECT";
         btn.classList.remove("connected-state");
-        document.getElementById("status-dot").className = "status-dot disconnected";
-        document.getElementById("status-text").textContent = "Disconnected";
+        if (connBadge) {
+            connBadge.className = "status-badge disconnected";
+        }
+        if (connText) {
+            connText.textContent = "Disconnected";
+        }
         document.getElementById("firmware-ver").textContent = "v--";
         
-        // Disable Write Config Button
-        btnWrite.disabled = true;
+        // 禁用保存按钮
+        if (btnWrite) btnWrite.disabled = true;
         
-        // Hide update trigger button
+        // 隐藏升级触发按钮与提示
         const btnUpdate = document.getElementById("btn-update-trigger");
         if (btnUpdate) btnUpdate.style.display = "none";
-        document.getElementById("firmware-status-label").textContent = "";
+        const labelStatus = document.getElementById("firmware-status-label");
+        if (labelStatus) labelStatus.textContent = "";
         
-        // 隐藏固件版本信息区块
-        const fwSection = document.getElementById("firmware-section");
-        if (fwSection) fwSection.style.display = "none";
-        
-        // 隐藏休眠等待时间区块
-        const sleepDivider = document.getElementById("sleep-timeout-divider");
-        if (sleepDivider) sleepDivider.style.display = "none";
-        const sleepSection = document.getElementById("sleep-timeout-section");
-        if (sleepSection) sleepSection.style.display = "none";
-        const btnSleepApply = document.getElementById("btn-sleep-timeout-apply");
-        if (btnSleepApply) btnSleepApply.style.display = "none";
-        
-        // 隐藏重置蓝牙配对按钮
-        const resetBtDivider = document.getElementById("reset-bt-divider");
-        if (resetBtDivider) resetBtDivider.style.display = "none";
-        const resetBtSection = document.getElementById("reset-bt-section");
-        if (resetBtSection) resetBtSection.style.display = "none";
-        
-        // 隐藏并折叠右侧 OTA 升级卡片，恢复左侧全宽
-        const layout = document.querySelector(".bottom-layout");
-        if (layout) layout.classList.add("ota-hidden");
+        // 折叠 OTA 面板
+        toggleOtaPanel(false);
         
         resetConfigUi();
     }
@@ -205,11 +219,20 @@ async function onConnectClick() {
 
 // ── Render Config Cache ──────────────────────────────────────────────────
 function renderConfig(config) {
-    document.getElementById("firmware-ver").textContent = "v" + (config.version || "1.0.15");
-    document.getElementById("mic-toggle").checked = (config.mic_enabled === 1);
-    document.getElementById("sleep-toggle").checked = (config.sleep_mode === 1);
+    if (!config) return;
+
+    // 固件版本
+    const fwEl = document.getElementById("firmware-ver");
+    if (fwEl) fwEl.textContent = "v" + (config.version || "1.0.17");
+
+    // 麦克风与深度休眠开关
+    const micToggle = document.getElementById("mic-toggle");
+    if (micToggle) micToggle.checked = (config.mic_enabled === 1);
+    const sleepToggle = document.getElementById("sleep-toggle");
+    if (sleepToggle) sleepToggle.checked = (config.sleep_mode === 1);
     
-    // 更新休眠等待时间
+
+    // 休眠等待时间
     if (config.sleep_timeout_min !== undefined) {
         currentSleepTimeoutMin = config.sleep_timeout_min;
         const sleepSelect = document.getElementById("sleep-timeout-select");
@@ -217,129 +240,181 @@ function renderConfig(config) {
             sleepSelect.value = String(config.sleep_timeout_min);
         }
     }
-    const sleepDivider = document.getElementById("sleep-timeout-divider");
-    if (sleepDivider) sleepDivider.style.display = "block";
-    const sleepSection = document.getElementById("sleep-timeout-section");
-    if (sleepSection) sleepSection.style.display = "flex";
-    const btnSleepApply = document.getElementById("btn-sleep-timeout-apply");
-    if (btnSleepApply) btnSleepApply.style.display = "none";
 
-    // 显示重置蓝牙配对按钮
-    const resetBtDivider = document.getElementById("reset-bt-divider");
-    if (resetBtDivider) resetBtDivider.style.display = "block";
-    const resetBtSection = document.getElementById("reset-bt-section");
-    if (resetBtSection) resetBtSection.style.display = "flex";
-
+    // 发射功率
     setTxPowerUi(config.tx_power !== undefined ? config.tx_power : 4);
     
-    for (let i = 0; i < 4; i++) {
-        const vk = config.mappings[i].vk;
-        const mod = config.mappings[i].mod;
-        
-        currentConfigs[i] = { vk, mod };
-        
-        // Update Key Card visual content (Display combination keys!)
-        updateKeyCardDisplay(i);
-        
-        // Modifiers
-        const pills = document.querySelectorAll(`#mods-${i} .mod-pill`);
-        pills.forEach(pill => {
-            const mask = parseInt(pill.getAttribute("data-mask"));
-            if ((mod & mask) > 0) {
-                pill.classList.add("active");
-            } else {
-                pill.classList.remove("active");
-            }
-        });
+    // 更新 4 个按键数据
+    if (config.mappings && config.mappings.length >= 4) {
+        for (let i = 0; i < 4; i++) {
+            currentConfigs[i] = {
+                vk: config.mappings[i].vk,
+                mod: config.mappings[i].mod
+            };
+            updateKeyCapVisual(i);
+        }
     }
+
+    // 刷新当前选中的编辑卡片
+    refreshCurrentKeyEditor();
 }
 
-// ── Compute and display combination key values (e.g. Cmd + Shift + A) ─────
-function updateKeyCardDisplay(btnIdx) {
-    const config = currentConfigs[btnIdx];
-    const displayEl = document.getElementById(`key-display-${btnIdx}`);
-    const cardEl = document.getElementById(`key-card-${btnIdx}`);
-    
-    if (config.vk === 0) {
-        displayEl.textContent = "--";
-        cardEl.classList.remove("active-display");
-        return;
+// ── Key Selection & Switch ───────────────────────────────────────────────
+function selectKey(idx) {
+    if (idx < 0 || idx > 3) return;
+    selectedKeyIdx = idx;
+
+    // 更新右侧键帽选中样式
+    for (let i = 0; i < 4; i++) {
+        const cap = document.getElementById(`key-cap-${i}`);
+        if (cap) {
+            if (i === idx) {
+                cap.classList.add("selected");
+            } else {
+                cap.classList.remove("selected");
+            }
+        }
     }
-    
-    cardEl.classList.add("active-display");
-    
-    const parts = [];
-    const mod = config.mod;
-    const modNames = [
-        { mask: 0x01, name: "Ctrl" }, { mask: 0x02, name: "Shift" }, 
-        { mask: 0x04, name: "Alt" }, { mask: 0x08, name: "Cmd" },
-        { mask: 0x10, name: "Ctrl" }, { mask: 0x20, name: "Shift" }, 
-        { mask: 0x40, name: "Alt" }, { mask: 0x80, name: "Cmd" }
-    ];
-    
-    // De-duplicate same modifiers across left/right
-    const seenMods = new Set();
-    modNames.forEach(m => {
-        if ((mod & m.mask) > 0) {
-            seenMods.add(m.name);
+
+    // 更新左侧面板徽章
+    const badge = document.getElementById("selectedKeyBadge");
+    if (badge) {
+        badge.textContent = `KEY 0${idx + 1}`;
+    }
+
+    // 刷新左侧编辑内容
+    refreshCurrentKeyEditor();
+}
+
+function refreshCurrentKeyEditor() {
+    const config = currentConfigs[selectedKeyIdx] || { vk: 0, mod: 0 };
+    const displayEl = document.getElementById("keyDisplay");
+    const subEl = document.getElementById("captureSub");
+    const captureView = document.getElementById("captureView");
+
+    if (captureView) {
+        captureView.classList.remove("listening");
+    }
+    if (subEl) {
+        subEl.textContent = "CLICK TO CAPTURE";
+    }
+
+    if (displayEl) {
+        displayEl.textContent = formatComboKeyString(config.vk, config.mod);
+    }
+
+    // 刷新修饰键激活状态
+    const pills = document.querySelectorAll(".mod-pill");
+    pills.forEach(pill => {
+        const mask = parseInt(pill.getAttribute("data-mask"));
+        if ((config.mod & mask) > 0) {
+            pill.classList.add("active");
+        } else {
+            pill.classList.remove("active");
         }
     });
-    
-    seenMods.forEach(name => parts.push(name));
-    parts.push(getFriendlyKeyName(config.vk));
-    
-    displayEl.textContent = parts.join(" + ");
 }
 
-function resetConfigUi() {
-    for (let i = 0; i < 4; i++) {
-        document.getElementById(`key-display-${i}`).textContent = "--";
-        const cardEl = document.getElementById(`key-card-${i}`);
-        if (cardEl) cardEl.classList.remove("active-display");
-        const pills = document.querySelectorAll(`#mods-${i} .mod-pill`);
-        pills.forEach(pill => pill.classList.remove("active"));
+function updateKeyCapVisual(idx) {
+    const config = currentConfigs[idx];
+    if (!config) return;
+
+    const valEl = document.getElementById(`cap-val-${idx}`);
+    const modsEl = document.getElementById(`cap-mods-${idx}`);
+
+    if (valEl) {
+        valEl.textContent = config.vk === 0 ? "--" : getFriendlyKeyName(config.vk);
     }
-    document.getElementById("mic-toggle").checked = false;
-    document.getElementById("sleep-toggle").checked = false;
-    setTxPowerUi(0);
+    if (modsEl) {
+        modsEl.textContent = formatModifiersShort(config.mod);
+    }
 }
 
-// ── Friendly Key Name ────────────────────────────────────────────────────
+// ── Modifiers Pill Toggle ─────────────────────────────────────────────────
+function toggleModForCurrent(mask) {
+    if (!isConnected) {
+        alert("请先连接硬件设备！");
+        return;
+    }
+
+    const currentMod = currentConfigs[selectedKeyIdx].mod;
+    const newMod = currentMod ^ mask; // 翻转掩码
+    currentConfigs[selectedKeyIdx].mod = newMod;
+
+    // 更新左侧主显与修饰键按钮
+    refreshCurrentKeyEditor();
+
+    // 同步更新右侧键帽修饰键微标
+    updateKeyCapVisual(selectedKeyIdx);
+}
+
+// ── Friendly Key String Formatting ───────────────────────────────────────
+function formatComboKeyString(vk, mod) {
+    if (vk === 0 && mod === 0) return "--";
+
+    const parts = [];
+    const modNames = [
+        { mask: 0x01, name: "LCtrl" }, { mask: 0x02, name: "LShift" }, 
+        { mask: 0x04, name: "LOption" }, { mask: 0x08, name: "LCmd" },
+        { mask: 0x10, name: "RCtrl" }, { mask: 0x20, name: "RShift" }, 
+        { mask: 0x40, name: "ROption" }, { mask: 0x80, name: "RCmd" }
+    ];
+
+    modNames.forEach(m => {
+        if ((mod & m.mask) > 0) {
+            parts.push(m.name);
+        }
+    });
+
+    if (vk !== 0) {
+        parts.push(getFriendlyKeyName(vk));
+    }
+
+    return parts.length > 0 ? parts.join(" + ") : "--";
+}
+
+function formatModifiersShort(mod) {
+    if (!mod) return "";
+    const badges = [];
+    if (mod & 0x01) badges.push("LCtl");
+    if (mod & 0x02) badges.push("LShf");
+    if (mod & 0x04) badges.push("LOpt");
+    if (mod & 0x08) badges.push("LCmd");
+    if (mod & 0x10) badges.push("RCtl");
+    if (mod & 0x20) badges.push("RShf");
+    if (mod & 0x40) badges.push("ROpt");
+    if (mod & 0x80) badges.push("RCmd");
+    return badges.join(" ");
+}
+
 function getFriendlyKeyName(vk) {
     if (vk === 0) return "--";
     if (VK_TO_NAME[vk]) return VK_TO_NAME[vk];
     if (vk >= 0x30 && vk <= 0x39) return String.fromCharCode(vk);
     if (vk >= 0x41 && vk <= 0x5A) return String.fromCharCode(vk);
-    return `VK_${vk.toString(16).toUpperCase()}`;
+    return `0x${vk.toString(16).toUpperCase()}`;
 }
 
-// ── Click Toggle Modifier (Local only, write on SAVE CONFIG) ─────────────
-async function toggleMod(btnIdx, mask) {
-    if (!isConnected) return;
-    
-    // 转换为十六进制字符串，如 1 变成 "0x01"，16 变成 "0x10"，以便与 HTML 属性精准匹配
-    const hexStr = "0x" + mask.toString(16).padStart(2, "0");
-    const pill = document.querySelector(`#mods-${btnIdx} .mod-pill[data-mask="${hexStr}"]`);
-    if (!pill) return;
-    
-    const wasActive = pill.classList.contains("active");
-    
-    if (wasActive) {
-        pill.classList.remove("active");
-        currentConfigs[btnIdx].mod &= ~mask;
-    } else {
-        pill.classList.add("active");
-        currentConfigs[btnIdx].mod |= mask;
+function resetConfigUi() {
+    for (let i = 0; i < 4; i++) {
+        currentConfigs[i] = { vk: 0, mod: 0 };
+        updateKeyCapVisual(i);
     }
-    
-    // Update main text dynamically in real time!
-    updateKeyCardDisplay(btnIdx);
+    refreshCurrentKeyEditor();
+    const micToggle = document.getElementById("mic-toggle");
+    if (micToggle) micToggle.checked = false;
+    const sleepToggle = document.getElementById("sleep-toggle");
+    if (sleepToggle) sleepToggle.checked = false;
+    setTxPowerUi(0);
 }
 
-// ── TX Power UX ──────────────────────────────────────────────────────────
+// ── TX Power UI ──────────────────────────────────────────────────────────
 function setTxPowerUi(level) {
-    const dbmMap = ["-12", "-9", "-6", "-3", "0", "3", "6", "9"];
-    document.getElementById("tx-power-val").textContent = `${dbmMap[level] || "0"} dBm`;
+    const dbmMap = ["-12 dBm", "-9 dBm", "-6 dBm", "-3 dBm", "Standard", "+3 dBm", "+6 dBm", "+9 dBm"];
+    const valEl = document.getElementById("tx-power-val");
+    if (valEl) {
+        valEl.textContent = dbmMap[level] !== undefined ? dbmMap[level] : "Standard";
+    }
     
     const segments = document.querySelectorAll("#tx-power-bar .power-segment");
     segments.forEach((seg, idx) => {
@@ -356,16 +431,25 @@ async function setTxPower(level) {
     setTxPowerUi(level);
 }
 
-// ── Mic & Sleep Toggles (Local only) ─────────────────────────────────────
+// ── Mic & Sleep Toggles ──────────────────────────────────────────────────
 function onMicToggle() {
-    // Only local state change, written on Save Config click
+    // 实时更新视觉联动
+    const slot = document.getElementById("virtualMicSlot");
+    const micToggle = document.getElementById("mic-toggle");
+    if (slot && micToggle) {
+        if (micToggle.checked) {
+            slot.style.borderColor = "rgba(255, 122, 0, 0.4)";
+        } else {
+            slot.style.borderColor = "var(--border-subtle)";
+        }
+    }
 }
 
 function onSleepToggle() {
-    // Only local state change, written on Save Config click
+    // 本地开关状态，点击 SAVE CONFIG 写入设备
 }
 
-// ── Write parameters to physical board flash (Save Config Button click) ──
+// ── Save All Configs to Device Flash ─────────────────────────────────────
 async function saveAllConfigsToDevice() {
     if (!isConnected || !window.pywebview || !window.pywebview.api) return;
     
@@ -380,43 +464,49 @@ async function saveAllConfigsToDevice() {
     const activeSegments = document.querySelectorAll("#tx-power-bar .power-segment.active");
     const tx = Math.max(0, activeSegments.length - 1);
     
-    const ok = await window.pywebview.api.write_config(
-        currentConfigs, 
-        tx, 
-        sleep, 
-        mic
-    );
-    
-    btnWrite.disabled = false;
-    btnWrite.textContent = origText;
-    
-    if (ok) {
-        alert("Configuration saved successfully to device flash!\n配置写入开发板成功！");
-    } else {
-        alert("Configuration save failed, please check connection.\n配置写入失败，请检查连接状态！");
+    try {
+        const ok = await window.pywebview.api.write_config(
+            currentConfigs, 
+            tx, 
+            sleep, 
+            mic
+        );
+        
+        btnWrite.disabled = false;
+        btnWrite.textContent = origText;
+        
+        if (ok) {
+            alert("配置已成功写入设备 Flash 闪存！\nConfiguration saved successfully.");
+        } else {
+            alert("配置写入失败，请检查串口连接状态！");
+        }
+    } catch (e) {
+        btnWrite.disabled = false;
+        btnWrite.textContent = origText;
+        alert("写入配置异常: " + e.message);
     }
 }
 
-// ── Capture physical key sequence (Native JS) ────────────────────────────
-function startKeyCapture(btnIdx) {
+// ── Key Capture Mechanism ────────────────────────────────────────────────
+function triggerCurrentKeyCapture() {
     if (!isConnected) {
-        alert("Please connect to the ESP32 keyboard first!\n请先建立有线串口连接！");
+        alert("请先连接硬件设备后再捕获按键！");
         return;
     }
     
-        if (capturingIdx !== -1) return; // Already capturing
+    if (capturingIdx !== -1) return; // 正在捕获中
     
-    capturingIdx = btnIdx;
+    capturingIdx = selectedKeyIdx;
     
-    const card = document.getElementById(`key-card-${btnIdx}`);
-    const btn = document.getElementById(`btn-capture-${btnIdx}`);
-    const display = document.getElementById(`key-display-${btnIdx}`);
+    const captureView = document.getElementById("captureView");
+    const display = document.getElementById("keyDisplay");
+    const sub = document.getElementById("captureSub");
     
-    card.classList.add("capturing-state");
-    btn.textContent = "PRESS...";
-    display.textContent = "?";
+    if (captureView) captureView.classList.add("listening");
+    if (display) display.textContent = "?";
+    if (sub) sub.textContent = "PRESS ANY KEY NOW...";
     
-    // Bind global native keyboard interception
+    // 监听键盘原生键击
     document.addEventListener("keydown", onCapturedKeydown);
 }
 
@@ -428,46 +518,157 @@ function onCapturedKeydown(e) {
     const vk = JS_CODE_TO_VK[code];
     
     if (vk !== undefined) {
-        // Unbind instantly
+        // 立即解绑
         document.removeEventListener("keydown", onCapturedKeydown);
         
         const btnIdx = capturingIdx;
         capturingIdx = -1;
         
-        const card = document.getElementById(`key-card-${btnIdx}`);
-        const btn = document.getElementById(`btn-capture-${btnIdx}`);
-        
-        card.classList.remove("capturing-state");
-        btn.textContent = "CAPTURE";
-        
-        // Save current key VK
+        // 保持现有修饰键，更新按键码
         currentConfigs[btnIdx].vk = vk;
         
-        // Update main text dynamically in real time!
-        updateKeyCardDisplay(btnIdx);
+        // 更新界面
+        refreshCurrentKeyEditor();
+        updateKeyCapVisual(btnIdx);
     } else {
-        alert(`Unsupported key code: ${code}\n不支持该按键码配置！`);
+        alert(`未识别或不支持的按键码: ${code}`);
     }
 }
 
-// ── Local BIN & Cloud OTA Upgrade Actions ───────────────────────────────
-async function onLocalBinUpgrade() {
-    if (!window.pywebview || !window.pywebview.api || !isConnected) return;
+// ── Physical Button Event Hook ───────────────────────────────────────────
+function onPhysicalButtonEvent(btnId, state) {
+    const cap = document.getElementById(`key-cap-${btnId}`);
+    if (!cap) return;
     
-    // 弹窗选取本地 bin 文件
+    if (state === 1) {
+        cap.classList.add("physical-pressed");
+        setTimeout(() => {
+            cap.classList.remove("physical-pressed");
+        }, 220);
+    }
+}
+
+
+// ── Sleep Timeout Setting ────────────────────────────────────────────────
+async function onSleepTimeoutChange() {
+    if (!isConnected || !window.pywebview || !window.pywebview.api) return;
+    
+    const select = document.getElementById("sleep-timeout-select");
+    if (!select) return;
+    const newMin = parseInt(select.value);
+    
+    const confirmed = confirm(`确认将深度休眠等待时间设置为 [${newMin} 分钟]？\n\n设备将写入配置并自动重启，生效后请重新点击 CONNECT 连接。`);
+    if (!confirmed) {
+        select.value = String(currentSleepTimeoutMin);
+        return;
+    }
+    
+    try {
+        const res = await window.pywebview.api.set_sleep_timeout_min(newMin);
+        if (res && res.success) {
+            currentSleepTimeoutMin = newMin;
+            alert(`休眠等待时间已成功更新为 [${newMin} 分钟]！\n设备正在重启，请等待几秒后重新连接。`);
+            if (isConnected) {
+                onConnectClick();
+            }
+        } else {
+            alert("设置休眠时间失败: " + (res ? res.message : "未知错误"));
+            select.value = String(currentSleepTimeoutMin);
+        }
+    } catch (e) {
+        alert("执行设置休眠时间发生异常: " + e.message);
+        select.value = String(currentSleepTimeoutMin);
+    }
+}
+
+// ── Reset BT Pairing ─────────────────────────────────────────────────────
+async function confirmResetBtPairing() {
+    if (!isConnected) {
+        alert("设备未连接，请先连接设备后再执行重置。");
+        return;
+    }
+    const confirmed = confirm(
+        "确定要遗忘当前设备的蓝牙配对吗？\n\n" +
+        "• 操作效果：设备将清空所有蓝牙配对记录和历史连接缓存，并自动重启。\n" +
+        "• 适用场景：需要更换新电脑配对，或遇到蓝牙重连异常。\n" +
+        "• 安全保护：按键键位映射、开发板型号、休眠时间等均会完整保留！\n\n" +
+        "点击【确定】立即执行并重启设备。"
+    );
+    if (!confirmed) return;
+
+    const btn = document.getElementById("btn-forget-pairings");
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "RESETTING...";
+    }
+
+    try {
+        const res = await window.pywebview.api.reset_bt_pairing();
+        if (res && res.status === "ok") {
+            alert("蓝牙配对记录已成功清空！\n设备正在重启进入可配对状态，现在你可以在电脑的蓝牙设置中重新搜索配对。");
+            if (isConnected) {
+                onConnectClick();
+            }
+        } else {
+            alert("重置配对失败: " + (res ? res.message : "未知错误"));
+        }
+    } catch (e) {
+        alert("执行重置发生异常: " + e.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = "FORGET BT";
+        }
+    }
+}
+
+// ── OTA Upgrade Panel & Operations ───────────────────────────────────────
+function toggleOtaPanel(forceState) {
+    const otaPanel = document.getElementById("ota-panel");
+    if (!otaPanel) return;
+    
+    if (forceState !== undefined) {
+        if (forceState) {
+            otaPanel.classList.remove("hidden");
+        } else {
+            otaPanel.classList.add("hidden");
+        }
+    } else {
+        otaPanel.classList.toggle("hidden");
+    }
+}
+
+async function onLocalBinUpgrade() {
+    if (!window.pywebview || !window.pywebview.api || !isConnected) {
+        alert("请先连接硬件设备！");
+        return;
+    }
+    
     const filePath = await window.pywebview.api.select_local_bin();
     if (!filePath) return;
     
+    executeBinFlash(filePath);
+}
+
+async function triggerLocalBinDrop(filePath, fileName) {
+    if (!isConnected) {
+        alert("请先连接硬件设备！");
+        return;
+    }
+    if (confirm(`确认立即刷入固件 [${fileName}]？`)) {
+        executeBinFlash(filePath);
+    }
+}
+
+async function executeBinFlash(filePath) {
     const progressFill = document.getElementById("progress-fill");
     const progressPct = document.getElementById("progress-pct");
     if (progressFill) progressFill.style.width = "0%";
-    if (progressPct) progressPct.textContent = "Connecting to write local BIN...";
+    if (progressPct) progressPct.textContent = "Connecting to flash local BIN...";
     
-    // 直接执行固件烧录，无需用户二次点击确认
     const ok = await window.pywebview.api.trigger_ota(filePath);
-    
     if (ok) {
-        alert("OTA Upgrade Completed Successfully! The device is now rebooting.\n固件本地升级成功！开发板正在重启生效。");
+        alert("固件本地升级成功！开发板正在重启生效。");
         if (progressFill) progressFill.style.width = "100%";
         if (progressPct) progressPct.textContent = "100% Completed";
     } else {
@@ -476,7 +677,10 @@ async function onLocalBinUpgrade() {
 }
 
 async function onCloudBinUpgrade() {
-    if (!window.pywebview || !window.pywebview.api || !isConnected) return;
+    if (!window.pywebview || !window.pywebview.api || !isConnected) {
+        alert("请先连接硬件设备！");
+        return;
+    }
     
     if (!confirm("确定要立即从 GitHub 下载该固件并直接刷写吗？\n(升级期间请保持有线连接且不要断电)")) {
         return;
@@ -489,57 +693,52 @@ async function onCloudBinUpgrade() {
     
     const ok = await window.pywebview.api.start_smart_update();
     if (!ok) {
-        alert("启动云端在线升级失败，请检查网络或串口连接！");
+        alert("启动在线云端升级失败，请检查网络或串口连接！");
     }
 }
 
-// ── Smart Cloud Check (自动检验机制) ──────────────────────────────────────────
+// ── Smart Cloud Check ────────────────────────────────────────────────────
 async function postConnectUpdateCheck() {
     if (!window.pywebview || !window.pywebview.api) return;
     
     const labelStatus = document.getElementById("firmware-status-label");
     const btnUpdate = document.getElementById("btn-update-trigger");
     
-    labelStatus.textContent = "(检测中...)";
-    labelStatus.style.color = "var(--text-muted)";
+    if (labelStatus) {
+        labelStatus.textContent = "(检测中...)";
+        labelStatus.style.color = "var(--text-muted)";
+    }
     
-    const res = await window.pywebview.api.check_update();
-    
-    if (res && res.ok) {
-        if (res.has_new) {
-            // 有新版固件：显示小字提示并“动态出来” UPDATE 按钮
-            labelStatus.textContent = `(有新版 v${res.latest})`;
-            labelStatus.style.color = "var(--accent-orange)";
-            
-            btnUpdate.style.display = "flex";
-            btnUpdate.dataset.latest = res.latest;
-            btnUpdate.textContent = "UPDATE";
-            btnUpdate.onclick = triggerSmartUpdate;
+    try {
+        const res = await window.pywebview.api.check_update();
+        if (res && res.ok) {
+            if (res.has_new) {
+                if (labelStatus) {
+                    labelStatus.textContent = `(发现新版 v${res.latest})`;
+                    labelStatus.style.color = "var(--accent-orange)";
+                }
+                if (btnUpdate) {
+                    btnUpdate.style.display = "inline-flex";
+                    btnUpdate.onclick = () => toggleOtaPanel(true);
+                }
+            } else {
+                if (labelStatus) {
+                    labelStatus.textContent = "(已是最新)";
+                    labelStatus.style.color = "#22c55e";
+                }
+                if (btnUpdate) btnUpdate.style.display = "none";
+            }
         } else {
-            // 已经是最新版：显示最新版小字，按钮保持隐藏
-            labelStatus.textContent = "(已经是最新版)";
-            labelStatus.style.color = "#2ed573";
-            btnUpdate.style.display = "none";
+            if (labelStatus) {
+                labelStatus.textContent = "(检测失败)";
+                labelStatus.style.color = "var(--text-muted)";
+            }
+            if (btnUpdate) btnUpdate.style.display = "none";
         }
-    } else {
-        labelStatus.textContent = "(检测固件失败)";
-        labelStatus.style.color = "var(--text-inactive)";
-        btnUpdate.style.display = "none";
+    } catch (e) {
+        if (labelStatus) labelStatus.textContent = "";
+        if (btnUpdate) btnUpdate.style.display = "none";
     }
-}
-
-// 点击顶部 UPDATE 按钮，平滑拉开右侧 OTA 固件卡片面版
-function triggerSmartUpdate() {
-    // 展开右下侧 OTA 区域，左下侧自动压缩至 320px 宽度
-    const layout = document.querySelector(".bottom-layout");
-    if (layout) {
-        layout.classList.remove("ota-hidden");
-    }
-    
-    const progressFill = document.getElementById("progress-fill");
-    const progressPct = document.getElementById("progress-pct");
-    if (progressFill) progressFill.style.width = "0%";
-    if (progressPct) progressPct.textContent = "OTA Upgrade Activated / OTA 更新已唤出";
 }
 
 function onSmartUpdateComplete(success) {
@@ -554,18 +753,13 @@ function onSmartUpdateComplete(success) {
         if (progressFill) progressFill.style.width = "100%";
         if (progressPct) progressPct.textContent = "100% Completed";
         alert("固件在线升级成功！开发板正在重启生效。");
-        if (btnUpdate) btnUpdate.style.display = "none";
-        if (labelStatus) {
-            labelStatus.textContent = "(已经是最新版)";
-            labelStatus.style.color = "#2ed573";
-        }
     } else {
-        alert("在线升级成功！开发板正在重启引导，请等待片刻后重新连接。");
-        if (btnUpdate) btnUpdate.style.display = "none";
-        if (labelStatus) {
-            labelStatus.textContent = "(已经是最新版)";
-            labelStatus.style.color = "#2ed573";
-        }
+        alert("在线升级完成！开发板正在重启引导，请等待片刻后重新连接。");
+    }
+    if (btnUpdate) btnUpdate.style.display = "none";
+    if (labelStatus) {
+        labelStatus.textContent = "(已是最新)";
+        labelStatus.style.color = "#22c55e";
     }
 }
 
@@ -578,161 +772,23 @@ function onSmartUpdateError(reason) {
     alert(`在线固件升级失败！\n原因: ${reason}`);
 }
 
-// ── Python bridge callback interface ─────────────────────────────────────
+// ── Python Bridge Progress Callback ──────────────────────────────────────
 function onOtaProgress(written, total, type) {
     const pct = ((written / total) * 100).toFixed(1);
-    document.getElementById("progress-fill").style.width = `${pct}%`;
+    const fill = document.getElementById("progress-fill");
+    const text = document.getElementById("progress-pct");
+    if (fill) fill.style.width = `${pct}%`;
     
     let prefix = "Flashing: ";
     if (type === "download") {
         prefix = "Downloading: ";
-    } else if (type === "flash") {
-        prefix = "Flashing: ";
     }
-    
-    document.getElementById("progress-pct").textContent = `${prefix}${pct}%`;
+    if (text) text.textContent = `${prefix}${pct}%`;
 }
 
-// ── Window Termination ───────────────────────────────────────────────────
+// ── Close Native Window ──────────────────────────────────────────────────
 function closeAppWindow() {
     if (window.pywebview && window.pywebview.api) {
         window.pywebview.api.close_window();
-    }
-}
-
-// ── Physical button events dispatch ──────────────────────────────────────
-function onPhysicalButtonEvent(btnId, state) {
-    const card = document.getElementById(`key-card-${btnId}`);
-    if (!card) return;
-    
-    if (state === 1) {
-        card.classList.add("physical-pressed");
-        setTimeout(() => {
-            card.classList.remove("physical-pressed");
-        }, 250);
-        
-        const vk = currentConfigs[btnId].vk;
-        const keyName = getFriendlyKeyName(vk);
-        const mod = currentConfigs[btnId].mod;
-        
-        const parts = [];
-        const modNames = [
-            { mask: 0x01, name: "Ctrl" }, { mask: 0x02, name: "Shift" }, 
-            { mask: 0x04, name: "Alt" }, { mask: 0x08, name: "Cmd" },
-            { mask: 0x10, name: "Ctrl" }, { mask: 0x20, name: "Shift" }, 
-            { mask: 0x40, name: "Alt" }, { mask: 0x80, name: "Cmd" }
-        ];
-        
-        const seenMods = new Set();
-        modNames.forEach(m => {
-            if ((mod & m.mask) > 0) {
-                seenMods.add(m.name);
-            }
-        });
-        seenMods.forEach(name => parts.push(name));
-        parts.push(keyName);
-        
-        const monitorVal = document.getElementById("monitor-val");
-        monitorVal.textContent = parts.join("+");
-        
-        monitorVal.style.transform = "scale(1.1)";
-        setTimeout(() => {
-            monitorVal.style.transform = "scale(1)";
-        }, 150);
-    }
-}
-
-// ── 休眠等待时间选择与应用 ─────────────────────────────────────────────────
-function onSleepTimeoutChange() {
-    const select = document.getElementById("sleep-timeout-select");
-    const btnApply = document.getElementById("btn-sleep-timeout-apply");
-    if (!select || !btnApply) return;
-    
-    const selectedMin = parseInt(select.value);
-    if (selectedMin !== currentSleepTimeoutMin) {
-        btnApply.style.display = "flex";
-    } else {
-        btnApply.style.display = "none";
-    }
-}
-
-async function applySleepTimeout() {
-    if (!window.pywebview || !window.pywebview.api) return;
-    const select = document.getElementById("sleep-timeout-select");
-    const newMin = parseInt(select.value);
-    
-    const confirmed = confirm(`确认将深度休眠等待时间设置为 [${newMin} 分钟]？\n\n设备将写入配置并自动重启，生效后请重新点击 CONNECT 连接。`);
-    if (!confirmed) {
-        select.value = String(currentSleepTimeoutMin);
-        document.getElementById("btn-sleep-timeout-apply").style.display = "none";
-        return;
-    }
-    
-    const btnApply = document.getElementById("btn-sleep-timeout-apply");
-    btnApply.disabled = true;
-    btnApply.textContent = "SAVING...";
-    
-    try {
-        const res = await window.pywebview.api.set_sleep_timeout_min(newMin);
-        btnApply.disabled = false;
-        btnApply.textContent = "APPLY";
-        btnApply.style.display = "none";
-        
-        if (res && res.success) {
-            currentSleepTimeoutMin = newMin;
-            alert(`休眠等待时间已成功更新为 [${newMin} 分钟]！\n设备正在重启，请等待几秒后重新点击 CONNECT 连接。`);
-            if (isConnected) {
-                onConnectClick();
-            }
-        } else {
-            alert("设置失败: " + (res ? res.message : "未知错误"));
-            select.value = String(currentSleepTimeoutMin);
-        }
-    } catch (e) {
-        btnApply.disabled = false;
-        btnApply.textContent = "APPLY";
-        alert("执行设置发生异常: " + e.message);
-        select.value = String(currentSleepTimeoutMin);
-    }
-}
-
-// ── 遗忘蓝牙连接重置交互 ─────────────────────────────────────────────────────
-async function confirmResetBtPairing() {
-    if (!isConnected) {
-        alert("设备未连接，请先连接设备。");
-        return;
-    }
-    const confirmed = confirm(
-        "确定要遗忘当前设备的蓝牙配对吗？\n\n" +
-        "• 操作效果：设备将清空所有蓝牙配对记录和历史连接缓存，并自动重启。\n" +
-        "• 适用场景：需要更换新电脑配对，或遇到蓝牙重连异常。\n" +
-        "• 安全保护：按键键位映射、开发板型号、休眠时间等均会完整保留！\n\n" +
-        "点击【确定】立即执行并重启设备。"
-    );
-    if (!confirmed) return;
-
-    const btn = document.getElementById("btn-reset-bt");
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = "RESETTING...";
-    }
-
-    try {
-        const res = await window.pywebview.api.reset_bt_pairing();
-        if (res && res.status === "ok") {
-            alert("蓝牙配对记录已成功清空！\n设备正在重启进入可配对状态，现在你可以在电脑或新设备的蓝牙设置中重新搜索配对。");
-            if (isConnected) {
-                onConnectClick();
-            }
-        } else {
-            alert("重置配对失败: " + (res ? res.message : "未知错误"));
-        }
-    } catch (e) {
-        alert("执行重置发生异常: " + e.message);
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" style="margin-right: 3px; vertical-align: -1px;"><path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>FORGET BT`;
-        }
     }
 }

@@ -6,6 +6,7 @@ Bridges serial sync-read thread to asyncio futures for smooth GUI interaction.
 import os
 import sys
 import re
+import time
 import asyncio
 import json
 import logging
@@ -17,14 +18,17 @@ log = logging.getLogger(__name__)
 
 
 class _EsptoolProgressWriter:
-    """Captures esptool stdout to extract flash write percentage and invoke GUI progress callback."""
+    """Captures esptool stdout/stderr to extract flash write percentage and invoke GUI progress callback."""
     def __init__(self, orig_stdout, total_size, cb=None):
         self.orig_stdout = orig_stdout
         self.total_size = total_size
         self.cb = cb
-        self.pct_re = re.compile(r'\((\d+)\s*%\)')
+        # Matches `]  35.2%` (esptool v4+), `( 35 %)` (esptool v3-), or bare `35.2%`
+        self.pct_re = re.compile(r'(?:\]|\(|\b)\s*(\d+(?:\.\d+)?)\s*%')
         self.encoding = getattr(orig_stdout, "encoding", "utf-8") or "utf-8"
         self.errors = getattr(orig_stdout, "errors", "replace") or "replace"
+        self._last_pct = -1.0
+        self._buffer = ""
 
     def isatty(self):
         return False
@@ -35,15 +39,25 @@ class _EsptoolProgressWriter:
                 self.orig_stdout.write(text)
             except Exception:
                 pass
-        m = self.pct_re.search(text)
-        if m:
-            pct = int(m.group(1))
-            if self.cb:
-                written = int(self.total_size * pct / 100)
-                try:
-                    self.cb(written, self.total_size)
-                except Exception:
-                    pass
+
+        if not text:
+            return
+
+        self._buffer += text
+        if len(self._buffer) > 2048:
+            self._buffer = self._buffer[-1024:]
+
+        matches = self.pct_re.findall(self._buffer)
+        if matches:
+            try:
+                pct = float(matches[-1])
+                if pct > self._last_pct + 0.3 or pct >= 100.0:
+                    self._last_pct = pct
+                    if self.cb:
+                        written = int(self.total_size * min(pct, 100.0) / 100.0)
+                        self.cb(written, self.total_size)
+            except Exception:
+                pass
 
     def flush(self):
         if self.orig_stdout:
@@ -51,6 +65,7 @@ class _EsptoolProgressWriter:
                 self.orig_stdout.flush()
             except Exception:
                 pass
+
 
 
 class SppClient:
@@ -142,17 +157,22 @@ class SppClient:
             self._read_thread = threading.Thread(target=self._run_read_loop, daemon=True)
             self._read_thread.start()
             
-            # Delay to wait for ESP32 boot sequence to finish if reset was triggered
-            log.info("Waiting 2.5 seconds for device boot stabilization...")
-            await asyncio.sleep(2.5)
+            # Fast-path check: give driver 0.3s to establish UART stream
+            log.info("Checking device readiness...")
+            await asyncio.sleep(0.3)
             
-            # Fetch device configuration to populate cache
+            # Fetch device configuration
             ok = await self._fetch_config()
             if not ok:
-                log.warning("Failed to fetch initial configuration from device.")
-                # We still keep the connection, it might have been a timeout
+                log.info("Device did not respond immediately, waiting 1.0s for possible boot...")
+                await asyncio.sleep(1.0)
+                ok = await self._fetch_config()
                 
-            log.info(f"SPP Client successfully connected to {port}")
+            if ok:
+                log.info(f"SPP Client successfully connected to {port}")
+            else:
+                log.warning(f"Device at {port} connected (config fetch timed out, keeping connection for OTA/console).")
+                
             return True
         except Exception as e:
             log.error(f"Failed to connect to {port}: {e}")
@@ -394,49 +414,94 @@ class SppClient:
             return True
         return False
 
-    async def reset_bt_pairing(self) -> bool:
-        """Send command to reset Bluetooth pairings on ESP32 (forget device & reboot)."""
-        resp = await self._send_cmd({"cmd": "reset_bt_pairing"})
+    async def reset_bt_pairing(self, slot: int = None) -> bool:
+        """Send command to reset Bluetooth pairings on ESP32 for target slot (forget device & reboot)."""
+        cmd = {"cmd": "reset_bt_pairing"}
+        if slot is not None:
+            cmd["slot"] = slot
+        resp = await self._send_cmd(cmd)
         return resp is not None and resp.get("status") == "ok"
 
-    async def get_config(self) -> dict | None:
-        """Fetch and return full configuration dictionary formatted for UI client."""
-        ok = await self._fetch_config()
-        if ok:
-            cfg = {
-                "buttons": [
-                    {"vk": self._config_cache.get("btn1_vk", 0), "mod": self._config_cache.get("btn1_mod", 0)},
-                    {"vk": self._config_cache.get("btn2_vk", 0), "mod": self._config_cache.get("btn2_mod", 0)},
-                    {"vk": self._config_cache.get("btn3_vk", 0), "mod": self._config_cache.get("btn3_mod", 0)},
-                    {"vk": self._config_cache.get("btn4_vk", 0), "mod": self._config_cache.get("btn4_mod", 0)}
-                ],
-                "tx_power": self._config_cache.get("tx_power", 4),
-                "sleep": self._config_cache.get("sleep_mode", 1),
-                "mic_enabled": self._config_cache.get("mic_enabled", 1),
-                "version": self._config_cache.get("version", "1.0.0"),
-                "board_model": self._config_cache.get("board_model", 0),
-                "board_name": self._config_cache.get("board_name", "WEMOS 18650"),
-                "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5)
-            }
-            return cfg
-        return None
+    async def switch_host_slot(self, slot: int = None) -> bool:
+        """Switch active Bluetooth host slot (0: PC 1, 1: PC 2)."""
+        cmd_dict = {"cmd": "switch_host_slot"}
+        if slot is not None:
+            cmd_dict["slot"] = slot
+        resp = await self._send_cmd(cmd_dict)
+        if resp and resp.get("status") == "ok":
+            if slot is not None:
+                self._config_cache["active_slot"] = slot
+            else:
+                self._config_cache["active_slot"] = 1 if self._config_cache.get("active_slot", 0) == 0 else 0
+            return True
+        return False
 
-    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1) -> bool:
-        """macOS helper to write all configurations at once."""
-        for i in range(min(len(mapping), 4)):
-            ok = await self.write_button_mapping(i, mapping[i]["vk"], mapping[i]["mod"])
+    async def get_config(self, slot: int = None) -> dict | None:
+        """Fetch and return full configuration dictionary formatted for UI client."""
+        if slot is not None:
+            resp = await self._send_cmd({"cmd": "get_config", "slot": slot}, timeout=2.0)
+            if resp and resp.get("status") == "ok":
+                self._config_cache.update(resp)
+        else:
+            ok = await self._fetch_config()
             if not ok:
-                return False
-        ok = await self.write_tx_power(tx)
-        if not ok:
-            return False
-        ok = await self.write_sleep_mode(sleep)
-        if not ok:
-            return False
-        ok = await self.write_mic_enabled(mic_enabled)
-        if not ok:
-            return False
-        return True
+                return None
+        
+        cfg = {
+            "buttons": [
+                {"vk": self._config_cache.get("btn1_vk", 0xA3), "mod": self._config_cache.get("btn1_mod", 0)},
+                {"vk": self._config_cache.get("btn2_vk", 0x0D), "mod": self._config_cache.get("btn2_mod", 0)},
+                {"vk": self._config_cache.get("btn3_vk", 0x26), "mod": self._config_cache.get("btn3_mod", 0)},
+                {"vk": self._config_cache.get("btn4_vk", 0x28), "mod": self._config_cache.get("btn4_mod", 0)}
+            ],
+            "tx_power": self._config_cache.get("tx_power", 4),
+            "sleep": self._config_cache.get("sleep_mode", 1),
+            "mic_enabled": self._config_cache.get("mic_enabled", 1),
+            "version": self._config_cache.get("version", "1.0.18"),
+            "board_model": self._config_cache.get("board_model", 0),
+            "board_name": self._config_cache.get("board_name", "WEMOS 18650"),
+            "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5),
+            "active_slot": self._config_cache.get("active_slot", 0),
+            "query_slot": self._config_cache.get("query_slot", slot if slot is not None else self._config_cache.get("active_slot", 0)),
+            "slot0_paired": self._config_cache.get("slot0_paired", 0),
+            "slot1_paired": self._config_cache.get("slot1_paired", 0),
+            "slot0_os": self._config_cache.get("slot0_os", 0),
+            "slot1_os": self._config_cache.get("slot1_os", 0),
+            "query_os": self._config_cache.get("query_os", 0)
+        }
+        return cfg
+
+    async def write_host_os(self, slot: int, os_type: int) -> bool:
+        """Set the identified OS type (1: Apple, 2: Windows) on the device for the given slot."""
+        resp = await self._send_cmd({"cmd": "set_host_os", "slot": slot, "os_type": os_type})
+        if resp and resp.get("status") == "ok":
+            self._config_cache[f"slot{slot}_os"] = os_type
+            if self._config_cache.get("active_slot", 0) == slot:
+                self._config_cache["query_os"] = os_type
+            return True
+        return False
+
+    async def set_config(self, mapping: list, tx: int, sleep: int, mic_enabled: int = 1, sleep_timeout_min: int = 5, slot: int = None, os_type: int = None) -> bool:
+        """Write all configurations at once into ESP32 via set_all_config single atomic command."""
+        cmd_dict = {
+            "cmd": "set_all_config",
+            "tx_power": tx,
+            "sleep_mode": sleep,
+            "mic_enabled": mic_enabled,
+            "sleep_timeout_min": sleep_timeout_min
+        }
+        if slot is not None:
+            cmd_dict["slot"] = slot
+        if os_type is not None:
+            cmd_dict["os_type"] = os_type
+        for i in range(min(len(mapping), 4)):
+            cmd_dict[f"btn{i+1}_vk"] = mapping[i]["vk"]
+            cmd_dict[f"btn{i+1}_mod"] = mapping[i]["mod"]
+            
+        resp = await self._send_cmd(cmd_dict, timeout=3.0)
+        if resp and resp.get("status") == "ok":
+            return True
+        return False
 
     async def read_firmware_version(self) -> str:
         """Get the current firmware version from cache."""
@@ -444,8 +509,8 @@ class SppClient:
             await self._fetch_config()
         return self._config_cache.get("version", "Unknown")
 
-    async def upload_firmware(self, bin_path: str, progress_callback=None, mode="auto") -> bool:
-        """Upload firmware .bin file to ESP32 using direct esptool hardware flash with legacy fallback."""
+    async def upload_firmware(self, bin_path: str, progress_callback=None, mode="ota") -> bool:
+        """Upload firmware .bin file to ESP32 using reliable application-level serial OTA."""
         if not self._connected or not self._ser:
             log.error("Flash failed: Serial client is not connected.")
             return False
@@ -456,22 +521,15 @@ class SppClient:
 
         total_size = os.path.getsize(bin_path)
         port = self._port or (self._ser.port if self._ser else None)
-        log.info(f"Starting firmware upload on {port}. File: {bin_path} ({total_size} bytes, Mode: {mode})")
+        log.info(f"Starting firmware OTA upload on {port}. File: {bin_path} ({total_size} bytes, Mode: {mode})")
 
-        has_esptool = False
-        try:
-            import esptool
-            has_esptool = True
-        except ImportError:
-            log.warning("esptool module not available in environment, falling back to legacy OTA.")
-
-        # If connected via physical serial port and esptool is available, use direct hardware flash
-        if has_esptool and port and mode != "legacy":
-            log.info("Executing Direct Hardware Flash Engine (Scheme B)...")
+        # 始终使用纯应用层串口 OTA 协议，完全不触碰 DTR/RTS 硬件电平，杜绝芯片挂死
+        if mode == "esptool":
+            log.info("Executing Direct Hardware Flash Engine (esptool)...")
             return await self._upload_firmware_esptool(bin_path, total_size, port, progress_callback)
         else:
-            log.info("Executing Legacy Chunked OTA Engine...")
-            return await self._upload_firmware_legacy(bin_path, total_size, progress_callback)
+            log.info("Executing Reliable Application Serial OTA Engine...")
+            return await self._upload_firmware_ota(bin_path, total_size, progress_callback)
 
     async def _upload_firmware_esptool(self, bin_path: str, total_size: int, port: str, progress_callback=None) -> bool:
         """Directly flash ESP32 via esptool Python API, cross-platform compatible with CH340 & CP2102."""
@@ -548,19 +606,13 @@ class SppClient:
             except Exception:
                 pass
 
-        # 3. Wait 2.0s for hardware reset to stabilize and re-establish connection
-        await asyncio.sleep(2.0)
-        log.info(f"Re-connecting to {port} to restore application link...")
-        for retry in range(3):
-            if await self.connect(port):
-                log.info("Re-connected successfully to device after flash!")
-                break
-            await asyncio.sleep(1.0)
-
+        # 3. Disconnect port cleanly so device can reboot independently and UI resets connection
+        self.disconnect_sync()
+        log.info("SPP serial handle closed after flash. Awaiting user reconnection.")
         return True
 
-    async def _upload_firmware_legacy(self, bin_path: str, total_size: int, progress_callback=None) -> bool:
-        """Legacy chunked VFS serial OTA protocol fallback."""
+    async def _upload_firmware_ota(self, bin_path: str, total_size: int, progress_callback=None) -> bool:
+        """Application-level serial OTA protocol engine with Clean OTA Mode handshake & strict 1KB sync."""
         try:
             with open(bin_path, "rb") as f:
                 bin_data = f.read()
@@ -572,102 +624,116 @@ class SppClient:
         while not self._ota_queue.empty():
             self._ota_queue.get_nowait()
 
-        # 1. Send ota_start command
-        resp = await self._send_cmd({"cmd": "ota_start", "size": total_size}, timeout=10.0)
+        # 1. Send ota_start command to initiate OTA handshake
+        log.info(f"Sending ota_start command to ESP32 (Size: {total_size} bytes)...")
+        resp = await self._send_cmd({"cmd": "ota_start", "size": total_size}, timeout=8.0)
         if not resp:
             log.error("OTA start failed: No response from device.")
             return False
 
+        # 检查是否需要进入 Clean OTA Mode（关闭蓝牙/音频以彻底消除 Flash 写入冲突）
         if resp.get("status") == "ok" and resp.get("reboot") == 1:
-            log.info("Device is rebooting into clean OTA mode...")
-            port = self._ser.port
-            await self.disconnect()
-            await asyncio.sleep(3.0)
+            log.info("Device requested reboot into clean OTA mode for zero-interference flash erase...")
+            port = self._ser.port if self._ser else self._port
+            self.disconnect_sync()
+
+            # 等待 3.5 秒让设备软重启并就绪
+            await asyncio.sleep(3.5)
+
             log.info(f"Reconnecting to {port} in clean OTA mode...")
             if not await self.connect(port):
                 log.error("Failed to reconnect in clean OTA mode.")
                 return False
-            resp = await self._send_cmd({"cmd": "ota_start", "size": total_size}, timeout=10.0)
+
+            log.info("Re-sending OTA start handshake in clean mode...")
+            resp = await self._send_cmd({"cmd": "ota_start", "size": total_size}, timeout=8.0)
             if not resp or resp.get("status") != "ok":
                 log.error(f"Clean OTA start failed: {resp.get('reason') if resp else 'No response'}")
                 return False
+
         elif resp.get("status") != "ok":
-            log.error(f"OTA start failed: {resp.get('reason')}")
+            log.error(f"OTA start failed: {resp.get('reason', 'unknown error')}")
             return False
 
-        log.info("OTA handshake success. Transferring binary payload in chunks...")
+        log.info("OTA handshake success! Streaming binary payload in strict 1KB chunks...")
         self._ota_mode = True
         try:
-            chunk_size = 256
+            chunk_size = 1024
             current_total = 0
+            last_cb_time = 0.0
+
+            # Initial 0% progress callback
+            if progress_callback:
+                try:
+                    progress_callback(0, total_size)
+                except Exception:
+                    pass
+
             for i in range(0, total_size, chunk_size):
                 chunk = bin_data[i:i+chunk_size]
                 expected_total = i + len(chunk)
-                is_last_chunk = (i + chunk_size >= total_size)
-                if is_last_chunk and i > 0:
-                    target_sync = (i // 1024) * 1024
-                    try:
-                        while current_total < target_sync:
-                            chunk_resp = await asyncio.wait_for(self._ota_queue.get(), timeout=8.0)
-                            if chunk_resp:
-                                if chunk_resp.get("status") == "error":
-                                    return False
-                                if chunk_resp.get("status") == "done":
-                                    return True
-                                current_total = max(current_total, chunk_resp.get("total_written", 0))
-                    except asyncio.TimeoutError:
-                        return False
 
                 self._ser.write(chunk)
                 self._ser.flush()
 
-                while not self._ota_queue.empty():
+                # Strict 1KB handshake flow control:
+                # 严格等待 ESP32 写入 Flash 并确认，彻底杜绝 UART RingBuffer 溢出和数据损坏！
+                while current_total < expected_total:
                     try:
-                        chunk_resp = self._ota_queue.get_nowait()
-                        if chunk_resp:
-                            if chunk_resp.get("status") == "error":
-                                return False
-                            if chunk_resp.get("status") == "done":
-                                return True
-                            current_total = max(current_total, chunk_resp.get("total_written", 0))
-                    except asyncio.QueueEmpty:
-                        break
+                        chunk_resp = await asyncio.wait_for(self._ota_queue.get(), timeout=8.0)
+                        if not chunk_resp:
+                            log.error("Empty chunk response from device.")
+                            return False
 
-                if i > 0 and i % (1024 * 16) == 0:
-                    target_sync = (i // 1024) * 1024
-                    try:
-                        while current_total < target_sync:
-                            chunk_resp = await asyncio.wait_for(self._ota_queue.get(), timeout=10.0)
-                            if chunk_resp:
-                                if chunk_resp.get("status") == "error":
-                                    return False
-                                if chunk_resp.get("status") == "done":
-                                    return True
-                                current_total = max(current_total, chunk_resp.get("total_written", 0))
+                        if chunk_resp.get("status") == "error":
+                            log.error(f"OTA chunk write failed: {chunk_resp.get('reason')}")
+                            return False
+                        if chunk_resp.get("status") == "done":
+                            log.info("OTA completed successfully!")
+                            if progress_callback:
+                                try:
+                                    progress_callback(total_size, total_size)
+                                except Exception:
+                                    pass
+                            self.disconnect_sync()
+                            return True
+
+                        current_total = chunk_resp.get("total_written", 0)
                     except asyncio.TimeoutError:
+                        log.error(f"OTA chunk write timed out waiting for {expected_total} bytes. Current confirmed: {current_total}")
                         return False
 
-                if progress_callback:
-                    progress_callback(max(current_total, expected_total), total_size)
+                # 节流更新进度条（避免高频同步阻塞 evaluate_js）
+                now = time.time()
+                if (now - last_cb_time >= 0.08) or (expected_total >= total_size):
+                    last_cb_time = now
+                    if progress_callback:
+                        try:
+                            progress_callback(current_total, total_size)
+                        except Exception:
+                            pass
 
-                await asyncio.sleep(0.005)
+                # 每次 chunk 给驱动 3ms 稳定延迟
+                await asyncio.sleep(0.003)
 
+            # 3. 所有分包发送完毕，等待 ESP32 执行 esp_ota_end 校验与设置引导分区
             log.info("All firmware chunks sent. Waiting for final verification on device...")
             try:
-                while True:
-                    final_resp = await asyncio.wait_for(self._ota_queue.get(), timeout=8.0)
-                    if not final_resp:
-                        return False
-                    status = final_resp.get("status")
-                    if status == "done":
-                        return True
-                    elif status == "error":
-                        return False
-                    elif status in ("progress", "next"):
-                        continue
-                    else:
-                        return False
+                final_resp = await asyncio.wait_for(self._ota_queue.get(), timeout=12.0)
+                if final_resp and final_resp.get("status") == "done":
+                    log.info("OTA upgrade completed successfully! The device is now rebooting.")
+                    if progress_callback:
+                        try:
+                            progress_callback(total_size, total_size)
+                        except Exception:
+                            pass
+                    self.disconnect_sync()
+                    return True
+                else:
+                    log.error(f"OTA verification failed: {final_resp.get('reason') if final_resp else 'Invalid status'}")
+                    return False
             except asyncio.TimeoutError:
+                log.error("OTA final verification timed out.")
                 return False
         finally:
             self._ota_mode = False

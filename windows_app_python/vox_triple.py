@@ -69,7 +69,11 @@ class Api:
         """Connect to physical USB-serial device."""
         log.info(f"Connecting to {port}...")
         future = run_coro(self.spp.connect(port))
-        ok = future.result(timeout=6.0)
+        try:
+            ok = future.result(timeout=8.0)
+        except Exception as e:
+            log.error(f"connect_device exception: {e}")
+            ok = False
         self._connected = ok
         return ok
 
@@ -81,43 +85,63 @@ class Api:
         self._connected = False
         return True
 
-    def fetch_config(self) -> dict | None:
+    def fetch_config(self, slot: int = None) -> dict | None:
         """Fetch config cache from the device."""
         if not self._connected:
             return None
             
-        future = run_coro(self.spp._fetch_config())
-        ok = future.result(timeout=3.0)
-        if not ok:
+        future = run_coro(self.spp.get_config(slot))
+        cfg = future.result(timeout=3.0)
+        if not cfg:
             return None
             
+        query_os = cfg.get("query_os", 0)
+        target_slot = cfg.get("query_slot", 0)
+
         # Format mapping list to JSON compatible
         config = {
-            "version": self.spp._config_cache.get("version", "1.0.9"),
-            "tx_power": self.spp._config_cache.get("tx_power", 4),
-            "sleep_mode": self.spp._config_cache.get("sleep_mode", 1),
-            "mic_enabled": self.spp._config_cache.get("mic_enabled", 1),
-            "board_model": self.spp._config_cache.get("board_model", 0),
-            "board_name": self.spp._config_cache.get("board_name", "WEMOS 18650"),
-            "sleep_timeout_min": self.spp._config_cache.get("sleep_timeout_min", 5),
-            "mappings": []
+            "version": cfg.get("version", "1.0.18"),
+            "tx_power": cfg.get("tx_power", 7),
+            "sleep_mode": cfg.get("sleep", 1),
+            "mic_enabled": cfg.get("mic_enabled", 1),
+            "board_model": cfg.get("board_model", 0),
+            "board_name": cfg.get("board_name", "WEMOS 18650"),
+            "sleep_timeout_min": cfg.get("sleep_timeout_min", 5),
+            "active_slot": cfg.get("active_slot", 0),
+            "query_slot": target_slot,
+            "slot0_paired": cfg.get("slot0_paired", 0),
+            "slot1_paired": cfg.get("slot1_paired", 0),
+            "slot0_os": cfg.get("slot0_os", 0),
+            "slot1_os": cfg.get("slot1_os", 0),
+            "query_os": query_os,
+            "mappings": cfg.get("buttons", [])
         }
-        for i in range(4):
-            vk = self.spp._config_cache.get(f"btn{i+1}_vk", 0)
-            mod = self.spp._config_cache.get(f"btn{i+1}_mod", 0)
-            config["mappings"].append({"vk": vk, "mod": mod})
-            
         return config
 
-    def write_config(self, mappings: list, tx: int, sleep: int, mic: int) -> bool:
-        """Write all parameters to board Flash at once."""
+    def write_config(self, mappings: list, tx: int, sleep: int, mic: int, sleep_timeout: int = 5, slot: int = None) -> bool:
+        """Write all parameters to board Flash at once (Unified Sync)."""
         if not self._connected:
             return False
             
-        log.info(f"Save parameters: mapping={mappings}, tx={tx}, sleep={sleep}, mic={mic}")
-        future = run_coro(self.spp.set_config(mappings, tx, sleep, mic))
-        ok = future.result(timeout=5.0)
+        log.info(f"Sync all parameters: mapping={mappings}, tx={tx}, sleep={sleep}, mic={mic}, sleep_timeout={sleep_timeout}, slot={slot}")
+        future = run_coro(self.spp.set_config(mappings, tx, sleep, mic, sleep_timeout, slot))
+        ok = future.result(timeout=6.0)
         return ok
+
+    def switch_host_slot(self, slot: int = None) -> dict:
+        """Switch active host slot (0: PC 1, 1: PC 2) via SPP."""
+        if not self._connected:
+            return {"status": "error", "message": "Not connected"}
+        log.info(f"Requesting host switch to slot: {slot}")
+        future = run_coro(self.spp.switch_host_slot(slot))
+        try:
+            ok = future.result(timeout=4.0)
+            if ok:
+                new_slot = self.spp._config_cache.get("active_slot", 0)
+                return {"status": "ok", "active_slot": new_slot}
+            return {"status": "error", "message": "Failed to switch host"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
     def set_board_model(self, model: int) -> dict:
         """Set board hardware model on device and trigger restart."""
@@ -129,7 +153,7 @@ class Api:
         return {"success": ok, "message": "ok" if ok else "write failed"}
 
     def set_sleep_timeout_min(self, minutes: int) -> dict:
-        """Set inactivity sleep timeout (minutes) on device and trigger restart."""
+        """Set inactivity sleep timeout (minutes) on device dynamically."""
         if not self._connected:
             return {"success": False, "message": "Not connected"}
         log.info(f"Set sleep timeout: {minutes} min")
@@ -137,11 +161,11 @@ class Api:
         ok = future.result(timeout=5.0)
         return {"success": ok, "message": "ok" if ok else "write failed"}
 
-    def reset_bt_pairing(self) -> dict:
+    def reset_bt_pairing(self, slot: int = None) -> dict:
         """Expose API to frontend to forget BT pairings on the device and reboot."""
         if not self.spp or not self.spp.is_connected:
             return {"status": "error", "message": "Device not connected"}
-        future = run_coro(self.spp.reset_bt_pairing())
+        future = run_coro(self.spp.reset_bt_pairing(slot))
         try:
             ok = future.result(timeout=4.0)
             if ok:
@@ -181,10 +205,22 @@ class Api:
         
         def progress_cb(written, total):
             if self._window:
-                self._window.evaluate_js(f"onOtaProgress({written}, {total})")
+                try:
+                    self._window.evaluate_js(f"onOtaProgress({written}, {total}, 'flash')")
+                except Exception:
+                    pass
 
         future = run_coro(self.spp.upload_firmware(bin_path, progress_cb))
-        ok = future.result(timeout=60.0)
+        try:
+            ok = future.result(timeout=180.0)
+        except Exception as e:
+            log.error(f"trigger_ota failed or timeout: {e}")
+            ok = False
+
+        if ok:
+            # 升级成功，ESP32 正在重启，上位机断开连接以保持状态同步
+            self._connected = False
+            self.spp.disconnect_sync()
         return ok
 
     def check_update(self) -> dict:
@@ -196,8 +232,8 @@ class Api:
             log.warning(f"check_update network request failed/timeout: {e}")
             
         if self._github_version:
-            curr = self.spp._config_cache.get("version", "1.0.10")
-            has_new = self._github_version > curr
+            curr = self.spp._config_cache.get("version", "1.0.18")
+            has_new = self._is_newer_version(self._github_version, curr)
             return {
                 "ok": True,
                 "latest": self._github_version,
@@ -210,6 +246,64 @@ class Api:
                 "ok": False,
                 "message": "Failed to fetch updates from GitHub.\n获取 GitHub 在线更新版本失败，请检查网络！"
             }
+
+    def check_client_update(self, current_version: str) -> dict:
+        """Check if a newer client application release exists on GitHub."""
+        future = run_coro(self._check_github_version())
+        try:
+            future.result(timeout=4.0)
+        except Exception as e:
+            log.warning(f"check_client_update network request failed/timeout: {e}")
+            
+        if self._github_version:
+            has_new = self._is_newer_version(self._github_version, current_version)
+            return {
+                "ok": True,
+                "latest": self._github_version,
+                "current": current_version,
+                "has_new": has_new
+            }
+        return {
+            "ok": False,
+            "has_new": False
+        }
+
+    @staticmethod
+    def _is_newer_version(latest_str: str, current_str: str) -> bool:
+        """Compare two version strings semantically (e.g. 1.0.18-beta1 vs 1.0.17)."""
+        import re
+        def parse_v(v_str):
+            if not v_str:
+                return [0]
+            clean = str(v_str).strip().lstrip("vV")
+            parts = re.split(r"[.\-_]", clean)
+            nums = []
+            for p in parts:
+                try:
+                    nums.append(int(p))
+                except ValueError:
+                    if "beta" in p.lower():
+                        nums.append(-1)
+                    elif "rc" in p.lower():
+                        nums.append(-2)
+                    elif "alpha" in p.lower():
+                        nums.append(-3)
+            return nums
+
+        l_nums = parse_v(latest_str)
+        c_nums = parse_v(current_str)
+        max_len = max(len(l_nums), len(c_nums))
+        l_nums.extend([0] * (max_len - len(l_nums)))
+        c_nums.extend([0] * (max_len - len(c_nums)))
+        return l_nums > c_nums
+
+    def open_browser_url(self, url: str = None) -> bool:
+        """Open release or target URL in default system browser."""
+        import webbrowser
+        target = url or "https://github.com/elementchen/VoxTriple_Classic/releases"
+        log.info(f"Opening browser URL: {target}")
+        webbrowser.open(target)
+        return True
 
     def start_smart_update(self) -> bool:
         """Automatically download latest firmware and trigger OTA flash."""
@@ -246,14 +340,16 @@ class Api:
             ok = await self.spp.upload_firmware(save_path, progress_cb)
             if self._window:
                 if ok:
-                    self._window.evaluate_js("alert('OTA Upgrade Completed Successfully! The device is now rebooting.\\n固件升级成功！开发板正在重启，请稍候。')")
+                    self._connected = False
+                    self.spp.disconnect_sync()
+                    self._window.evaluate_js("onSmartUpdateComplete(true)")
                 else:
                     err_msg = getattr(self.spp, 'last_error', '') or '写入握手超时或串口未响应'
-                    self._window.evaluate_js(f"alert('固件写入失败！\\n原因: {err_msg}\\n请检查供电线并复位重新连接测试！')")
+                    self._window.evaluate_js(f"onSmartUpdateError('{err_msg}')")
         except Exception as e:
             log.error(f"Flash failed: {e}")
             if self._window:
-                self._window.evaluate_js(f"alert('固件写入异常: {str(e)}')")
+                self._window.evaluate_js(f"onSmartUpdateError('{str(e)}')")
 
     async def _download_firmware_async(self, download_url, save_path):
         loop = asyncio.get_running_loop()
@@ -324,15 +420,14 @@ def main():
 
     api = Api()
     
-    # Enable window stretching and provide proper content padding
+    # 固定窗口大小为 980x845（高度减少 60 像素，布局紧凑饱满，杜绝下方多余空白），禁止最大化与拉伸
     window = webview.create_window(
         title="VoxTriple Config Client", 
         url=index_path, 
         js_api=api,
-        width=860,
-        height=890,
-        min_size=(830, 850),
-        resizable=True,
+        width=980,
+        height=845,
+        resizable=False,
         frameless=False
     )
     api.set_window(window)
