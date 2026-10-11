@@ -546,6 +546,7 @@ function resetConfigUi() {
     document.removeEventListener("keydown", onCapturedKeydown);
     clearPhysicalPressedStates();
     updateOsBadge(0);
+    updateHostSlotUi(0);
 
     for (let i = 0; i < 4; i++) {
         currentConfigs[i] = { vk: 0, mod: 0 };
@@ -802,6 +803,11 @@ function updateHostSlotUi(slot) {
             pill1.classList.add("active");
             pill0.classList.remove("active");
         }
+    }
+
+    const watermark = document.getElementById("pair-watermark-text");
+    if (watermark) {
+        watermark.textContent = (slot === 1) ? "PAIR 2" : "PAIR 1";
     }
 }
 
