@@ -28,10 +28,10 @@ def load() -> dict:
         "auto_start": False,
         "tx_power": 4,
         "sleep_mode": True,
-        "button1": {"vk_code": 0x0D, "modifier": 0x00},
-        "button2": {"vk_code": 0x1B, "modifier": 0x00},
-        "button3": {"vk_code": 0x20, "modifier": 0x00},
-        "button4": {"vk_code": 0x09, "modifier": 0x00},
+        "button1": {"vk_code": 0xA3, "modifier": 0x00},
+        "button2": {"vk_code": 0x0D, "modifier": 0x00},
+        "button3": {"vk_code": 0x26, "modifier": 0x00},
+        "button4": {"vk_code": 0x28, "modifier": 0x00},
     }
 
 

@@ -15,10 +15,10 @@ static const char *TAG = "CONFIG_STORAGE";
 
 /* Default button mappings (Windows VK codes) */
 static const uint8_t s_default_vk[BUTTON_NUM] = {
+    0xA3,  /* VK_RCONTROL (RCtrl) */
     0x0D,  /* VK_RETURN (Enter) */
-    0x1B,  /* VK_ESCAPE (Esc) */
-    0x20,  /* VK_SPACE (Space) */
-    0x09,  /* VK_TAB (Tab) */
+    0x26,  /* VK_UP (Up) */
+    0x28,  /* VK_DOWN (Down) */
 };
 
 static const uint8_t s_default_mod[BUTTON_NUM] = {
@@ -65,6 +65,20 @@ void config_storage_init(void)
     if (config_storage_load_mic_enabled(&mic_enabled) != ESP_OK) {
         ESP_LOGI(TAG, "Mic enabled: no saved config, setting default (enabled)");
         config_storage_save_mic_enabled(1);
+    }
+
+    /* Initialize tx_power default configuration (default to 4 -> 0dBm) */
+    uint8_t tx_power = 0;
+    if (config_storage_load_tx_power(&tx_power) != ESP_OK) {
+        ESP_LOGI(TAG, "TX power: no saved config, setting default (4 -> 0dBm)");
+        config_storage_save_tx_power(4);
+    }
+
+    /* Initialize sleep_timeout default configuration (default to 5 min) */
+    uint8_t sleep_timeout = 0;
+    if (config_storage_load_sleep_timeout(&sleep_timeout) != ESP_OK) {
+        ESP_LOGI(TAG, "Sleep timeout: no saved config, setting default (5 min)");
+        config_storage_save_sleep_timeout(5);
     }
 }
 

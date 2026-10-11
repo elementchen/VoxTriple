@@ -574,7 +574,7 @@ function resetConfigUi() {
 
     const sleepToggle = document.getElementById("sleep-toggle");
     if (sleepToggle) sleepToggle.checked = false;
-    setTxPowerUi(0);
+    setTxPowerUi(4);
 }
 
 // ── TX Power UI ──────────────────────────────────────────────────────────

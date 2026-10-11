@@ -194,7 +194,7 @@ static void bt_stack_up_handler(uint16_t event, void *p_param)
         /* Set Classic BT TX power: load from NVS or default to 0 dBm */
         uint8_t tx_power_level = 4;  /* Default: 0 dBm */
         if (config_storage_load_tx_power(&tx_power_level) != ESP_OK || tx_power_level > 7) {
-            tx_power_level = 7;
+            tx_power_level = 4;
         }
         esp_bredr_tx_power_set((esp_power_level_t)tx_power_level, (esp_power_level_t)tx_power_level);
         ESP_LOGI(TAG, "Classic BT TX power set to level %d", tx_power_level);

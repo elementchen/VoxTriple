@@ -48,7 +48,7 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
             config_storage_load_slot_button(query_slot, 2, &vk3, &mod3);
             config_storage_load_slot_button(query_slot, 3, &vk4, &mod4);
             
-            uint8_t tx_power = 7;
+            uint8_t tx_power = 4;
             config_storage_load_tx_power(&tx_power);
             uint8_t sleep_mode = 0;
             config_storage_load_slot_sleep_mode(query_slot, &sleep_mode);
