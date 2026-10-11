@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -50,27 +50,17 @@
                     <span class="btn-connect-text" id="btn-connect-text">CONNECT</span>
                 </button>
 
-                <!-- 双设备配对快速切换组件 (Pair 1 / Pair 2) -->
+                <!-- 双设备配对状态展示组件 (Pair 1 / Pair 2 仅作状态指示) -->
                 <div class="host-switch-section" id="host-switch-section" style="display: none;">
                     <span class="control-label">PAIR</span>
                     <div class="host-switch-pills">
-                        <button class="host-pill active" id="host-pill-0" onclick="switchHostSlot(0)" title="Pair 1 (Green: Paired, Orange: Unpaired)" tabindex="-1">
+                        <div class="host-pill active" id="host-pill-0" title="Pair 1 (Green: Paired, Orange: Unpaired)">
                             <span class="host-status-dot empty" id="host-dot-0"></span>Pair 1
-                        </button>
-                        <button class="host-pill" id="host-pill-1" onclick="switchHostSlot(1)" title="Pair 2 (Green: Paired, Orange: Unpaired)" tabindex="-1">
+                        </div>
+                        <div class="host-pill" id="host-pill-1" title="Pair 2 (Green: Paired, Orange: Unpaired)">
                             <span class="host-status-dot empty" id="host-dot-1"></span>Pair 2
-                        </button>
+                        </div>
                     </div>
-                </div>
-
-                <!-- 取消蓝牙配对按钮（连接后显示） -->
-                <div class="reset-bt-wrapper" id="reset-bt-section" style="display: none;">
-                    <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="Unpair current slot and restart device" tabindex="-1">
-                        <svg viewBox="0 0 24 24" width="11" height="11">
-                            <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
-                        </svg>
-                        UNPAIR
-                    </button>
                 </div>
             </div>
         </header>
@@ -82,10 +72,18 @@
 
                     <!-- ============ 左栏：节能与硬件设置（未连接时通过 panel-hidden 隐藏但固定占位） ============ -->
                     <div class="settings-panel panel-hidden" id="settings-panel">
-                        <!-- 当前配对频道水印展示 (纯排版大粗体浅浅灰色水印，无单独背景框) -->
+                        <!-- 当前配对频道水印展示与右侧 UNPAIR 按钮 -->
                         <div class="pair-watermark-box" id="pair-watermark-box">
-                            <span class="pair-watermark-os-icon" id="pair-watermark-os-icon" style="visibility: hidden;"></span>
-                            <span class="pair-watermark-text" id="pair-watermark-text">PAIR 1</span>
+                            <div class="pair-watermark-info">
+                                <span class="pair-watermark-os-icon" id="pair-watermark-os-icon" style="visibility: hidden;"></span>
+                                <span class="pair-watermark-text" id="pair-watermark-text">PAIR 1</span>
+                            </div>
+                            <button class="btn-reset-bt" id="btn-reset-bt" onclick="confirmResetBtPairing()" title="Unpair current slot and restart device" tabindex="-1">
+                                <svg viewBox="0 0 24 24" width="11" height="11">
+                                    <path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
+                                </svg>
+                                UNPAIR
+                            </button>
                         </div>
 
                         <div class="panel-header">

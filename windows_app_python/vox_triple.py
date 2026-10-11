@@ -50,6 +50,7 @@ class Api:
         self.spp = spp_client.SppClient()
         self.spp.on_button_event = self._on_button_event
         self.spp.on_status = self._on_status
+        self.spp.on_slot_change = self._on_slot_change
         self._connected = False
         self._window = None
         self._github_version = None
@@ -495,6 +496,39 @@ class Api:
 
     def _on_status(self, hfp: int, audio: int):
         log.debug(f"HFP={hfp} Audio={audio}")
+
+    def _on_slot_change(self, slot: int):
+        import time
+        now = time.time()
+        # 避免 0.8 秒内重复触发相同的 reload
+        if hasattr(self, "_last_slot_change_time") and (now - self._last_slot_change_time < 0.8):
+            log.info(f"Duplicate slot event ignored within debounce window: slot={slot}")
+            return
+        self._last_slot_change_time = now
+
+        log.info(f"Hardware slot changed: slot={slot}. Initiating hot-reload with retry...")
+        def reload_task():
+            import time
+            # ESP32 软重启耗时约 200-400ms，首次延时 500ms
+            time.sleep(0.5)
+            cfg = None
+            for attempt in range(4):
+                try:
+                    cfg = self.fetch_config(slot)
+                    if cfg:
+                        log.info(f"Successfully hot-reloaded config for slot={slot} on attempt {attempt+1}")
+                        break
+                except Exception as e:
+                    log.warning(f"Fetch config attempt {attempt+1} failed: {e}")
+                time.sleep(0.4)
+
+            if self._window and cfg:
+                import json
+                cfg_json = json.dumps(cfg)
+                self._window.evaluate_js(f"window.onSlotHotSwitched && window.onSlotHotSwitched({cfg_json})")
+            else:
+                log.error(f"Failed to hot-reload config for slot={slot} after retries")
+        threading.Thread(target=reload_task, daemon=True).start()
 
     async def _check_github_version(self):
         url = "https://api.github.com/repos/elementchen/VoxTriple_Classic/releases/latest"

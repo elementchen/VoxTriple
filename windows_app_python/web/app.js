@@ -254,11 +254,9 @@ async function onConnectClick() {
             const fwSection = document.getElementById("firmware-section");
             if (fwSection) fwSection.classList.remove("panel-hidden");
 
-            // 显示多设备配对切换与重置按钮
+            // 显示多设备配对状态指示
             const hostSection = document.getElementById("host-switch-section");
             if (hostSection) hostSection.style.display = "inline-flex";
-            const resetBtSection = document.getElementById("reset-bt-section");
-            if (resetBtSection) resetBtSection.style.display = "inline-flex";
             
             // 静默检查固件更新
             postConnectUpdateCheck();
@@ -302,8 +300,6 @@ function applyDisconnectedUi() {
     if (fwSection) fwSection.classList.add("panel-hidden");
     const hostSection = document.getElementById("host-switch-section");
     if (hostSection) hostSection.style.display = "none";
-    const resetBtSection = document.getElementById("reset-bt-section");
-    if (resetBtSection) resetBtSection.style.display = "none";
     resetConfigUi();
 }
 
@@ -756,6 +752,15 @@ function clearPhysicalPressedStates() {
         if (cap) cap.classList.remove("physical-pressed");
     }
 }
+
+// ── 硬件拨动开关物理切换实时热重载回调 ─────────────────────────────────────
+window.onSlotHotSwitched = function(cfg) {
+    if (!cfg) return;
+    console.log("Hardware slot hot-switched received:", cfg);
+    currentActiveSlot = (cfg.query_slot !== undefined) ? cfg.query_slot : (cfg.active_slot || 0);
+    renderConfig(cfg);
+    updateHostSlotUi(currentActiveSlot);
+};
 
 // ── 双设备配置查看与管理切换 (Pair 1 / Pair 2) ─────────────────────────
 // 不向 ESP32 发出切换频道指令及重启，仅切换读取与展示对应频道的配置

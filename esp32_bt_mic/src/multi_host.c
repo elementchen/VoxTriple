@@ -11,6 +11,7 @@
 #include "classic_hidd.h"
 #include "bt_init.h"
 #include "multi_host.h"
+#include "uart_console.h"
 
 static const char *TAG = "MULTI_HOST";
 static uint8_t s_active_slot = 0;
@@ -161,7 +162,10 @@ esp_err_t multi_host_set_slot(uint8_t new_slot)
     s_active_slot = new_slot;
     config_storage_set_active_slot(new_slot);
 
-    // 2. 触发 LED 闪烁反馈
+    // 2. 主动向 USB 串口上位机发送槽位热切换通知
+    uart_console_send_event_slot(new_slot);
+
+    // 3. 触发 LED 闪烁反馈
     multi_host_trigger_led_feedback(new_slot);
 
     // 3. 延时 400ms 保证客户端回执和日志写完，随后整机干净重启重置 Bluedroid 协议栈！

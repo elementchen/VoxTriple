@@ -249,3 +249,10 @@ void uart_console_send_event_status(uint8_t hfp_connected, uint8_t audio_active)
     snprintf(resp, sizeof(resp), "{\"event\":\"status\",\"hfp\":%d,\"audio\":%d}\n", hfp_connected, audio_active);
     write(1, resp, strlen(resp));
 }
+
+void uart_console_send_event_slot(uint8_t slot)
+{
+    char resp[64];
+    snprintf(resp, sizeof(resp), "{\"event\":\"slot\",\"active_slot\":%d}\n", slot);
+    write(1, resp, strlen(resp));
+}

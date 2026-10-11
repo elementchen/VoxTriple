@@ -81,6 +81,7 @@ class SppClient:
         # Callbacks registered by the GUI
         self.on_button_event = None   # callback(button_id: int, state: int)
         self.on_status = None         # callback(hfp: int, audio: int)
+        self.on_slot_change = None    # callback(slot: int)
 
         # Future used to wait for responses of commands
         self._response_future = None
@@ -211,6 +212,14 @@ class SppClient:
                 log.debug(f"Serial RX: {line}")
                 if not line.startswith("{"):
                     log.warning(f"[ESP32 LOG] {line}")
+                    # 启动日志签名检测：硬件拨动开关重启后自动同步
+                    if "Hardware Slide Switch:" in line or "Active Slot:" in line:
+                        import re
+                        m = re.search(r"Mapped Slot:\s*(\d+)", line) or re.search(r"Active Slot:\s*\[(\d+)\]", line)
+                        if m and self.on_slot_change:
+                            detected_slot = int(m.group(1))
+                            log.info(f"Detected hardware switch boot signature from log: Slot={detected_slot}")
+                            self.on_slot_change(detected_slot)
                     continue
                 try:
                     data = json.loads(line)
@@ -250,6 +259,10 @@ class SppClient:
                         hfp = data.get("hfp", 0)
                         audio = data.get("audio", 0)
                         self.on_status(hfp, audio)
+                    elif evt == "slot" and self.on_slot_change:
+                        slot = data.get("active_slot", 0)
+                        log.info(f"Received slot event from ESP32: active_slot={slot}")
+                        self.on_slot_change(slot)
                         
                 # Check if it's a command response
                 elif "status" in data:

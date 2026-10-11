@@ -166,6 +166,9 @@ void app_main(void)
     ESP_LOGI(TAG, "  Waiting for Bluetooth connections...");
     ESP_LOGI(TAG, "============================================");
 
+    /* Broadcast current active slot event over UART so client software syncs immediately */
+    uart_console_send_event_slot(curr_slot);
+
     /* Restore INFO logging for debugging BT stack state and connection event flow. */
     esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_level_set("BTN_HANDLER", ESP_LOG_DEBUG);
