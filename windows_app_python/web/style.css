@@ -357,6 +357,41 @@ button {
     box-shadow: 0 0 4px rgba(249, 115, 22, 0.4);
 }
 
+/* 语言切换下拉选单（靠右对齐） */
+.lang-switch-section {
+    margin-left: auto; /* 靠右对齐 */
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--container-bg);
+    border-radius: var(--r-control);
+    padding: 0 6px 0 8px;
+    height: 32px;
+    border: 1px solid var(--border-soft);
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+}
+
+.lang-switch-section:hover {
+    border-color: var(--border-color);
+}
+
+.lang-icon {
+    color: var(--fg-muted);
+    flex-shrink: 0;
+}
+
+.lang-select-wrapper select {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fg-default);
+    cursor: pointer;
+    padding-right: 2px;
+}
+
 /* 遗忘蓝牙连接按钮（位于 Settings 顶部水印标题右侧） */
 .btn-reset-bt {
     background: rgba(239, 68, 68, 0.08);

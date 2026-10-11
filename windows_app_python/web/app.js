@@ -2,6 +2,226 @@
 // VoxTriple Webview Frontend App Logic (OpenDesign 2-Panel - Windows Edition)
 // ==========================================================================
 
+// ── Internationalization (i18n) ───────────────────────────────────────────
+const I18N = {
+    zh: {
+        client_upgrade_title: "检查客户端软件更新",
+        port_label: "串口",
+        port_refresh: "刷新串口列表",
+        port_no_devices: "未检测到设备",
+        btn_connect: "连接设备",
+        btn_connecting: "正在连接...",
+        btn_connected: "已连接",
+        btn_disconnect: "断开连接",
+        
+        unpair_title: "清除当前频道的配对并重启设备",
+        unpair_btn: "解除配对",
+        unpairing_btn: "正在解除...",
+        mic_name: "无线麦克风",
+        mic_desc: "蓝牙语音录音输入",
+        sleep_name: "自动休眠",
+        sleep_desc: "超时进入超低功耗待机",
+        sleep_timeout_name: "休眠等待时间",
+        sleep_timeout_desc: "无操作持续保持连接时长",
+        signal_name: "发射信号强度",
+        save_btn: "写入 ESP32",
+        save_btn_saving: "正在写入...",
+        save_btn_saved: "已保存至设备",
+        
+        tx_levels: ["-12 dBm (极弱)", "-9 dBm (微弱)", "-6 dBm (较低)", "-3 dBm (一般)", "标准 (默认)", "+3 dBm (较强)", "+6 dBm (增强)", "+9 dBm (极强)"],
+
+        mic_tooltip: "点击切换麦克风开启/关闭状态",
+        
+        key_mapping_title: "按键映射",
+        key_mapping_tips: "就绪 · 点击录制",
+        capture_box_title: "点击此处开始录入按键",
+        capture_default_hint: "点击上方虚线框 · 按下物理按键",
+        capture_listening: "正在录制 · 请按下键盘任意按键（ESC取消）",
+        modifiers_label: "修饰功能键",
+        
+        ota_title: "固件无线/串口升级 (OTA)",
+        ota_subtitle: "本地 .bin 刷写或云端最新发布",
+        ota_board_fw: "板载固件",
+        ota_btn_local: "选择本地固件",
+        ota_btn_cloud: "云端在线升级",
+        ota_ready: "就绪",
+        
+        client_update_title: "客户端软件在线升级",
+        client_update_sub: "客户端版本在线更新",
+        modal_curr_label: "当前版本",
+        modal_latest_label: "最新版本",
+        modal_notes_title: "更新日志",
+        modal_btn_later: "稍后提醒",
+        modal_btn_download: "立即下载更新",
+        modal_btn_downloading: "正在下载中...",
+        modal_btn_ready: "下载完成，立即重启",
+        
+        msg_select_port: "请选择有效的设备串口！",
+        msg_connect_fail: "连接失败，请检查串口是否被占用或数据线是否插紧！",
+        msg_connect_first: "请先连接硬件设备！",
+        msg_unpair_confirm: (hostName) => 
+            `确定解除并清除 [${hostName}] 的蓝牙配对关系吗？\n\n` +
+            `• 独立隔离：仅清除 [${hostName}] 的配对，另一个频道的配对完全不受影响！\n` +
+            `• 按键映射与休眠节能设置均会完整保留！\n\n` +
+            `点击 [确定] 立即解除 [${hostName}] 配对并重启设备进入可配对状态。`,
+        msg_unpair_success: (hostName) => `[${hostName}] 配对已成功解除！\n设备正在重启进入等待配对状态。`,
+        msg_unpair_fail: (err) => `解除配对失败：${err}`,
+        msg_save_success: (hostName) => `配置已成功保存至 [${hostName}]！\n设备正在重启以应用全新参数。`,
+        msg_save_fail: "保存配置失败，请检查串口连接！",
+        msg_unrecognized_key: (code) => `未识别或暂不支持的按键码: ${code}`,
+        msg_flash_local_confirm: (filename) => `准备刷入本地固件：\n${filename}\n\n确认立即开始刷写？`
+    },
+    en: {
+        client_upgrade_title: "Check Client Software Update",
+        port_label: "PORT",
+        port_refresh: "Refresh Port List",
+        port_no_devices: "No Devices",
+        btn_connect: "CONNECT",
+        btn_connecting: "CONNECTING...",
+        btn_connected: "CONNECTED",
+        btn_disconnect: "DISCONNECT",
+        
+        unpair_title: "Unpair current slot and restart device",
+        unpair_btn: "UNPAIR",
+        unpairing_btn: "UNPAIRING...",
+        mic_name: "Microphone",
+        mic_desc: "Bluetooth Audio Input",
+        sleep_name: "Sleep Mode",
+        sleep_desc: "Auto deep sleep",
+        sleep_timeout_name: "Sleep Timeout",
+        sleep_timeout_desc: "Inactivity duration",
+        signal_name: "Signal Strength",
+        save_btn: "WRITE TO ESP32",
+        save_btn_saving: "SAVING...",
+        save_btn_saved: "SAVED TO DEVICE",
+        
+        tx_levels: ["-12 dBm", "-9 dBm", "-6 dBm", "-3 dBm", "Standard", "+3 dBm", "+6 dBm", "+9 dBm"],
+
+        mic_tooltip: "Click to toggle Microphone ON/OFF",
+        
+        key_mapping_title: "KEY MAPPING",
+        key_mapping_tips: "Listening · Press key",
+        capture_box_title: "Click box to record key",
+        capture_default_hint: "Click box to record · Press key",
+        capture_listening: "PRESS ANY KEY NOW (ESC to cancel)...",
+        modifiers_label: "MODIFIERS",
+        
+        ota_title: "FIRMWARE UPGRADE (OTA)",
+        ota_subtitle: "Flash official bin or cloud release",
+        ota_board_fw: "BOARD FW",
+        ota_btn_local: "CHOOSE LOCAL BIN",
+        ota_btn_cloud: "CLOUD UPDATE",
+        ota_ready: "Ready",
+        
+        client_update_title: "Client Software Update",
+        client_update_sub: "Online Client Update",
+        modal_curr_label: "CURRENT",
+        modal_latest_label: "LATEST",
+        modal_notes_title: "RELEASE NOTES",
+        modal_btn_later: "Later",
+        modal_btn_download: "Download & Update",
+        modal_btn_downloading: "Downloading...",
+        modal_btn_ready: "Update Ready, Restart Now",
+        
+        msg_select_port: "Please select a valid device serial port!",
+        msg_connect_fail: "Connection failed. Please check device serial port or cable connection!",
+        msg_connect_first: "Please connect the device first!",
+        msg_unpair_confirm: (hostName) => 
+            `Unpair and clear Bluetooth pairing for [${hostName}]?\n\n` +
+            `• Slot Isolation: Only clears pairing for [${hostName}], the other pair remains unaffected!\n` +
+            `• Key mappings and sleep settings are fully preserved!\n\n` +
+            `Click [OK] to unpair [${hostName}] and restart device.`,
+        msg_unpair_success: (hostName) => `Pairing for [${hostName}] cleared successfully!\nDevice is rebooting in discoverable mode.`,
+        msg_unpair_fail: (err) => `Unpair failed: ${err}`,
+        msg_save_success: (hostName) => `Configurations successfully saved to [${hostName}]!\nDevice is rebooting to apply new parameters.`,
+        msg_save_fail: "Failed to save configuration. Please check serial connection!",
+        msg_unrecognized_key: (code) => `Unrecognized or unsupported key code: ${code}`,
+        msg_flash_local_confirm: (filename) => `Ready to flash local firmware:\n${filename}\n\nConfirm to start flashing now?`
+    }
+};
+
+let currentLang = "zh";
+
+function t(key, ...args) {
+    const dict = I18N[currentLang] || I18N["en"];
+    const val = (dict && dict[key] !== undefined) ? dict[key] : (I18N["en"][key] !== undefined ? I18N["en"][key] : key);
+    if (typeof val === "function") {
+        return val(...args);
+    }
+    return val;
+}
+
+function applyLanguage(lang) {
+    if (!I18N[lang]) lang = "en";
+    currentLang = lang;
+
+    const langSelect = document.getElementById("lang-select");
+    if (langSelect && langSelect.value !== lang) {
+        langSelect.value = lang;
+    }
+
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        const val = t(key);
+        if (val) el.textContent = val;
+    });
+
+    document.querySelectorAll("[data-i18n-title]").forEach(el => {
+        const key = el.getAttribute("data-i18n-title");
+        const val = t(key);
+        if (val) el.setAttribute("title", val);
+    });
+
+    // 动态按钮文本
+    const btnConnectText = document.getElementById("btn-connect-text");
+    if (btnConnectText) {
+        btnConnectText.textContent = isConnected ? t("btn_connected") : t("btn_connect");
+    }
+
+    const btnWriteText = document.getElementById("btn-write-text");
+    if (btnWriteText && !btnWriteText.dataset.saving) {
+        btnWriteText.textContent = t("save_btn");
+    }
+
+    // 麦克风 title
+    const micSlot = document.getElementById("virtualMicSlot");
+    if (micSlot) {
+        micSlot.setAttribute("title", t("mic_tooltip"));
+    }
+
+    // 信号强度
+    if (window.currentTxPowerLevel !== undefined) {
+        setTxPowerUi(window.currentTxPowerLevel);
+    }
+}
+
+function onLanguageChange(lang) {
+    localStorage.setItem("vox_app_lang", lang);
+    applyLanguage(lang);
+}
+
+async function initLanguage() {
+    let chosenLang = localStorage.getItem("vox_app_lang");
+    if (!chosenLang) {
+        try {
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.get_system_locale) {
+                chosenLang = await window.pywebview.api.get_system_locale();
+            }
+        } catch (e) {
+            console.warn("get_system_locale failed:", e);
+        }
+        if (!chosenLang) {
+            const nav = (navigator.language || navigator.userLanguage || "zh").toLowerCase();
+            chosenLang = nav.startsWith("zh") ? "zh" : "en";
+        }
+    }
+    applyLanguage(chosenLang);
+}
+
+window.addEventListener('pywebviewready', () => {
+    initLanguage();
+});
+
 // ── Virtual Key Code Map (Physical Keyboard mappings under Windows) ──────
 const JS_CODE_TO_VK = {
     "KeyA": 0x41, "KeyB": 0x42, "KeyC": 0x43, "KeyD": 0x44, "KeyE": 0x45, "KeyF": 0x46, "KeyG": 0x47,
@@ -76,16 +296,19 @@ document.addEventListener("DOMContentLoaded", () => {
         btnConnect.addEventListener("mouseenter", () => {
             if (isConnected) {
                 const textEl = document.getElementById("btn-connect-text");
-                if (textEl) textEl.textContent = "DISCONNECT";
+                if (textEl) textEl.textContent = t("btn_disconnect");
             }
         });
         btnConnect.addEventListener("mouseleave", () => {
             if (isConnected) {
                 const textEl = document.getElementById("btn-connect-text");
-                if (textEl) textEl.textContent = "CONNECTED";
+                if (textEl) textEl.textContent = t("btn_connected");
             }
         });
     }
+
+    // 初始化语言
+    initLanguage();
 
     // 启动时静默检查客户端是否有最新版本
     setTimeout(checkClientUpdateSilent, 800);
@@ -195,7 +418,7 @@ function updatePorts(ports) {
     
     select.innerHTML = "";
     if (!ports || ports.length === 0) {
-        select.innerHTML = '<option value="">No Devices</option>';
+        select.innerHTML = `<option value="">${t("port_no_devices")}</option>`;
         return;
     }
     
@@ -223,16 +446,16 @@ async function onConnectClick() {
         const portSelect = document.getElementById("port-select");
         const selectedPort = portSelect ? portSelect.value : "";
         if (!selectedPort) {
-            alert("请选择有效的设备串口！");
+            alert(t("msg_select_port"));
             return;
         }
         
-        if (textEl) textEl.textContent = "CONNECTING...";
+        if (textEl) textEl.textContent = t("btn_connecting");
         const ok = await window.pywebview.api.connect_device(selectedPort);
         if (ok) {
             isConnected = true;
             btn.classList.add("connected-state");
-            if (textEl) textEl.textContent = "CONNECTED";
+            if (textEl) textEl.textContent = t("btn_connected");
             
             // 展示左侧设置面板
             const settingsPanel = document.getElementById("settings-panel");
@@ -261,8 +484,8 @@ async function onConnectClick() {
             // 静默检查固件更新
             postConnectUpdateCheck();
         } else {
-            if (textEl) textEl.textContent = "CONNECT";
-            alert("Connection failed. Please check device serial port or cable connection!");
+            if (textEl) textEl.textContent = t("btn_connect");
+            alert(t("msg_connect_fail"));
         }
     } else {
         await window.pywebview.api.disconnect_device();
@@ -277,7 +500,7 @@ function applyDisconnectedUi() {
     const btnWrite = document.getElementById("btn-write-config");
 
     if (btn) btn.classList.remove("connected-state");
-    if (textEl) textEl.textContent = "CONNECT";
+    if (textEl) textEl.textContent = t("btn_connect");
     const fwVer = document.getElementById("firmware-ver");
     if (fwVer) fwVer.textContent = "v--";
 
@@ -454,7 +677,7 @@ function refreshCurrentKeyEditor() {
         captureView.classList.remove("listening");
     }
     if (subEl) {
-        subEl.textContent = "Click box to record · Press key";
+        subEl.textContent = t("capture_default_hint");
     }
 
     if (displayEl) {
@@ -601,7 +824,8 @@ function resetConfigUi() {
 
 // ── TX Power UI ──────────────────────────────────────────────────────────
 function setTxPowerUi(level) {
-    const dbmMap = ["-12 dBm", "-9 dBm", "-6 dBm", "-3 dBm", "Standard", "+3 dBm", "+6 dBm", "+9 dBm"];
+    window.currentTxPowerLevel = level;
+    const dbmMap = (I18N[currentLang] || I18N.en).tx_levels;
     const valEl = document.getElementById("tx-power-val");
     if (valEl) {
         valEl.textContent = dbmMap[level] !== undefined ? dbmMap[level] : "Standard";
@@ -691,12 +915,12 @@ async function saveAllConfigsToDevice() {
         
         if (ok) {
             currentSleepTimeoutMin = sleepTimeout;
-            alert(`Configurations successfully saved to [${hostName}]!\nDevice is rebooting to apply new parameters.`);
+            alert(t("msg_save_success", hostName));
             if (isConnected) {
                 onConnectClick();
             }
         } else {
-            alert("Failed to save configuration. Please check serial connection!");
+            alert(t("msg_save_fail"));
         }
     } catch (e) {
         btnWrite.disabled = false;
@@ -723,7 +947,7 @@ function triggerCurrentKeyCapture() {
     
     if (captureView) captureView.classList.add("listening");
     if (display) display.textContent = "?";
-    if (sub) sub.textContent = "PRESS ANY KEY NOW (ESC to cancel)...";
+    if (sub) sub.textContent = t("capture_listening");
     
     // 监听键盘原生键击
     document.addEventListener("keydown", onCapturedKeydown);
@@ -877,40 +1101,35 @@ function updatePairWatermarkIcon(slot) {
 // ── 取消蓝牙配对重置交互 ─────────────────────────────────────────────────────
 async function confirmResetBtPairing() {
     if (!isConnected) {
-        alert("Device is not connected. Please connect first.");
+        alert(t("msg_connect_first"));
         return;
     }
     const hostName = (currentActiveSlot === 0) ? "Pair 1" : "Pair 2";
-    const confirmed = confirm(
-        `Unpair and clear Bluetooth pairing for [${hostName}]?\n\n` +
-        `• Slot Isolation: Only clears pairing for [${hostName}], the other pair remains unaffected!\n` +
-        `• Key mappings and sleep settings are fully preserved!\n\n` +
-        `Click [OK] to unpair [${hostName}] and restart device.`
-    );
+    const confirmed = confirm(t("msg_unpair_confirm", hostName));
     if (!confirmed) return;
 
     const btn = document.getElementById("btn-reset-bt");
     if (btn) {
         btn.disabled = true;
-        btn.textContent = "UNPAIRING...";
+        btn.textContent = t("unpairing_btn");
     }
 
     try {
         const res = await window.pywebview.api.reset_bt_pairing(currentActiveSlot);
         if (res && res.status === "ok") {
-            alert(`Pairing for [${hostName}] cleared successfully!\nDevice is rebooting in discoverable mode.`);
+            alert(t("msg_unpair_success", hostName));
             if (isConnected) {
                 onConnectClick();
             }
         } else {
-            alert("Unpair failed: " + (res ? res.message : "Unknown error"));
+            alert(t("msg_unpair_fail", res ? res.message : "Unknown error"));
         }
     } catch (e) {
-        alert("Unpair exception: " + e.message);
+        alert(t("msg_unpair_fail", e.message));
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11"><path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg> UNPAIR`;
+            btn.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11"><path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg> <span id="btn-reset-bt-text" data-i18n="unpair_btn">${t("unpair_btn")}</span>`;
         }
     }
 }

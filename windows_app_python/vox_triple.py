@@ -65,6 +65,26 @@ class Api:
     def set_window(self, window):
         self._window = window
 
+    def get_system_locale(self) -> str:
+        """Detect Windows OS UI display language, returns 'zh' or 'en'."""
+        try:
+            import ctypes
+            # GetUserDefaultUILanguage: 0x0804=zh-CN, 0x0404=zh-TW, 0x0c04=zh-HK, 0x1404=zh-MO
+            lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage()
+            primary_lang = lang_id & 0x3ff
+            if primary_lang == 0x04:  # LANG_CHINESE
+                return "zh"
+        except Exception as e:
+            log.debug(f"ctypes GetUserDefaultUILanguage error: {e}")
+        try:
+            import locale
+            loc = locale.getdefaultlocale()[0]
+            if loc and loc.lower().startswith("zh"):
+                return "zh"
+        except Exception as e:
+            log.debug(f"locale getdefaultlocale error: {e}")
+        return "en"
+
     def get_ports(self) -> list[str]:
         """Scan Windows local for COM ports."""
         ports = []
