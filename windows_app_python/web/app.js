@@ -62,7 +62,10 @@ let currentSlotPaired = [0, 0]; // 记录槽位是否已配对 (0: 未配对, 1:
 let currentSlotOs = [0, 0];   // 记录槽位配对系统 (1: Apple, 2: Windows, 0: 未知)
 let selectedOtaPath = "";
 
-const CURRENT_CLIENT_VERSION = "1.0.18";
+const CURRENT_CLIENT_VERSION = "1.0.19-beta";
+let clientUpdateInfo = null;
+let downloadedClientExePath = null;
+let isDownloadingClient = false;
 
 // ── DOM Initialization ───────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -83,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // 启动时静默检查客户端是否有最新版本
+    setTimeout(checkClientUpdateSilent, 800);
     
     // 修饰键 Pills 点击委托
     const modPills = document.querySelectorAll(".mod-pill");
@@ -1044,3 +1050,215 @@ function onOtaProgress(written, total, type) {
     if (type === "download") prefix = "Downloading: ";
     if (progressPct) progressPct.textContent = `${prefix}${pct}%`;
 }
+
+// ── 客户端软件在线更新交互逻辑 (Client App Self-Update) ────────────────────
+async function checkClientUpdateSilent() {
+    if (!window.pywebview || !window.pywebview.api) return;
+    try {
+        const res = await window.pywebview.api.check_client_update(CURRENT_CLIENT_VERSION);
+        if (res && res.ok && res.has_new) {
+            clientUpdateInfo = res;
+            const dot = document.getElementById("update-badge-dot");
+            if (dot) dot.style.display = "block";
+            const btn = document.getElementById("btn-app-upgrade");
+            if (btn) btn.classList.add("has-update");
+        }
+    } catch (e) {
+        console.warn("Silent client update check failed:", e);
+    }
+}
+
+async function openClientUpdateModal(userInitiated = false) {
+    const modal = document.getElementById("client-update-modal");
+    if (!modal) return;
+    modal.style.display = "flex";
+
+    const currVerEl = document.getElementById("modal-curr-ver");
+    const latestVerEl = document.getElementById("modal-latest-ver");
+    const notesEl = document.getElementById("modal-release-notes");
+    const sizeEl = document.getElementById("modal-file-size");
+    const btnAction = document.getElementById("btn-modal-action");
+
+    if (currVerEl) currVerEl.textContent = "v" + CURRENT_CLIENT_VERSION;
+
+    if (clientUpdateInfo) {
+        renderModalInfo(clientUpdateInfo);
+        return;
+    }
+
+    if (latestVerEl) latestVerEl.textContent = "Checking...";
+    if (notesEl) notesEl.textContent = "正在连接 GitHub 检查最新客户端发布信息...";
+    if (btnAction) {
+        btnAction.disabled = true;
+        btnAction.textContent = "检查更新中...";
+    }
+
+    try {
+        const res = await window.pywebview.api.check_client_update(CURRENT_CLIENT_VERSION);
+        if (res && res.ok) {
+            clientUpdateInfo = res;
+            renderModalInfo(res);
+        } else {
+            if (latestVerEl) latestVerEl.textContent = "Check Failed";
+            if (notesEl) notesEl.textContent = (res && res.message) ? res.message : "未能获取更新信息，请检查网络连接后重试。";
+            if (btnAction) {
+                btnAction.disabled = false;
+                btnAction.textContent = "重试检查";
+                btnAction.onclick = () => openClientUpdateModal(true);
+            }
+        }
+    } catch (e) {
+        if (latestVerEl) latestVerEl.textContent = "Network Error";
+        if (notesEl) notesEl.textContent = "请求异常: " + e.message;
+        if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.textContent = "重试";
+            btnAction.onclick = () => openClientUpdateModal(true);
+        }
+    }
+}
+
+function renderModalInfo(info) {
+    const latestVerEl = document.getElementById("modal-latest-ver");
+    const notesEl = document.getElementById("modal-release-notes");
+    const sizeEl = document.getElementById("modal-file-size");
+    const btnAction = document.getElementById("btn-modal-action");
+
+    if (latestVerEl) latestVerEl.textContent = "v" + (info.latest || CURRENT_CLIENT_VERSION);
+    if (notesEl) notesEl.textContent = info.notes || "修复已知问题，优化整体性能与界面交互。";
+    
+    if (sizeEl && info.exe_size) {
+        const sizeMb = (info.exe_size / (1024 * 1024)).toFixed(1);
+        sizeEl.textContent = `${info.exe_name || "Installer"} (~${sizeMb} MB)`;
+    }
+
+    if (downloadedClientExePath) {
+        if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.textContent = "立即重启更新并运行";
+            btnAction.onclick = launchDownloadedUpdate;
+        }
+        return;
+    }
+
+    if (info.has_new) {
+        if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.textContent = "立即下载更新";
+            btnAction.onclick = onClientUpdateAction;
+        }
+    } else {
+        if (btnAction) {
+            btnAction.disabled = true;
+            btnAction.textContent = "当前已是最新版";
+        }
+    }
+}
+
+function closeClientUpdateModal() {
+    if (isDownloadingClient) {
+        if (!confirm("客户端正在后台下载更新，确定要关闭窗口吗？（下载仍将在后台继续）")) {
+            return;
+        }
+    }
+    const modal = document.getElementById("client-update-modal");
+    if (modal) modal.style.display = "none";
+}
+
+async function onClientUpdateAction() {
+    if (!window.pywebview || !window.pywebview.api) return;
+    if (isDownloadingClient) return;
+
+    if (downloadedClientExePath) {
+        launchDownloadedUpdate();
+        return;
+    }
+
+    const downloadBox = document.getElementById("client-download-box");
+    const statusText = document.getElementById("client-download-status");
+    const btnAction = document.getElementById("btn-modal-action");
+
+    if (downloadBox) downloadBox.style.display = "flex";
+    if (statusText) statusText.textContent = "正在建立高速下载通道...";
+    if (btnAction) {
+        btnAction.disabled = true;
+        btnAction.textContent = "正在下载中...";
+    }
+    isDownloadingClient = true;
+
+    try {
+        const res = await window.pywebview.api.download_client_update();
+        if (!res || !res.ok) {
+            isDownloadingClient = false;
+            alert(res ? res.message : "启动下载失败");
+            if (btnAction) {
+                btnAction.disabled = false;
+                btnAction.textContent = "重试下载";
+            }
+        }
+    } catch (e) {
+        isDownloadingClient = false;
+        alert("下载异常: " + e.message);
+        if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.textContent = "重试下载";
+        }
+    }
+}
+
+// 后端推送回调：下载进度
+function onClientDownloadProgress(downloaded, total, speedStr) {
+    const bar = document.getElementById("client-download-bar");
+    const pctEl = document.getElementById("client-download-pct");
+    const sizeEl = document.getElementById("client-download-size");
+    const speedEl = document.getElementById("client-download-speed");
+    const statusText = document.getElementById("client-download-status");
+
+    const pct = (total > 0) ? Math.min(100, Math.max(0, (downloaded / total) * 100)).toFixed(1) : 0;
+    if (bar) bar.style.width = `${pct}%`;
+    if (pctEl) pctEl.textContent = `${pct}%`;
+
+    const dMb = (downloaded / (1024 * 1024)).toFixed(1);
+    const tMb = (total / (1024 * 1024)).toFixed(1);
+    if (sizeEl) sizeEl.textContent = `${dMb} MB / ${tMb} MB`;
+    if (speedEl) speedEl.textContent = speedStr;
+    if (statusText) statusText.textContent = "正在下载更新程序...";
+}
+
+// 后端推送回调：下载完成
+function onClientDownloadComplete(ok, pathOrError) {
+    isDownloadingClient = false;
+    const btnAction = document.getElementById("btn-modal-action");
+    const statusText = document.getElementById("client-download-status");
+    const speedEl = document.getElementById("client-download-speed");
+    const bar = document.getElementById("client-download-bar");
+
+    if (ok) {
+        downloadedClientExePath = pathOrError;
+        if (bar) bar.style.width = "100%";
+        if (statusText) statusText.textContent = "下载完成！新程序已就绪。";
+        if (speedEl) speedEl.textContent = "100%";
+        if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.textContent = "立即重启更新并运行";
+            btnAction.onclick = launchDownloadedUpdate;
+        }
+    } else {
+        if (statusText) statusText.textContent = "下载失败: " + pathOrError;
+        if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.textContent = "重试下载";
+            btnAction.onclick = onClientUpdateAction;
+        }
+    }
+}
+
+async function launchDownloadedUpdate() {
+    if (!downloadedClientExePath || !window.pywebview || !window.pywebview.api) return;
+    try {
+        await window.pywebview.api.launch_client_update(downloadedClientExePath);
+    } catch (e) {
+        alert("启动新版本程序异常: " + e.message);
+    }
+}
+

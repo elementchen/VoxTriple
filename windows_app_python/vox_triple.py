@@ -54,6 +54,12 @@ class Api:
         self._window = None
         self._github_version = None
         self._github_bin_url = None
+        self._github_release_body = ""
+        self._github_exe_url = None
+        self._github_exe_name = None
+        self._github_exe_size = 0
+        self._downloading_client = False
+        self._downloaded_client_path = None
 
     def set_window(self, window):
         self._window = window
@@ -251,7 +257,7 @@ class Api:
         """Check if a newer client application release exists on GitHub."""
         future = run_coro(self._check_github_version())
         try:
-            future.result(timeout=4.0)
+            future.result(timeout=8.0)
         except Exception as e:
             log.warning(f"check_client_update network request failed/timeout: {e}")
             
@@ -261,12 +267,115 @@ class Api:
                 "ok": True,
                 "latest": self._github_version,
                 "current": current_version,
-                "has_new": has_new
+                "has_new": has_new,
+                "notes": self._github_release_body or "修复已知问题，优化使用体验。",
+                "exe_name": self._github_exe_name or f"VoxTriple_v{self._github_version}.exe",
+                "exe_size": self._github_exe_size,
+                "exe_url": self._github_exe_url
             }
         return {
             "ok": False,
-            "has_new": False
+            "has_new": False,
+            "message": "未能连接到 GitHub 更新服务器，请检查网络连接。"
         }
+
+    def download_client_update(self) -> dict:
+        """Download latest client executable in background thread with progress callback."""
+        if not self._github_exe_url:
+            return {"ok": False, "message": "未找到新版本可执行程序下载链接。"}
+        if self._downloading_client:
+            return {"ok": False, "message": "已有下载任务正在进行中。"}
+
+        threading.Thread(target=self._run_client_download_worker, daemon=True).start()
+        return {"ok": True, "message": "下载已在后台启动。"}
+
+    def _run_client_download_worker(self):
+        import time
+        import tempfile
+        self._downloading_client = True
+        temp_dir = os.path.join(tempfile.gettempdir(), "VoxTriple_Update")
+        os.makedirs(temp_dir, exist_ok=True)
+        filename = self._github_exe_name or f"VoxTriple_v{self._github_version}.exe"
+        save_path = os.path.join(temp_dir, filename)
+
+        try:
+            log.info(f"Downloading client update from {self._github_exe_url} to {save_path}...")
+            req = urllib.request.Request(self._github_exe_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=30.0) as resp:
+                total_size = int(resp.headers.get("content-length", 0)) or self._github_exe_size
+                downloaded = 0
+                start_time = time.time()
+                last_time = start_time
+                last_bytes = 0
+                speed_str = "0 KB/s"
+
+                with open(save_path, "wb") as f:
+                    while True:
+                        chunk = resp.read(65536)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                        downloaded += len(chunk)
+
+                        now = time.time()
+                        if now - last_time >= 0.25:
+                            time_diff = now - last_time
+                            bytes_diff = downloaded - last_bytes
+                            speed_bps = bytes_diff / time_diff if time_diff > 0 else 0
+                            if speed_bps >= 1024 * 1024:
+                                speed_str = f"{speed_bps / (1024 * 1024):.1f} MB/s"
+                            else:
+                                speed_str = f"{speed_bps / 1024:.0f} KB/s"
+                            last_time = now
+                            last_bytes = downloaded
+
+                            if self._window:
+                                self._window.evaluate_js(
+                                    f"onClientDownloadProgress({downloaded}, {total_size}, '{speed_str}')"
+                                )
+
+            self._downloading_client = False
+            self._downloaded_client_path = save_path
+            log.info(f"Client update downloaded successfully: {save_path}")
+            if self._window:
+                escaped_path = save_path.replace("\\", "/")
+                self._window.evaluate_js(f"onClientDownloadComplete(true, '{escaped_path}')")
+        except Exception as e:
+            self._downloading_client = False
+            log.error(f"Client download failed: {e}")
+            if self._window:
+                escaped_err = str(e).replace("'", "\\'")
+                self._window.evaluate_js(f"onClientDownloadComplete(false, '{escaped_err}')")
+
+    def launch_client_update(self, exe_path: str = None) -> bool:
+        """Launch downloaded new client exe and exit current process."""
+        target = exe_path or self._downloaded_client_path
+        if not target or not os.path.exists(target):
+            log.error(f"Cannot launch client update, file not found: {target}")
+            return False
+
+        try:
+            import subprocess
+            log.info(f"Launching updated executable: {target}")
+            subprocess.Popen([target], close_fds=True)
+            self.close_window()
+            return True
+        except Exception as e:
+            log.error(f"Failed to launch update: {e}")
+            return False
+
+    def open_update_folder(self, exe_path: str = None) -> bool:
+        """Open system file explorer and highlight the downloaded file."""
+        target = exe_path or self._downloaded_client_path
+        if not target or not os.path.exists(target):
+            return False
+        import subprocess
+        try:
+            subprocess.Popen(f'explorer /select,"{os.path.abspath(target)}"')
+            return True
+        except Exception as e:
+            log.error(f"Failed to open folder: {e}")
+            return False
 
     @staticmethod
     def _is_newer_version(latest_str: str, current_str: str) -> bool:
@@ -391,17 +500,26 @@ class Api:
         url = "https://api.github.com/repos/elementchen/VoxTriple_Classic/releases/latest"
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=4.0) as resp:
+            with urllib.request.urlopen(req, timeout=8.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                tag = data.get("tag_name", "v1.0.17").strip()
+                tag = data.get("tag_name", "").strip()
                 if tag.startswith("v"):
                     tag = tag[1:]
                 self._github_version = tag
+                self._github_release_body = data.get("body", "")
+                self._github_exe_url = None
+                self._github_exe_name = None
+                self._github_exe_size = 0
+                self._github_bin_url = None
+
                 for asset in data.get("assets", []):
                     name = asset.get("name", "")
-                    if name.endswith(".bin") and "merged" not in name:
+                    if name.lower().endswith(".exe"):
+                        self._github_exe_url = asset.get("browser_download_url")
+                        self._github_exe_name = name
+                        self._github_exe_size = asset.get("size", 0)
+                    elif name.endswith(".bin") and "merged" not in name:
                         self._github_bin_url = asset.get("browser_download_url")
-                        break
         except Exception as e:
             log.warning(f"Check version failed: {e}")
 
