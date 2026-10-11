@@ -23,26 +23,34 @@ VoxTriple v1.6 — ESP32 Lite V1.0.0 接线图
 
    *按键说明*：按键按下时接地（低电平有效），由 ESP32 内部上拉电阻维持高电平。
 
-3. 板载指示灯 LED:
+3. 物理两档拨动开关 (Slide Switch - 配对频道物理切换):
+   - 信号端 → GPIO 33 (左侧排 Pin 8)
+   - 公共端 → GND     (左侧排 Pin 4 或任意 GND)
+   - 档位逻辑：
+     * 悬空/断开 (电平 1) → Pair 1 (电脑一)
+     * 接地/导通 (电平 0) → Pair 2 (电脑二)
+   - 特点：自带内部上拉无需外接电阻；零漏电；支持开机直读与运行时拨动软重启秒切。
+
+4. 板载指示灯 LED:
    - 物理固化在 GPIO 22 (右侧排 Pin 2) 上，无需任何外挂杜邦线或电阻！
    - 低电平点亮（Active Low），高电平熄灭。
    - 软件全自动控制（按下 Button 1 时点亮指示，松开时熄灭；休眠与唤醒双闪反馈）。
 
-4. 电池供电与充放电:
+5. 电池供电与充放电:
    - 板载 JST-PH 2.0mm 锂电池插座（或排针 BAT 引脚），支持 3.7V 聚合物锂电池。
    - 板载 TP4054 充电芯片，插入 USB 时自动充电并指示。
 
-5. ESP32 Lite V1.0.0 完整排针速查表:
+6. ESP32 Lite V1.0.0 完整排针速查表:
    ------------------------------------------------------------
    左侧排针 (JP1 从上到下):        右侧排针 (JP2 从上到下):
    Pin 1:  5V (VBUS USB输入)       Pin 1:  GND
    Pin 2:  3V3  ← INMP441 VDD      Pin 2:  GPIO 22 ← 板载贴片 LED (内部固化)
    Pin 3:  EN / RST (复位按键)      Pin 3:  GPIO 19 ← Button 2 (快捷键 2)
-   Pin 4:  GND  ← 麦克风接地       Pin 4:  GPIO 23 ← Button 3 (快捷键 3)
-   Pin 5:  GPIO 34 (纯输入)        Pin 5:  GPIO 18 ← Button 4 (快捷键 4)
-   Pin 6:  GPIO 35 (纯输入)        Pin 6:  GPIO 5  (保留)
-   Pin 7:  GPIO 32 (保留)          Pin 7:  GPIO 17 (保留)
-   Pin 8:  GPIO 33 (保留)          Pin 8:  GPIO 16 (空闲可用)
+   Pin 4:  GND  ← 麦克风/开关接地   Pin 4:  GPIO 23 ← Button 3 (快捷键 3)
+   Pin 5:  GPIO 34 (纯输入，预留)   Pin 5:  GPIO 18 ← Button 4 (快捷键 4)
+   Pin 6:  GPIO 35 (纯输入，预留)   Pin 6:  GPIO 5  ← [远期预留: OLED SCL]
+   Pin 7:  GPIO 32 (保留)          Pin 7:  GPIO 17 ← [远期预留: OLED SDA]
+   Pin 8:  GPIO 33 ← 物理两档拨动开关 Pin 8:  GPIO 16 (空闲可用)
    Pin 9:  GPIO 25 ← INMP441 SD    Pin 9:  GPIO 4  ← Button 1 (语音PTT/唤醒)
    Pin 10: GPIO 26 ← INMP441 WS    Pin 10: GPIO 0  (BOOT下载模式引脚，避开)
    Pin 11: GPIO 27 ← INMP441 SCK   Pin 11: GPIO 2  (Strapping引脚，避开)

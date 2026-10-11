@@ -9,8 +9,11 @@
 extern "C" {
 #endif
 
+/* 物理两档拨动开关引脚定义：GPIO 33 (左侧排针 Pin 8，接地为 Pair 2，悬空为 Pair 1) */
+#define MULTI_HOST_SWITCH_GPIO  GPIO_NUM_33
+
 /**
- * @brief Initialize multi-host module
+ * @brief Initialize multi-host module and physical slide switch (GPIO 33)
  */
 esp_err_t multi_host_init(void);
 
@@ -18,6 +21,12 @@ esp_err_t multi_host_init(void);
  * @brief Get currently active host slot (0 or 1)
  */
 uint8_t multi_host_get_current_slot(void);
+
+/**
+ * @brief Read hardware switch state directly from GPIO 33
+ * @return 0 for Pair 1 (High/Floating), 1 for Pair 2 (Low/GND)
+ */
+uint8_t multi_host_read_hardware_switch_slot(void);
 
 /**
  * @brief Trigger switching to the other host slot (Slot 0 <-> Slot 1)

@@ -119,6 +119,11 @@ void app_main(void)
         nvs_close(handle);
     }
 
+    /* Step 2b: Initialize Multi-Host Manager and Hardware Slide Switch (GPIO 33) */
+    ESP_LOGI(TAG, "Step 2b: Initializing Multi-Host Manager & Hardware Switch (GPIO 33)...");
+    multi_host_init();
+    uint8_t curr_slot = multi_host_get_current_slot();
+
     /* Step 3: Initialize I2S microphone driver */
     ESP_LOGI(TAG, "Step 3: Initializing I2S microphone...");
 #if ENABLE_CLASSIC_BT_MIC
@@ -154,15 +159,10 @@ void app_main(void)
     ESP_LOGI(TAG, "Step 6: Initializing button handler...");
     button_handler_init();
 
-    /* Step 7: Initialize Multi-Host Manager */
-    ESP_LOGI(TAG, "Step 7: Initializing Multi-Host Manager...");
-    multi_host_init();
-    uint8_t curr_slot = multi_host_get_current_slot();
-
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  System initialized successfully!");
-    ESP_LOGI(TAG, "  Firmware: v1.0.18 (Dual-Host Ready)");
-    ESP_LOGI(TAG, "  Active Slot: [%d] (Switch via Btn 3+4)", curr_slot);
+    ESP_LOGI(TAG, "  Firmware: v1.0.19-beta (Dual-Host + Hardware Switch)");
+    ESP_LOGI(TAG, "  Active Slot: [%d] (Slide Switch: GPIO 33)", curr_slot);
     ESP_LOGI(TAG, "  Waiting for Bluetooth connections...");
     ESP_LOGI(TAG, "============================================");
 

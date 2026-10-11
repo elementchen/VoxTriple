@@ -48,17 +48,90 @@ static void led_feedback_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
+static TaskHandle_t s_switch_monitor_task = NULL;
+
 void multi_host_trigger_led_feedback(uint8_t slot)
 {
     xTaskCreate(led_feedback_task, "led_fb_task", 2048, (void *)(uint32_t)slot, 4, NULL);
 }
 
+uint8_t multi_host_read_hardware_switch_slot(void)
+{
+    // GPIO 33 内部弱上拉使能：
+    // 电平 1 (未接地/悬空) = Slot 0 (Pair 1)
+    // 电平 0 (接 GND)    = Slot 1 (Pair 2)
+    int level = gpio_get_level(MULTI_HOST_SWITCH_GPIO);
+    return (level == 0) ? 1 : 0;
+}
+
+static void hardware_switch_monitor_task(void *pvParameters)
+{
+    ESP_LOGI(TAG, "Hardware switch monitor task started (GPIO %d)", MULTI_HOST_SWITCH_GPIO);
+    uint8_t last_sampled_slot = multi_host_read_hardware_switch_slot();
+    uint8_t debounce_count = 0;
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(50)); // 50ms 轮询检测
+        uint8_t current_slot = multi_host_read_hardware_switch_slot();
+
+        if (current_slot != last_sampled_slot) {
+            debounce_count++;
+            if (debounce_count >= 3) { // 连续 150ms 稳定保持新状态，防抖通过
+                ESP_LOGW(TAG, "Hardware slide switch toggled detected: Slot %d -> %d", last_sampled_slot, current_slot);
+                last_sampled_slot = current_slot;
+                debounce_count = 0;
+
+                // 若物理档位与当前正在运行的活跃槽位不一致，触发物理切换
+                if (current_slot != s_active_slot) {
+                    multi_host_set_slot(current_slot);
+                }
+            }
+        } else {
+            debounce_count = 0;
+        }
+    }
+}
+
 esp_err_t multi_host_init(void)
 {
+    // 1. 初始化 GPIO 33 两档拨动开关引脚（输入模式 + 内部弱上拉）
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << MULTI_HOST_SWITCH_GPIO),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    esp_err_t ret = gpio_config(&io_conf);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure switch GPIO %d: %s", MULTI_HOST_SWITCH_GPIO, esp_err_to_name(ret));
+    }
+
+    // 等待 15ms 让内部弱上拉电平充分建立
+    vTaskDelay(pdMS_TO_TICKS(15));
+
+    // 2. 读取物理拨动开关档位
+    uint8_t hw_slot = multi_host_read_hardware_switch_slot();
     config_storage_get_active_slot(&s_active_slot);
-    ESP_LOGI(TAG, "Multi-host initialized. Current Active Slot: %d", s_active_slot);
-    // 开机根据当前活跃槽位触发物理 LED 反馈 (槽位0: 单闪3次; 槽位1: 双闪3次)
+
+    ESP_LOGI(TAG, "Hardware Slide Switch: GPIO %d level=%d (Mapped Slot: %d), NVS Slot: %d",
+             MULTI_HOST_SWITCH_GPIO, gpio_get_level(MULTI_HOST_SWITCH_GPIO), hw_slot, s_active_slot);
+
+    // 3. 物理开关档位拥有最高权威性：开机若与 NVS 不符，则以硬件物理开关为准更新 NVS
+    if (hw_slot != s_active_slot) {
+        ESP_LOGW(TAG, "Syncing active slot with hardware switch: NVS %d -> Hardware %d", s_active_slot, hw_slot);
+        s_active_slot = hw_slot;
+        config_storage_set_active_slot(hw_slot);
+    }
+
+    // 4. 开机根据当前活跃槽位触发物理 LED 闪烁反馈 (槽位0: 单闪3次; 槽位1: 双闪3次)
     multi_host_trigger_led_feedback(s_active_slot);
+
+    // 5. 启动运行时物理拨动开关消抖监控任务
+    if (s_switch_monitor_task == NULL) {
+        xTaskCreate(hardware_switch_monitor_task, "hw_sw_task", 2048, NULL, 5, &s_switch_monitor_task);
+    }
+
     return ESP_OK;
 }
 
