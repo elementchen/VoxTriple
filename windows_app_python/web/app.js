@@ -1,4 +1,4 @@
-// ==========================================================================
+﻿// ==========================================================================
 // VoxTriple Webview Frontend App Logic (OpenDesign 2-Panel - Windows Edition)
 // ==========================================================================
 
@@ -757,7 +757,8 @@ function clearPhysicalPressedStates() {
     }
 }
 
-// ── 双设备快速切换 (电脑一 / 电脑二) ─────────────────────────────────────────
+// ── 双设备配置查看与管理切换 (Pair 1 / Pair 2) ─────────────────────────
+// 不向 ESP32 发出切换频道指令及重启，仅切换读取与展示对应频道的配置
 async function switchHostSlot(targetSlot) {
     if (!isConnected || !window.pywebview || !window.pywebview.api) {
         alert("Please connect the device first!");
@@ -766,34 +767,17 @@ async function switchHostSlot(targetSlot) {
     if (targetSlot === currentActiveSlot) {
         return;
     }
-    const hostName = (targetSlot === 0) ? "Pair 1" : "Pair 2";
-    const confirmed = confirm(
-        `Switch active pairing slot to [${hostName}]?\n\n` +
-        `• Safe & Reliable: Target slot saved and device auto-reboots to reinitialize Bluetooth stack;\n` +
-        `• Auto Connect: Automatically connects to [${hostName}] upon reboot (enters discoverable mode if unpaired);\n` +
-        `• Physical Feedback: LED confirms (Pair 1 blinks 3x single, Pair 2 blinks 3x double).\n\n` +
-        `Click [OK] to proceed with slot switching.`
-    );
-    if (!confirmed) return;
 
-    updateHostSlotUi(targetSlot);
+    currentActiveSlot = targetSlot;
+    updateHostSlotUi(currentActiveSlot);
 
     try {
-        const res = await window.pywebview.api.switch_host_slot(targetSlot);
-        if (res && res.status === "ok") {
-            currentActiveSlot = (res.active_slot !== undefined) ? res.active_slot : targetSlot;
-            updateHostSlotUi(currentActiveSlot);
-            alert(`Switched to [${hostName}] successfully!\nDevice is rebooting to apply Bluetooth parameters.`);
-            if (isConnected) {
-                onConnectClick();
-            }
-        } else {
-            alert("Switch failed: " + (res ? res.message : "Unknown error"));
-            updateHostSlotUi(currentActiveSlot);
+        const cfg = await window.pywebview.api.fetch_config(targetSlot);
+        if (cfg) {
+            renderConfig(cfg);
         }
     } catch (e) {
-        alert("Switch exception: " + e.message);
-        updateHostSlotUi(currentActiveSlot);
+        console.warn("Fetch slot config failed:", e);
     }
 }
 
