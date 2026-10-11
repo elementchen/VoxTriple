@@ -702,45 +702,67 @@ button {
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     background: transparent;
     border: none;
-}
-
-.virtual-mic-slot-vertical:hover {
-    background: transparent;
-    border: none;
-    transform: translateY(-1px);
-}
-
-.virtual-mic-slot-vertical:hover .mic-slot-icon,
-.virtual-mic-slot-vertical:hover .mic-status-text {
-    color: var(--accent-orange);
-}
-
-.virtual-mic-slot-vertical.active .mic-slot-icon {
-    color: var(--accent-orange);
-    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.4));
-}
-
-.virtual-mic-slot-vertical.active .mic-status-text {
-    color: var(--accent-orange);
+    color: #6b7280; /* 关闭状态：灰色 */
 }
 
 .mic-glyph-wrap {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 26px;
+    height: 26px;
 }
 
 .mic-slot-icon {
-    color: #4b5563;
+    color: inherit;
     transition: all 0.2s ease;
+}
+
+/* 关闭状态禁止符号（圆圈+斜杠）：覆盖在灰色麦克风图标上 */
+.mic-disabled-slash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: inherit;
+    opacity: 0.92;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    display: block;
 }
 
 .mic-status-text {
     font-size: 8.5px;
     font-weight: 800;
     letter-spacing: 0.8px;
-    color: #6b7280;
+    color: inherit;
     transition: all 0.2s ease;
+}
+
+/* 开启状态：鲜明亮丽的橘色，发光，隐藏禁止符号 */
+.virtual-mic-slot-vertical.active {
+    color: var(--accent-orange);
+}
+
+.virtual-mic-slot-vertical.active .mic-slot-icon {
+    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.45));
+}
+
+.virtual-mic-slot-vertical.active .mic-disabled-slash {
+    display: none;
+}
+
+/* 鼠标悬停 (mouse over)：高对比度纯正质感黑色，界限分明！ */
+.virtual-mic-slot-vertical:hover {
+    color: #111827 !important;
+    background: transparent;
+    border: none;
+    transform: translateY(-1px);
+}
+
+.virtual-mic-slot-vertical:hover .mic-slot-icon {
+    filter: none;
 }
 
 /* 下凹按键槽（Button Well）：浅一点点的精致深灰色，四周留白与按键间距皆为 7px */

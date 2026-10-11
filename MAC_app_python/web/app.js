@@ -410,10 +410,10 @@ function resetConfigUi() {
 
 // ── TX Power UI ──────────────────────────────────────────────────────────
 function setTxPowerUi(level) {
-    const dbmMap = ["-12", "-9", "-6", "-3", "0", "3", "6", "9"];
+    const dbmMap = ["-12 dBm", "-9 dBm", "-6 dBm", "-3 dBm", "Standard", "+3 dBm", "+6 dBm", "+9 dBm"];
     const valEl = document.getElementById("tx-power-val");
     if (valEl) {
-        valEl.textContent = `${dbmMap[level] || "0"} dBm`;
+        valEl.textContent = dbmMap[level] !== undefined ? dbmMap[level] : "Standard";
     }
     
     const segments = document.querySelectorAll("#tx-power-bar .power-segment");
