@@ -58,7 +58,8 @@ let isConnected = false;
 let capturingIdx = -1;
 let currentSleepTimeoutMin = 5;
 let currentActiveSlot = 0;    // 当前处于活跃状态的电脑槽位 (0: 电脑一, 1: 电脑二)
-let currentSlotOs = [2, 2];   // 记录槽位配对系统 (1: Apple, 2: Windows)
+let currentSlotPaired = [0, 0]; // 记录槽位是否已配对 (0: 未配对, 1: 已配对)
+let currentSlotOs = [0, 0];   // 记录槽位配对系统 (1: Apple, 2: Windows, 0: 未知)
 let selectedOtaPath = "";
 
 const CURRENT_CLIENT_VERSION = "1.0.18-beta1";
@@ -297,10 +298,6 @@ function applyDisconnectedUi() {
     if (hostSection) hostSection.style.display = "none";
     const resetBtSection = document.getElementById("reset-bt-section");
     if (resetBtSection) resetBtSection.style.display = "none";
-
-    // 隐藏操作系统徽章（保持占位隐藏）
-    updateOsBadge(0);
-
     resetConfigUi();
 }
 
@@ -331,6 +328,8 @@ function renderConfig(config) {
     }
 
     // 双设备配对状态 (电脑一 / 电脑二)
+    if (config.slot0_paired !== undefined) currentSlotPaired[0] = config.slot0_paired;
+    if (config.slot1_paired !== undefined) currentSlotPaired[1] = config.slot1_paired;
     if (config.slot0_os !== undefined) currentSlotOs[0] = config.slot0_os;
     if (config.slot1_os !== undefined) currentSlotOs[1] = config.slot1_os;
     if (config.active_slot !== undefined) {
@@ -364,10 +363,6 @@ function renderConfig(config) {
             pill1.title = "Pair 2 (Unpaired / Empty)";
         }
     }
-
-    // 渲染操作系统识别徽章（左侧栏 KEY MAPPING 标题旁）
-    const curOs = (config.query_os !== undefined) ? config.query_os : ((currentActiveSlot === 0) ? config.slot0_os : config.slot1_os);
-    updateOsBadge(curOs);
 
     // 发射功率等级
     setTxPowerUi(config.tx_power !== undefined ? config.tx_power : 4);
@@ -548,8 +543,8 @@ function resetConfigUi() {
     capturingIdx = -1;
     document.removeEventListener("keydown", onCapturedKeydown);
     clearPhysicalPressedStates();
-    updateOsBadge(0);
-    currentSlotOs = [2, 2];
+    currentSlotPaired = [0, 0];
+    currentSlotOs = [0, 0];
     updateHostSlotUi(0);
 
     for (let i = 0; i < 4; i++) {
@@ -821,12 +816,23 @@ function updatePairWatermarkIcon(slot) {
     const iconEl = document.getElementById("pair-watermark-os-icon");
     if (!iconEl) return;
 
+    const isPaired = (slot === 0) ? currentSlotPaired[0] : currentSlotPaired[1];
     const osType = (slot === 0) ? currentSlotOs[0] : currentSlotOs[1];
+
+    if (!isConnected || !isPaired || !osType) {
+        // 未连接、或者该频道未配对、或者未识别系统：透明占位，不显示图标
+        iconEl.style.visibility = "hidden";
+        iconEl.innerHTML = "";
+        return;
+    }
+
+    // 已配对且已识别系统：展示浅灰系统Logo
+    iconEl.style.visibility = "visible";
     if (osType === 1) { // Apple (macOS)
         iconEl.innerHTML = `<svg viewBox="0 0 170 170" width="18" height="18" fill="currentColor">
             <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.7-7.85-12.01-14.42-5.74-8.81-10.23-18.7-13.48-29.68-3.24-10.97-4.87-21.78-4.87-32.43 0-16.32 4.11-29.74 12.33-40.27 8.22-10.53 18.7-15.86 31.44-15.99 6.29 0 12.82 1.58 19.59 4.75 6.77 3.17 11.22 4.88 13.34 5.12 2.7-.49 7.4-2.31 14.1-5.48 6.7-3.16 12.78-4.66 18.24-4.5 14.15.52 25.13 6.13 32.93 16.83-12.63 7.64-18.76 18.04-18.39 31.22.37 10.37 4.26 19.06 11.66 26.06 7.41 7 16.14 10.88 26.2 11.64-2.22 6.64-4.87 13.06-7.96 19.26zM119.22 33.15c0-7.72 2.76-14.97 8.29-21.75 5.53-6.77 12.28-10.9 20.25-12.4 1.1 6.96-.34 14.11-4.33 21.46-3.99 7.34-9.87 12.08-17.64 14.22-.88-.49-2.07-.86-3.57-1.12-1.5-.27-2.5-.41-3-.41z"/>
         </svg>`;
-    } else { // Windows 或默认
+    } else if (osType === 2) { // Windows PC
         iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
             <path d="M0 3.449L9.75 2.1v9.451H0V3.449zm10.949-1.551L24 0v11.551H10.949V1.898zM0 12.45h9.75V21.9L0 20.551V12.45zm10.949 0H24V24l-13.051-1.898V12.45z"/>
         </svg>`;
@@ -871,36 +877,6 @@ async function confirmResetBtPairing() {
             btn.disabled = false;
             btn.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11"><path fill="currentColor" d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg> UNPAIR`;
         }
-    }
-}
-
-// ── 操作系统类型徽章渲染 (1: Apple, 2: Windows) ─────────────────────────────
-// 纯图标显示在中间产品示意图正下方，小巧精致无文字，位置完全锁定保持不动
-function updateOsBadge(osType) {
-    const badge = document.getElementById("os-badge");
-    const icon = document.getElementById("os-badge-icon");
-    if (!badge || !icon) return;
-
-    if (!isConnected || !osType) {
-        badge.classList.add("panel-hidden");
-        return;
-    }
-
-    badge.classList.remove("panel-hidden");
-    if (osType === 1) { // Apple
-        badge.className = "os-badge os-apple";
-        badge.title = "已识别配对系统：Apple (macOS)";
-        icon.innerHTML = `<svg viewBox="0 0 170 170" width="13" height="13" fill="currentColor">
-            <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.7-7.85-12.01-14.42-5.74-8.81-10.23-18.7-13.48-29.68-3.24-10.97-4.87-21.78-4.87-32.43 0-16.32 4.11-29.74 12.33-40.27 8.22-10.53 18.7-15.86 31.44-15.99 6.29 0 12.82 1.58 19.59 4.75 6.77 3.17 11.22 4.88 13.34 5.12 2.7-.49 7.4-2.31 14.1-5.48 6.7-3.16 12.78-4.66 18.24-4.5 14.15.52 25.13 6.13 32.93 16.83-12.63 7.64-18.76 18.04-18.39 31.22.37 10.37 4.26 19.06 11.66 26.06 7.41 7 16.14 10.88 26.2 11.64-2.22 6.64-4.87 13.06-7.96 19.26zM119.22 33.15c0-7.72 2.76-14.97 8.29-21.75 5.53-6.77 12.28-10.9 20.25-12.4 1.1 6.96-.34 14.11-4.33 21.46-3.99 7.34-9.87 12.08-17.64 14.22-.88-.49-2.07-.86-3.57-1.12-1.5-.27-2.5-.41-3-.41z"/>
-        </svg>`;
-    } else if (osType === 2) { // Windows
-        badge.className = "os-badge os-windows";
-        badge.title = "已识别配对系统：Windows PC";
-        icon.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-            <path d="M0 3.449L9.75 2.1v9.451H0V3.449zm10.949-1.551L24 0v11.551H10.949V1.898zM0 12.45h9.75V21.9L0 20.551V12.45zm10.949 0H24V24l-13.051-1.898V12.45z"/>
-        </svg>`;
-    } else {
-        badge.classList.add("panel-hidden");
     }
 }
 

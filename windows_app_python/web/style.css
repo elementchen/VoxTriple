@@ -472,6 +472,9 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
     color: inherit;
     line-height: 1;
 }
