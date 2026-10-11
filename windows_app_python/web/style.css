@@ -451,30 +451,40 @@ button {
     transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* 当前配对频道水印文本框（大粗体浅灰色，类似水印质感） */
+/* 当前配对频道水印文本（纯文字直接展示，大粗体浅浅灰色，无单独背景框） */
 .pair-watermark-box {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 7px;
     width: 100%;
     height: 44px;
-    background: rgba(246, 248, 250, 0.75);
-    border: 1px solid rgba(220, 225, 232, 0.75);
-    border-radius: var(--r-card);
+    background: transparent;
+    border: none;
+    border-radius: 0;
     margin-bottom: 2px;
     user-select: none;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    box-shadow: none;
+    color: #cbd2dc; /* 更加浅淡、轻盈透亮的水印浅灰！ */
+}
+
+.pair-watermark-os-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    line-height: 1;
 }
 
 .pair-watermark-text {
     font-size: 22px;
     font-weight: 900;
-    letter-spacing: 3.5px;
-    color: #b8bfc9; /* 浅浅的高级水印灰，低对比度不抢占主体 */
+    letter-spacing: 3px;
+    color: inherit;
     text-transform: uppercase;
     line-height: 1;
     font-family: inherit;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .settings-list {
