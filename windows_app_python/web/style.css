@@ -1172,7 +1172,7 @@ button {
     border-radius: var(--r-panel);
     background: #18181b;
     color: #ffffff;
-    font-size: 11.5px;
+    font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.05em;
     display: flex;
