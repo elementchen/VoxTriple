@@ -161,7 +161,7 @@ void app_main(void)
 
     ESP_LOGI(TAG, "============================================");
     ESP_LOGI(TAG, "  System initialized successfully!");
-    ESP_LOGI(TAG, "  Firmware: v1.0.18-beta1 (Dual-Host Ready)");
+    ESP_LOGI(TAG, "  Firmware: v1.0.18 (Dual-Host Ready)");
     ESP_LOGI(TAG, "  Active Slot: [%d] (Switch via Btn 3+4)", curr_slot);
     ESP_LOGI(TAG, "  Waiting for Bluetooth connections...");
     ESP_LOGI(TAG, "============================================");
