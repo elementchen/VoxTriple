@@ -1,0 +1,220 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   VoxTriple Official Website - Apple-Grade Brand & Tech Aesthetic
+   ========================================================================== */
+
+:root {
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --bg-deep: #000002;
+  --bg-surface: #0a0a0f;
+  --bg-card: rgba(18, 18, 24, 0.7);
+  --bg-card-hover: rgba(28, 28, 38, 0.9);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(0, 113, 227, 0.4);
+  --brand-blue: #2997ff;
+  --brand-cyan: #00f2fe;
+  --brand-purple: #9d4edd;
+  --text-pure: #ffffff;
+  --text-muted: #86868b;
+  --text-sub: #a1a1a6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-display);
+  background-color: var(--bg-deep);
+  color: var(--text-pure);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* 苹果级极光渐变背景 */
+.aurora-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  opacity: 0.18;
+}
+
+.aurora-blue {
+  background: radial-gradient(circle, #0071e3 0%, rgba(0, 113, 227, 0) 70%);
+}
+
+.aurora-purple {
+  background: radial-gradient(circle, #7928ca 0%, rgba(121, 40, 202, 0) 70%);
+}
+
+.aurora-cyan {
+  background: radial-gradient(circle, #00f2fe 0%, rgba(0, 242, 254, 0) 70%);
+}
+
+/* 毛玻璃质感 */
+.glass-header {
+  background: rgba(0, 0, 2, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.glass-box {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+}
+
+/* 巨幕大字渐变排版 */
+.hero-title {
+  font-size: clamp(2.8rem, 7vw, 5.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.text-gradient {
+  background: linear-gradient(180deg, #ffffff 20%, #86868b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 按键模拟器交互部件 */
+.sim-key {
+  position: relative;
+  background: linear-gradient(180deg, #24252a 0%, #151619 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+.sim-key:hover {
+  border-color: var(--brand-blue);
+  box-shadow: 0 4px 14px rgba(41, 151, 255, 0.3);
+}
+
+.sim-key:active,
+.sim-key.pressed {
+  transform: translateY(3px) scale(0.97);
+  background: #111215;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(0, 0, 0, 0.6);
+  border-color: var(--brand-blue);
+}
+
+/* 板载指示灯模拟 */
+.led-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #1c2738;
+  border: 1px solid rgba(0, 113, 227, 0.3);
+  transition: all 0.2s ease;
+}
+
+.led-indicator.active {
+  background: #00f2fe;
+  box-shadow: 0 0 12px #00f2fe, 0 0 24px rgba(0, 242, 254, 0.8);
+  border-color: #ffffff;
+}
+
+/* 交互终端日志样式 */
+.terminal-window {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: #0d0e12;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: #15161c;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* 音频声波动态 SVG */
+.wave-bar {
+  transform-origin: bottom;
+  animation: wavePulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes wavePulse {
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(1); }
+}
+
+/* 按钮风格 */
+.btn-apple {
+  background: #0071e3;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 980px;
+  font-size: 15px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 113, 227, 0.3);
+}
+
+.btn-apple:hover {
+  background: #0077ed;
+  transform: scale(1.02);
+  box-shadow: 0 6px 24px rgba(0, 113, 227, 0.5);
+}
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f5f7;
+  padding: 12px 24px;
+  border-radius: 980px;
+  font-size: 15px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  border: 1px solid var(--border-glass);
+  transition: all 0.2s ease;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+}

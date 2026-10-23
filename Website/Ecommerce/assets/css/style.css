@@ -1,0 +1,228 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   VoxTriple E-Commerce - Apple-Inspired Premium Aesthetics
+   ========================================================================== */
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #121316;
+  --bg-card: rgba(26, 27, 31, 0.65);
+  --bg-card-hover: rgba(35, 37, 42, 0.85);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(0, 113, 227, 0.5);
+  --accent-apple: #2997ff;
+  --accent-apple-glow: rgba(41, 151, 255, 0.25);
+  --accent-cyan: #00f2fe;
+  --accent-orange: #ff6b4a;
+  --text-primary: #f5f5f7;
+  --text-secondary: #86868b;
+  --text-muted: #6e6e73;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  overflow-x: hidden;
+  selection-background-color: var(--accent-apple);
+}
+
+::selection {
+  background: rgba(41, 151, 255, 0.3);
+  color: #ffffff;
+}
+
+/* 玻璃拟态与微光 */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+}
+
+.glass-nav {
+  background: rgba(10, 10, 12, 0.78);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* 渐变文本 */
+.text-gradient-apple {
+  background: linear-gradient(135deg, #ffffff 30%, #a1a1a6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #ffe066 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 按钮微动效 */
+.btn-primary {
+  background: #0071e3;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 12px 28px;
+  border-radius: 980px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 113, 227, 0.35);
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: #0077ed;
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 113, 227, 0.5);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f5f7;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 980px;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 缩略图选择指示器 */
+.thumb-item {
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background: #17181c;
+}
+
+.thumb-item.active {
+  border-color: var(--accent-apple);
+  box-shadow: 0 0 16px var(--accent-apple-glow);
+}
+
+/* 规格选择卡片 */
+.option-card {
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.option-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.option-card.selected {
+  border-color: var(--accent-apple);
+  background: rgba(41, 151, 255, 0.08);
+  box-shadow: 0 0 20px rgba(41, 151, 255, 0.15);
+}
+
+/* 颜色选择球 */
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 2px transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.color-dot.active {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-apple);
+}
+
+/* 吸顶购买栏动画 */
+#sticky-buy-bar {
+  transform: translateY(120%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#sticky-buy-bar.visible {
+  transform: translateY(0);
+}
+
+/* 折叠手风琴 FAQ */
+.faq-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+}
+
+.faq-item.open .faq-content {
+  max-height: 400px;
+  transition: max-height 0.35s ease-in-out;
+}
+
+.faq-item.open .faq-icon {
+  transform: rotate(180deg);
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2c33;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3e414c;
+}
