@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VoxTriple — 极客双模手持麦克风键盘系统 | 官方产品站</title>
-  <meta name="description" content="VoxTriple 基于 ESP32 的双模经典蓝牙麦克风键盘。同时实现 HID 键盘与 HFP 麦克风原生免驱双角色，搭配跨平台配置客户端与 20 秒极速有线 OTA。">
+  <title>VoxTriple — 专为 AI 时代打造的掌上语音输入机械中枢 | 官方产品站</title>
+  <meta name="description" content="VoxTriple 基于 ESP32 的双模经典蓝牙麦克风键盘。客制化机械轴体，内置聚合物锂电待机7天，原生免驱直连台式机与笔记本，每分钟300字语音输入流。">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -47,12 +47,13 @@
           </div>
           <span class="font-bold text-lg tracking-tight text-white group-hover:text-blue-400 transition-colors">VoxTriple</span>
         </a>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-neutral-400 border border-white/10 hidden sm:inline-block">v1.0.19</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 hidden sm:inline-block">AI 语音中枢 v1.0.19</span>
       </div>
 
       <nav class="hidden md:flex items-center gap-8 text-xs font-medium text-neutral-400">
         <a href="#overview" class="hover:text-white transition-colors">概述</a>
-        <a href="#acoustics" class="hover:text-white transition-colors">声学科技</a>
+        <a href="#philosophy" class="hover:text-white transition-colors">对标与哲学</a>
+        <a href="#acoustics" class="hover:text-white transition-colors">声学与 ASR</a>
         <a href="#simulator" class="hover:text-white transition-colors">互动体验</a>
         <a href="#software" class="hover:text-white transition-colors">桌面客户端</a>
         <a href="#ota" class="hover:text-white transition-colors">闪电 OTA</a>
@@ -61,7 +62,7 @@
 
       <div class="flex items-center gap-4">
         <a href="../Ecommerce/index.html" class="btn-apple text-xs py-1.5 px-4 font-semibold shadow-none">
-          <span>前往电商选购</span>
+          <span>进入电商详情页</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </a>
       </div>
@@ -75,17 +76,17 @@
       
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-6 backdrop-blur-md">
         <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-        <span>新一代经典蓝牙双模手持中枢</span>
+        <span>专为台式机无麦克风与 AI 对话打造的物理终端</span>
       </div>
 
       <h1 class="hero-title text-gradient tracking-tight">
         VoxTriple.<br/>
-        灵感，一触即发。
+        把 3 倍速的思考，装进掌心。
       </h1>
 
       <p class="mt-6 text-lg sm:text-xl text-neutral-400 max-w-2xl mx-auto font-normal leading-relaxed">
-        将录音棚级的清晰人声，与 4 键物理宏控制融于掌心。<br class="hidden sm:inline" />
-        原生免驱，即插即连。跨越系统壁垒，随你从容穿行于工位、书房与咖啡馆。
+        经典蓝牙免驱直连，客制化机械轴体与广播级全向硅麦一体成型。<br class="hidden sm:inline" />
+        大拇指按住口述，松手直接发送给 AI。告别伏案打字与桌面麦克风束缚，在漫步中构思未来。
       </p>
 
       <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
@@ -95,7 +96,7 @@
         </a>
         <a href="#downloads" class="btn-glass">
           <i data-lucide="download" class="w-4 h-4"></i>
-          <span>下载客户端与固件</span>
+          <span>获取配置工具与固件</span>
         </a>
       </div>
 
@@ -104,49 +105,49 @@
     <!-- 居中产品写真大图与浮动标签 -->
     <div class="relative w-full max-w-5xl mx-auto mt-12 px-4 group">
       <div class="relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-4 sm:p-8 backdrop-blur-2xl shadow-2xl">
-        <img src="../Medias/Final03.png" alt="VoxTriple 3D 渲染图" class="w-full h-auto max-h-[560px] object-contain mx-auto filter drop-shadow-[0_20px_50px_rgba(41,151,255,0.25)] transition-transform duration-700 group-hover:scale-102" />
+        <img src="../Medias/Final03.png" alt="VoxTriple 渲染图" class="w-full h-auto max-h-[540px] object-contain mx-auto filter drop-shadow-[0_20px_50px_rgba(41,151,255,0.25)] transition-transform duration-700 group-hover:scale-102" />
         
-        <!-- 浮动硬件标签 1 -->
+        <!-- 浮动硬件标签 1：尺寸 -->
         <div class="hidden sm:flex absolute top-12 left-12 glass-box p-3 items-center gap-3 text-left border border-white/10 shadow-xl">
           <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
+            <i data-lucide="ruler" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">18.5 × 29.8 × 102 mm</div>
+            <div class="text-[10px] text-neutral-400">极致纤薄掌心握持</div>
+          </div>
+        </div>
+
+        <!-- 浮动硬件标签 2：机械轴 -->
+        <div class="hidden sm:flex absolute top-12 right-12 glass-box p-3 items-center gap-3 text-left border border-white/10 shadow-xl">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+            <i data-lucide="keyboard" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">客制化机械轴体</div>
+            <div class="text-[10px] text-neutral-400">清脆段落 · PTT 盲操闭环</div>
+          </div>
+        </div>
+
+        <!-- 浮动硬件标签 3：聚合物电池 -->
+        <div class="hidden sm:flex absolute bottom-12 left-12 glass-box p-3 items-center gap-3 text-left border border-white/10 shadow-xl">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="battery-charging" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">轻薄聚合物锂电池</div>
+            <div class="text-[10px] text-neutral-400">待机 7 天 · 持续使用 1 整天</div>
+          </div>
+        </div>
+
+        <!-- 浮动硬件标签 4：免驱声学 -->
+        <div class="hidden sm:flex absolute bottom-12 right-12 glass-box p-3 items-center gap-3 text-left border border-white/10 shadow-xl">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
             <i data-lucide="mic" class="w-4 h-4"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-white">INMP441 MEMS</div>
-            <div class="text-[10px] text-neutral-400">I2S 高速全向数字硅麦</div>
-          </div>
-        </div>
-
-        <!-- 浮动硬件标签 2 -->
-        <div class="hidden sm:flex absolute top-12 right-12 glass-box p-3 items-center gap-3 text-left border border-white/10 shadow-xl">
-          <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
-            <i data-lucide="cpu" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <div class="text-xs font-bold text-white">ESP32 双核主控</div>
-            <div class="text-[10px] text-neutral-400">经典蓝牙 HID + HFP 双模</div>
-          </div>
-        </div>
-
-        <!-- 浮动硬件标签 3 -->
-        <div class="hidden sm:flex absolute bottom-12 left-12 glass-box p-3 items-center gap-3 text-left border border-white/10 shadow-xl">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-            <i data-lucide="battery" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <div class="text-xs font-bold text-white">18650 便携电池仓</div>
-            <div class="text-[10px] text-neutral-400">即换即用，无感持久续航</div>
-          </div>
-        </div>
-
-        <!-- 浮动硬件标签 4 -->
-        <div class="hidden sm:flex absolute bottom-12 right-12 glass-box p-3 items-center gap-3 text-left border border-white/10 shadow-xl">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
-            <i data-lucide="zap" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <div class="text-xs font-bold text-white">20秒有线极速 OTA</div>
-            <div class="text-[10px] text-neutral-400">上位机一键直写升级</div>
+            <div class="text-xs font-bold text-white">INMP441 + 16kHz mSBC</div>
+            <div class="text-[10px] text-neutral-400">为现代 ASR 语音输入法定制</div>
           </div>
         </div>
 
@@ -154,40 +155,43 @@
     </div>
   </section>
 
-  <!-- ==================== 苹果级设计哲学 (PHILOSOPHY) ==================== -->
-  <section class="py-24 border-t border-white/5 relative bg-[#050508]">
+  <!-- ==================== 对标与设计哲学 (PHILOSOPHY) ==================== -->
+  <section id="philosophy" class="py-24 border-t border-white/5 relative bg-[#050508]">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <span class="text-xs font-semibold tracking-widest text-blue-400 uppercase">Design Philosophy</span>
+      <span class="text-xs font-semibold tracking-widest text-blue-400 uppercase">Design Philosophy & Codex Benchmark</span>
       <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white mt-3 mb-8">
-        为什么我们需要重构手持交互？
+        对标与思考：为什么 Codex 之后，我们更需要语音手持？
       </h2>
       <div class="space-y-6 text-base sm:text-lg text-neutral-400 leading-relaxed text-left">
         <p>
-          在人工智能时代，语音听写与指令下发已成为我们最高效的思维延展。然而，传统桌面麦克风笨重且受限于线缆，普通蓝牙耳机在嘈杂环境中又常常漏音；当你想随时按下快捷键暂停、撤回或确认时，双手往往被迫离开舒适的握持姿势。
+          2026年，OpenAI 与 Work Louder 合作推出了售价高达 $230 的 <strong class="text-white">Codex Micro</strong> 桌面实体宏板。它揭示了一个不可逆的时代趋势：在 AI 和 Multi-Agent 时代，人类的角色已经从敲字符的程序员，演化为调度 AI 的指挥官。
         </p>
         <p>
-          <strong class="text-white font-medium">VoxTriple 应运而生。</strong> 我们在方寸之间重新编排了工业级声学通道与人体工学物理轻触微动。它是一支能够随身放进风衣口袋的专业录音麦克风，也是一个随时准备执行复杂宏命令的实体遥控器。
+          <strong class="text-white">然而，桌面宏板解决不了真正的输入瓶颈。</strong> 与 AI 交流需要输入浩瀚复杂的自然语言 Prompt，敲键盘 70 字/分的速度始终是在给大脑的思考拖后腿；更致命的是，大多数开发者的主力台式电脑根本没有麦克风，而市面上的桌面麦克风又将身体死死钉在工位前。
+        </p>
+        <p>
+          <strong class="text-blue-400 font-semibold">VoxTriple 就是这个缺失的关键拼图。</strong> 它将专业全向数字麦克风与客制化机械轴体一体化凝聚在 18.5mm 纤薄掌心中。你不再需要正襟危坐，在椅子上后仰靠下、踱步、依靠椅背，按住机械轴自然口述（300 字/分钟），松手一按回车即可直发 AI。
         </p>
       </div>
 
-      <!-- 实机写真展示墙 -->
+      <!-- 实物写真图墙 -->
       <div class="mt-14 grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div class="rounded-3xl overflow-hidden border border-white/10 relative group">
-          <img src="../Medias/手持麦克风键盘办公室场景图 (1).jpeg" alt="工位写真" class="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700" />
+          <img src="../Medias/手持麦克风键盘办公室场景图 (1).jpeg" alt="极客工位写真" class="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
             <div class="text-left">
-              <div class="text-sm font-semibold text-white">极客桌面 · 灵感枢纽</div>
-              <div class="text-xs text-neutral-400">单手握持呼叫 AI，效率倍增</div>
+              <div class="text-sm font-semibold text-white">台式机自由 · 告别弓腰</div>
+              <div class="text-xs text-neutral-400">背靠椅背，动动嘴皮子完成架构设计口述</div>
             </div>
           </div>
         </div>
 
         <div class="rounded-3xl overflow-hidden border border-white/10 relative group">
-          <img src="../Medias/手持麦克风键盘办公室场景图 (2).jpeg" alt="咖啡馆写真" class="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700" />
+          <img src="../Medias/手持麦克风键盘办公室场景图 (2).jpeg" alt="咖啡馆移动办公写真" class="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
             <div class="text-left">
-              <div class="text-sm font-semibold text-white">随行办公 · 轻声细语</div>
-              <div class="text-xs text-neutral-400">无论身处何地，保持克制与从容</div>
+              <div class="text-sm font-semibold text-white">咖啡厅随行 · 低声细语</div>
+              <div class="text-xs text-neutral-400">近场数字硅麦，不打扰周围顾客</div>
             </div>
           </div>
         </div>
@@ -196,18 +200,18 @@
     </div>
   </section>
 
-  <!-- ==================== 声学科技与 DSP 算法 ==================== -->
+  <!-- ==================== 声学科技与 ASR 语音输入 ==================== -->
   <section id="acoustics" class="py-24 border-t border-white/5 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div>
-          <span class="text-xs font-semibold tracking-widest text-cyan-400 uppercase">Acoustics & DSP</span>
+          <span class="text-xs font-semibold tracking-widest text-cyan-400 uppercase">ASR Acoustics & DSP</span>
           <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white mt-2 mb-6">
-            录音棚级人声，<br/>在掌心纤毫毕现。
+            现代 ASR 语音输入法的<br/>终极硬件载体。
           </h2>
           <p class="text-neutral-400 text-sm sm:text-base leading-relaxed mb-6">
-            VoxTriple 搭载高信噪比 INMP441 全向数字 MEMS 麦克风，通过 I2S 高速数字总线直接与 ESP32 芯片进行 16kHz 16-bit 无损通信。
+            在 Windows 11 下按下【Win + H】，在 macOS 上开启系统听写，手持 VoxTriple，光标处的打字速度将达到惊人的 300 字/分。
           </p>
           
           <div class="space-y-4">
@@ -218,7 +222,7 @@
               <div>
                 <h4 class="text-sm font-semibold text-white">硬件级 DSP 高通滤波</h4>
                 <p class="text-xs text-neutral-400 mt-1">
-                  精准切除 100Hz 以下由手持摩擦与桌面震动引发的物理低频杂音，确保人声通透干净。
+                  切除手持微小摩擦低频振动，确保输入法 ASR 语音识别准确率高达 98% 以上。
                 </p>
               </div>
             </div>
@@ -228,9 +232,9 @@
                 <i data-lucide="activity" class="w-5 h-5"></i>
               </div>
               <div>
-                <h4 class="text-sm font-semibold text-white">滑动平均平滑去噪</h4>
+                <h4 class="text-sm font-semibold text-white">18.5mm 极致厚度与聚合物电芯</h4>
                 <p class="text-xs text-neutral-400 mt-1">
-                  在嵌入式芯片内实时执行数字平滑滤波，抑制高频白噪与底噪，让大模型语音识别准确率显著跃升。
+                  彻底舍弃臃肿的 18650 电池，选用超薄高密度聚合物锂电，机身纤细温润，支持 7 天待机。
                 </p>
               </div>
             </div>
@@ -240,9 +244,9 @@
                 <i data-lucide="radio" class="w-5 h-5"></i>
               </div>
               <div>
-                <h4 class="text-sm font-semibold text-white">mSBC 宽带语音通道</h4>
+                <h4 class="text-sm font-semibold text-white">mSBC 16kHz 宽带语音通道</h4>
                 <p class="text-xs text-neutral-400 mt-1">
-                  突破传统窄带通话的 8kHz 音质天花板，以 16kHz 宽频带来更真实生动的人声还原。
+                  双模蓝牙复合协议，操作系统免驱识别为原生麦克风设备与客制化机械键盘。
                 </p>
               </div>
             </div>
@@ -276,9 +280,9 @@
           <div class="p-4 rounded-xl bg-black/50 border border-white/5 flex items-center justify-between text-xs text-neutral-400">
             <div class="flex items-center gap-2">
               <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-              <span>低频共振消除算法已载入</span>
+              <span>ASR 近场低语识别模型适配就绪</span>
             </div>
-            <span class="text-cyan-400 font-mono">SNR &gt; 61 dBA</span>
+            <span class="text-cyan-400 font-mono">18.5×29.8×102mm</span>
           </div>
         </div>
 
@@ -294,10 +298,10 @@
       <div class="text-center max-w-3xl mx-auto mb-16">
         <span class="text-xs font-semibold tracking-widest text-blue-400 uppercase">Live Interactive Lab</span>
         <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white mt-2">
-          亲手体验：硬件与软件的实时共振
+          亲手体验：机械轴体与语音流的实时共振
         </h2>
         <p class="text-neutral-400 text-sm sm:text-base mt-3">
-          点击下方虚拟 VoxTriple 手持按键（或直接按下键盘数字键 1、2、3、4），观察板载 LED 指示与右侧上位机捕获的实时串口数据流。
+          点击下方虚拟 VoxTriple 机械按键（或按键盘数字键 1、2、3、4），观察机械轴键程反馈与右侧上位机捕获的 ASR 语音数据包。
         </p>
       </div>
 
@@ -308,7 +312,6 @@
           <div>
             <div class="flex items-center justify-between mb-6">
               <span class="text-xs font-mono font-bold text-neutral-400">VOXTRIPLE HARDWARE MODEL</span>
-              <!-- 板载 LED 状态指示灯 -->
               <div class="flex items-center gap-2">
                 <span class="text-[11px] text-neutral-400">GPIO16 蓝灯:</span>
                 <div id="board-led" class="led-indicator" title="板载发光指示"></div>
@@ -323,46 +326,41 @@
               <span class="text-[11px] font-mono text-neutral-500">INMP441 ACOUSTIC APERTURE</span>
             </div>
 
-            <!-- 4 个实体微动按键网格 -->
+            <!-- 4 个客制化机械微动按键网格 -->
             <div class="grid grid-cols-2 gap-4">
-              <!-- 按键 1 -->
               <button id="btn-1" class="sim-key p-5 flex flex-col items-center justify-center gap-2 group">
-                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 1 (PTT)</span>
-                <span class="text-base font-bold text-white group-hover:text-blue-400">Enter</span>
-                <span class="text-[10px] text-blue-400/80">按住发声</span>
+                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 1 (PTT机械轴)</span>
+                <span class="text-base font-bold text-white group-hover:text-blue-400">Enter / 说话</span>
+                <span class="text-[10px] text-blue-400/80">按住口述 · 松开停止</span>
               </button>
 
-              <!-- 按键 2 -->
               <button id="btn-2" class="sim-key p-5 flex flex-col items-center justify-center gap-2 group">
-                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 2</span>
-                <span class="text-base font-bold text-white group-hover:text-blue-400">Esc</span>
-                <span class="text-[10px] text-neutral-500">取消/退出</span>
+                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 2 (机械轴)</span>
+                <span class="text-base font-bold text-white group-hover:text-blue-400">Esc (取消)</span>
+                <span class="text-[10px] text-neutral-500">说错立即撤回</span>
               </button>
 
-              <!-- 按键 3 -->
               <button id="btn-3" class="sim-key p-5 flex flex-col items-center justify-center gap-2 group">
-                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 3</span>
-                <span class="text-base font-bold text-white group-hover:text-blue-400">Space</span>
-                <span class="text-[10px] text-neutral-500">空格触发</span>
+                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 3 (机械轴)</span>
+                <span class="text-base font-bold text-white group-hover:text-blue-400">Space (空格)</span>
+                <span class="text-[10px] text-neutral-500">空格确认/暂停</span>
               </button>
 
-              <!-- 按键 4 -->
               <button id="btn-4" class="sim-key p-5 flex flex-col items-center justify-center gap-2 group">
-                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 4</span>
-                <span class="text-base font-bold text-white group-hover:text-blue-400">Tab</span>
-                <span class="text-[10px] text-neutral-500">长按3s重置蓝牙</span>
+                <span class="text-xs font-mono text-neutral-500 group-hover:text-neutral-300">KEY 4 (机械轴)</span>
+                <span class="text-base font-bold text-white group-hover:text-blue-400">Tab / Reset</span>
+                <span class="text-[10px] text-neutral-500">换行/长按3s配对</span>
               </button>
             </div>
           </div>
 
           <div class="mt-8 text-center text-xs text-neutral-500">
-            💡 支持键盘物理敲击 [1] [2] [3] [4] 键即时联动体验
+            💡 支持键盘敲击物理按键 [1] [2] [3] [4] 联动体验
           </div>
         </div>
 
         <!-- 右侧：上位机实时捕获与串口监视终端 -->
         <div class="lg:col-span-7 terminal-window flex flex-col justify-between shadow-2xl">
-          <!-- 上位机标题栏 -->
           <div class="terminal-header justify-between">
             <div class="flex items-center gap-2">
               <div class="terminal-dot bg-red-500/80"></div>
@@ -375,7 +373,6 @@
             </div>
           </div>
 
-          <!-- 上位机状态高亮仪表板 -->
           <div class="p-5 bg-neutral-900/60 border-b border-white/5 grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
               <div class="text-[11px] text-neutral-400">当前捕获按键 (Event)</div>
@@ -384,32 +381,30 @@
               </div>
             </div>
             <div>
-              <div class="text-[11px] text-neutral-400">蓝牙协议模式</div>
+              <div class="text-[11px] text-neutral-400">蓝牙 Profile 模式</div>
               <div class="text-sm font-mono font-semibold text-emerald-400 mt-1">
                 HID + HFP Dual Active
               </div>
             </div>
             <div class="hidden sm:block">
-              <div class="text-[11px] text-neutral-400">有线波特率</div>
-              <div class="text-sm font-mono font-semibold text-neutral-300 mt-1">
-                115200 8N1 Lossless
+              <div class="text-[11px] text-neutral-400">电池状态</div>
+              <div class="text-sm font-mono font-semibold text-cyan-400 mt-1">
+                聚合物电芯 7 天待机
               </div>
             </div>
           </div>
 
-          <!-- 实时串口日志滚动流 -->
           <div id="serial-log-stream" class="p-4 font-mono text-xs text-neutral-400 h-64 overflow-y-auto space-y-1">
-            <div class="text-neutral-500">[INIT] ESP32 dual core initialized at 240MHz</div>
+            <div class="text-neutral-500">[INIT] ESP32 dual core initialized at 240MHz (Low Power Aware)</div>
             <div class="text-neutral-500">[INIT] Classic BT stack ready. Device Name: 'VoxTriple_BT_Mic'</div>
             <div class="text-neutral-500">[INIT] INMP441 I2S DMA channel configured: BCLK=21, LRC=22, DIN=17</div>
-            <div class="text-neutral-500">[INIT] Buttons pull-up GPIO [4, 18, 19, 23] mapped and listening</div>
-            <div class="text-blue-400 font-semibold">[READY] 串口已联通，点击左侧按键开始实时映射测试...</div>
+            <div class="text-neutral-500">[INIT] Mechanical Switches mapped: GPIO [4, 18, 19, 23] Pull-up</div>
+            <div class="text-blue-400 font-semibold">[READY] 串口已联通，按住 Key 1 测试 PTT 麦克风流传输...</div>
           </div>
 
-          <!-- 底栏快捷操作说明 -->
           <div class="p-3 bg-neutral-950/80 border-t border-white/5 flex items-center justify-between text-xs text-neutral-500">
-            <span>免驱动原生集成架构</span>
-            <span class="text-neutral-400">响应延迟 &lt; 8ms</span>
+            <span>免驱动原生集成架构 · 台式机秒变语音工作站</span>
+            <span class="text-neutral-400">按键延迟 &lt; 8ms</span>
           </div>
 
         </div>
@@ -435,7 +430,6 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        <!-- Windows 客户端卡片 -->
         <div class="glass-box p-8 rounded-3xl border border-white/10 hover:border-blue-500/40 transition-colors">
           <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
@@ -452,7 +446,7 @@
           <ul class="space-y-3 text-sm text-neutral-400 mb-8 leading-relaxed">
             <li class="flex items-start gap-2">
               <i data-lucide="check" class="w-4 h-4 text-blue-400 shrink-0 mt-0.5"></i>
-              <span>USB 串口物理直连，大字号实时监控物理按键按下与释放状态。</span>
+              <span>USB 串口物理直连，大字号实时监控机械按键按下与释放状态。</span>
             </li>
             <li class="flex items-start gap-2">
               <i data-lucide="check" class="w-4 h-4 text-blue-400 shrink-0 mt-0.5"></i>
@@ -469,7 +463,6 @@
           </a>
         </div>
 
-        <!-- macOS 客户端卡片 -->
         <div class="glass-box p-8 rounded-3xl border border-white/10 hover:border-purple-500/40 transition-colors">
           <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
@@ -486,7 +479,7 @@
           <ul class="space-y-3 text-sm text-neutral-400 mb-8 leading-relaxed">
             <li class="flex items-start gap-2">
               <i data-lucide="check" class="w-4 h-4 text-purple-400 shrink-0 mt-0.5"></i>
-              <span>联动 macOS 辅助功能（Accessibility API），精准捕获系统级快捷操作。</span>
+              <span>联动 macOS 辅助功能（Accessibility API），精准捕获系统级听写操作。</span>
             </li>
             <li class="flex items-start gap-2">
               <i data-lucide="check" class="w-4 h-4 text-purple-400 shrink-0 mt-0.5"></i>
@@ -522,7 +515,6 @@
         </p>
       </div>
 
-      <!-- OTA 模拟演示面板 -->
       <div class="glass-box p-8 rounded-3xl border border-white/10">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div>
@@ -535,7 +527,6 @@
           </button>
         </div>
 
-        <!-- 进度条 -->
         <div class="w-full bg-neutral-900 rounded-full h-3 overflow-hidden border border-white/10 mb-3">
           <div id="demo-ota-progress" class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full w-0 transition-all duration-300"></div>
         </div>
@@ -545,10 +536,9 @@
           <span id="demo-ota-percent" class="font-mono font-bold text-amber-400">0%</span>
         </div>
 
-        <!-- 三步极速指南 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-white/5 text-xs text-neutral-400">
           <div class="p-3 rounded-xl bg-white/[0.02]">
-            <div class="font-semibold text-white mb-1">1. 插入 USB 串口</div>
+            <div class="font-semibold text-white mb-1">1. 插入 Type-C 串口</div>
             <span>打开上位机自动连接 COM 端口，即刻建立高速通信链路。</span>
           </div>
           <div class="p-3 rounded-xl bg-white/[0.02]">
@@ -582,7 +572,6 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <!-- 下载项 1：Windows 配置程序 -->
         <div class="glass-box p-6 rounded-3xl border border-white/10 flex flex-col justify-between">
           <div>
             <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-4">
@@ -590,7 +579,7 @@
             </div>
             <h3 class="text-lg font-bold text-white mb-1">Windows 配置客户端</h3>
             <p class="text-xs text-neutral-400 leading-relaxed mb-4">
-              `VoxTripleConfig.exe`，单文件免依赖，支持按键监控、实时键位重映射与极速 OTA。
+              `VoxTripleConfig.exe`，单文件免依赖，支持机械按键监控、实时键位重映射与极速 OTA。
             </p>
           </div>
           <div>
@@ -602,7 +591,6 @@
           </div>
         </div>
 
-        <!-- 下载项 2：一键合并固件 -->
         <div class="glass-box p-6 rounded-3xl border border-white/10 flex flex-col justify-between">
           <div>
             <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
@@ -614,7 +602,7 @@
             </p>
           </div>
           <div>
-            <div class="text-[11px] text-neutral-500 mb-2 font-mono">版本: v1.0.19-beta (含 Bootloader)</div>
+            <div class="text-[11px] text-neutral-500 mb-2 font-mono">版本: v1.0.19-beta (含聚合物电芯低功耗配置)</div>
             <a href="../../esp32_bt_mic/build/esp32_bt_mic_v1.0.19.bin" download class="btn-glass w-full justify-center text-xs py-2.5">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
               <span>下载合并固件包 (.bin)</span>
@@ -622,15 +610,14 @@
           </div>
         </div>
 
-        <!-- 下载项 3：3D 打印模型与开源源码 -->
         <div class="glass-box p-6 rounded-3xl border border-white/10 flex flex-col justify-between">
           <div>
             <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
               <i data-lucide="box" class="w-5 h-5"></i>
             </div>
-            <h3 class="text-lg font-bold text-white mb-1">3D 打印外壳模型</h3>
+            <h3 class="text-lg font-bold text-white mb-1">3D 打印外壳模型 (18.5mm精密版)</h3>
             <p class="text-xs text-neutral-400 leading-relaxed mb-4">
-              包含外壳 3D 模型工程文件 (`.skp`, `.skb`)，支持自定义结构定制与高精度打印。
+              包含外壳 3D 模型工程源文件 (`.skp`, `.skb`)，精准匹配聚合物电芯与机械轴定位孔。
             </p>
           </div>
           <div>
@@ -656,8 +643,8 @@
           <h4 class="font-semibold text-neutral-300 mb-3">产品生态</h4>
           <ul class="space-y-2">
             <li><a href="#overview" class="hover:text-white transition-colors">VoxTriple 概述</a></li>
-            <li><a href="#acoustics" class="hover:text-white transition-colors">INMP441 声学工程</a></li>
-            <li><a href="#simulator" class="hover:text-white transition-colors">在线交互仿真</a></li>
+            <li><a href="#philosophy" class="hover:text-white transition-colors">对标 Codex 哲学</a></li>
+            <li><a href="#acoustics" class="hover:text-white transition-colors">ASR 语音输入流</a></li>
             <li><a href="../Ecommerce/index.html" class="hover:text-white transition-colors">电商购买渠道</a></li>
           </ul>
         </div>
@@ -673,18 +660,19 @@
         </div>
 
         <div>
-          <h4 class="font-semibold text-neutral-300 mb-3">开发者与极客</h4>
+          <h4 class="font-semibold text-neutral-300 mb-3">硬件参数</h4>
           <ul class="space-y-2">
-            <li><a href="../../docs/flash_guide_zh.md" class="hover:text-white transition-colors">新手烧录教程</a></li>
-            <li><a href="../../README.md" class="hover:text-white transition-colors">系统接线与原理图</a></li>
-            <li><a href="../../LICENSE" class="hover:text-white transition-colors">MIT 开源许可</a></li>
+            <li>尺寸: 18.5 × 29.8 × 102.0 mm</li>
+            <li>电池: 聚合物锂电 (待机7天 / 续航1天)</li>
+            <li>按键: 4 × 客制化机械键盘轴体</li>
+            <li>麦克风: INMP441 全向数字 MEMS</li>
           </ul>
         </div>
 
         <div>
           <h4 class="font-semibold text-neutral-300 mb-3">设计语言</h4>
           <p class="text-neutral-500 leading-relaxed mb-3">
-            融合极客硬核工程与生活便携美学。以清爽、细腻、富有质感的方式呈现未来语音交互终端。
+            专为 AI 时代与台式电脑定制。将 3 倍速的思考装进掌心，以优雅姿态重塑人机语音交互。
           </p>
           <div class="flex items-center gap-2 text-neutral-400">
             <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
@@ -696,7 +684,7 @@
       <div class="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>© 2026 VoxTriple Project. 致力于让每一次发声与指令都纯净优雅。</div>
         <div class="flex items-center gap-6">
-          <a href="../Ecommerce/index.html" class="hover:text-white transition-colors">电商选购页</a>
+          <a href="../Ecommerce/index.html" class="hover:text-white transition-colors">前往白底电商长图页</a>
           <a href="#" class="hover:text-white transition-colors">返回顶部</a>
         </div>
       </div>
@@ -704,7 +692,6 @@
     </div>
   </footer>
 
-  <!-- 初始化 Lucide 图标与互动业务脚本 -->
   <script src="assets/js/main.js"></script>
   <script>
     lucide.createIcons();
