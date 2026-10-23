@@ -1,23 +1,18 @@
 @charset "UTF-8";
 
 /* ==========================================================================
-   VoxTriple E-Commerce - Pure White Tmall/Apple Flagship Long-Scroll Theme
+   VoxTriple Flagship Detail Stream - Apple & Codex Minimalist Pure Aesthetic
    ========================================================================== */
 
 :root {
   --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --bg-pure: #ffffff;
-  --bg-subtle: #f8f9fb;
-  --bg-card: #ffffff;
-  --border-light: rgba(0, 0, 0, 0.08);
-  --border-card: #e5e7eb;
-  --text-main: #111827;
-  --text-secondary: #4b5563;
-  --text-muted: #6b7280;
+  --bg-subtle: #fbfbfd;
+  --text-headline: #1d1d1f;
+  --text-body: #6e6e73;
+  --text-caption: #86868b;
   --accent-blue: #0071e3;
-  --accent-blue-hover: #0077ed;
-  --accent-blue-light: #eff6ff;
-  --accent-red: #ef4444;
+  --border-light: rgba(0, 0, 0, 0.06);
 }
 
 * {
@@ -31,8 +26,8 @@
 body {
   font-family: var(--font-family);
   background-color: var(--bg-pure);
-  color: var(--text-main);
-  line-height: 1.6;
+  color: var(--text-headline);
+  line-height: 1.5;
   overflow-x: hidden;
   selection-background-color: #dbeafe;
 }
@@ -42,153 +37,68 @@ body {
   color: #1e3a8a;
 }
 
-/* 白底旗舰店顶栏毛玻璃 */
-.white-nav {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-light);
+/* 巨幅大字排版 */
+.hero-headline {
+  font-size: clamp(2.8rem, 6.5vw, 5.2rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  color: var(--text-headline);
 }
 
-/* 天猫长图流卡片容器 */
-.card-container {
-  background: #ffffff;
-  border: 1px solid var(--border-card);
-  border-radius: 24px;
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.section-headline {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--text-headline);
 }
 
-.card-container:hover {
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+.section-subhead {
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--text-body);
 }
 
-/* 按钮微动效 */
-.btn-primary-blue {
-  background: var(--accent-blue);
-  color: #ffffff;
-  font-weight: 500;
-  padding: 12px 28px;
-  border-radius: 980px;
-  border: none;
-  cursor: pointer;
+/* 柔和阴影卡片与光影容器 */
+.apple-card {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: 32px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06);
+}
+
+/* 极简参数胶囊 */
+.spec-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 15px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
-  text-decoration: none;
-}
-
-.btn-primary-blue:hover {
-  background: var(--accent-blue-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 113, 227, 0.35);
-}
-
-.btn-primary-blue:active {
-  transform: translateY(1px);
-}
-
-.btn-secondary-white {
-  background: #f3f4f6;
-  color: #1f2937;
-  font-weight: 500;
-  padding: 12px 24px;
+  gap: 6px;
+  padding: 6px 14px;
   border-radius: 980px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 15px;
-  transition: all 0.2s ease;
-  text-decoration: none;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.btn-secondary-white:hover {
-  background: #e5e7eb;
+/* 渐变微光大图展示 */
+.media-hero-frame {
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f5f5f7 100%);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 36px;
 }
 
-/* 选配卡片高亮 */
-.edition-box {
-  border: 1.5px solid #e5e7eb;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 18px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.edition-box:hover {
-  border-color: #93c5fd;
-  background: #f8fafc;
-}
-
-.edition-box.selected {
-  border-color: var(--accent-blue);
-  background: #eff6ff;
-  box-shadow: 0 0 0 1px var(--accent-blue);
-}
-
-/* 缩略图选择器 */
-.thumb-card {
-  border: 2px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  background: #f8f9fa;
-}
-
-.thumb-card.active {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 12px rgba(0, 113, 227, 0.2);
-}
-
-/* 吸顶悬浮购买栏 */
-#sticky-buy-bar {
-  transform: translateY(120%);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-#sticky-buy-bar.visible {
-  transform: translateY(0);
-}
-
-/* FAQ 手风琴 */
-.faq-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
-}
-
-.faq-row.open .faq-content {
-  max-height: 300px;
-  transition: max-height 0.35s ease-in-out;
-}
-
-.faq-row.open .faq-chevron {
-  transform: rotate(180deg);
-}
-
-/* 渐变标题文本 */
-.title-gradient-dark {
-  background: linear-gradient(135deg, #111827 0%, #374151 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* 自定义白底滚动条 */
+/* 纯白滚动条 */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -196,10 +106,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
+  background: #d2d2d7;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #a1a1a6;
 }

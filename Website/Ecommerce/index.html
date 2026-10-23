@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VoxTriple 掌上语音输入机械终端 — 把 3 倍速的思考装进掌心</title>
-  <meta name="description" content="VoxTriple 专为台式机与 AI 对话定制的手持语音输入机械终端。客制化机械轴体，PTT即按即说，聚合物锂电整周待机，18.5mm极致纤薄掌心握持。">
+  <title>VoxTriple — 把思考的速度，提至三倍 | 官方产品详情</title>
+  <meta name="description" content="VoxTriple 专为 AI 时代与台式电脑定制的掌上语音输入机械终端。客制化机械轴体，内置聚合物锂电待机7天，18.5mm极致纤薄掌心握持。">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Custom Pure White E-Commerce Style -->
+  <!-- Custom Apple & Codex Flagship Style -->
   <link rel="stylesheet" href="assets/css/style.css">
   
   <script>
@@ -19,892 +19,376 @@
         extend: {
           colors: {
             appleBlue: '#0071e3',
-            appleDark: '#111827',
-            subtleGray: '#f8f9fb',
-            borderGray: '#e5e7eb'
+            appleHeadline: '#1d1d1f',
+            appleBody: '#6e6e73',
+            appleBg: '#ffffff',
+            appleSubtle: '#fbfbfd'
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-[#ffffff] text-[#111827] antialiased selection:bg-blue-100 selection:text-blue-900">
+<body class="bg-white text-[#1d1d1f] antialiased selection:bg-blue-100 selection:text-blue-900">
 
-  <!-- ==================== 白底旗舰顶栏 ==================== -->
-  <header class="fixed top-0 left-0 right-0 z-40 white-nav h-14 flex items-center">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <a href="#" class="flex items-center gap-2 group">
-          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/30 group-hover:bg-blue-700 transition-colors">
-            <i data-lucide="mic" class="w-4 h-4"></i>
-          </div>
-          <span class="font-bold text-lg tracking-tight text-gray-900">VoxTriple</span>
-        </a>
-        <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-          AI 语音输入与机械中枢
+  <!-- ==================== 纯粹正文长图流 (Pure Product Story Stream) ==================== -->
+  <main class="w-full overflow-hidden">
+
+    <!-- -------------------- 第 1 屏：巨幕首屏海报 (HERO BANNER) -------------------- -->
+    <section class="min-h-screen flex flex-col items-center justify-between pt-20 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-6xl mx-auto">
+      
+      <!-- 顶部小胶囊 -->
+      <div class="reveal-on-scroll">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200/80 mb-6 tracking-wide">
+          <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+          <span>专为 AI 对话与台式电脑定制 · 掌上语音输入机械中枢</span>
         </span>
       </div>
 
-      <nav class="hidden md:flex items-center gap-8 text-sm text-gray-600 font-medium">
-        <a href="#painpoints" class="hover:text-blue-600 transition-colors">为什么需要它</a>
-        <a href="#voice-flow" class="hover:text-blue-600 transition-colors">ASR 语音流</a>
-        <a href="#mechanical" class="hover:text-blue-600 transition-colors">客制化机械轴</a>
-        <a href="#dimensions" class="hover:text-blue-600 transition-colors">极致纤薄尺寸</a>
-        <a href="#battery" class="hover:text-blue-600 transition-colors">聚合物长续航</a>
-        <a href="#specs" class="hover:text-blue-600 transition-colors">规格参数</a>
-      </nav>
-
-      <div class="flex items-center gap-4">
-        <a href="../Official/index.html" class="text-xs text-gray-500 hover:text-gray-900 transition-colors hidden sm:flex items-center gap-1">
-          <span>品牌官网与开发者</span>
-          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-        </a>
-        <button onclick="document.getElementById('buy-options-area').scrollIntoView({behavior: 'smooth'})" class="btn-primary-blue text-xs py-2 px-4 shadow-sm">
-          <span>立即订购</span>
-        </button>
+      <!-- 巨幅震撼大标题 -->
+      <div class="max-w-4xl mx-auto reveal-on-scroll">
+        <h1 class="hero-headline">
+          把思考的速度，<br class="hidden sm:inline"/>
+          提至三倍。
+        </h1>
+        <p class="section-subhead mt-6 max-w-2xl mx-auto">
+          VoxTriple · 将广播级全向数字麦克风与客制化机械轴体，融于 18.5mm 掌心纤薄机身。<br class="hidden sm:inline"/>
+          免驱即连，按住即说。文字如瀑布倾泻，从容掌控 AI。
+        </p>
       </div>
-    </div>
-  </header>
 
-  <!-- 顶部官方礼遇提示条 -->
-  <div class="pt-16 pb-2.5 bg-gradient-to-r from-blue-50 via-indigo-50/50 to-blue-50 border-b border-blue-100/60 text-center text-xs text-blue-900 font-medium">
-    <span>🚀 现货顺丰速递 · 附赠 1.5m 编织弯头数据线与开箱即用免驱上位机 · 享 1 年换新质保</span>
-  </div>
+      <!-- 悬浮纯白产品摄影大片 -->
+      <div class="w-full my-10 max-w-5xl mx-auto reveal-on-scroll">
+        <div class="media-hero-frame p-4 sm:p-10 shadow-2xl shadow-gray-200/50">
+          <img src="../Medias/vox_hero_pure_white.jpg" alt="VoxTriple 纯白官方产品大片" class="w-full h-auto object-contain mx-auto filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)] transform hover:scale-[1.01] transition-transform duration-700" />
+        </div>
+      </div>
 
-  <!-- ==================== 第 1 屏：首屏爆点大片 (Hero Banner) ==================== -->
-  <section id="hero-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-      
-      <!-- 左侧：多媒体交互画廊 -->
-      <div class="lg:col-span-7 sticky top-20">
-        <div id="main-media-container" class="relative w-full aspect-[4/3] rounded-3xl bg-gray-50 border border-gray-200 overflow-hidden shadow-sm flex items-center justify-center group">
-          <img id="main-preview-img" src="../Medias/Final03.png" alt="VoxTriple 产品实物图" class="w-full h-full object-contain p-6 transition-all duration-300 transform group-hover:scale-102" />
-          <video id="main-preview-video" src="" class="hidden w-full h-full object-cover" controls playsinline></video>
+      <!-- 底部核心参数一览 -->
+      <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-gray-500 font-medium reveal-on-scroll">
+        <span class="spec-badge">18.5mm 极致纤薄</span>
+        <span class="spec-badge">客制化机械矮轴</span>
+        <span class="spec-badge">聚合物电芯 7 天待机</span>
+        <span class="spec-badge">16kHz 广播级宽带语音</span>
+        <span class="spec-badge">台式机/笔记本免驱秒连</span>
+      </div>
+
+    </section>
+
+    <!-- -------------------- 第 2 屏：时代与痛点拷问 -------------------- -->
+    <section class="py-28 sm:py-36 bg-[#fbfbfd] border-y border-gray-100">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-3xl mx-auto mb-20 reveal-on-scroll">
+          <span class="text-xs font-bold uppercase tracking-widest text-blue-600">The Problem</span>
+          <h2 class="section-headline mt-3">
+            你的思考，<br/>
+            何必困在 70 字/分钟的键盘上？
+          </h2>
+          <p class="section-subhead mt-4">
+            进入 AI 时代，人与机器的交互变成了海量自然语言沟通。传统的输入方式，早已成为限制你思维爆发的瓶颈。
+          </p>
+        </div>
+
+        <!-- 四大痛点大卡片对比 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          <div class="absolute top-4 left-4 flex gap-2">
-            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 text-gray-800 shadow-sm border border-gray-200">
-              白底官方实机
-            </span>
-            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-sm">
-              现货发售
-            </span>
-          </div>
-
-          <div class="absolute bottom-4 right-4 text-xs text-gray-500 bg-white/90 px-3 py-1.5 rounded-full border border-gray-200 flex items-center gap-1.5 shadow-sm">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600"></i>
-            <span>客制化机械轴体 · 聚合物电芯</span>
-          </div>
-        </div>
-
-        <!-- 缩略图切换 -->
-        <div class="mt-4 grid grid-cols-5 gap-3">
-          <div class="thumb-card active aspect-square flex items-center justify-center p-1.5" data-type="image" data-src="../Medias/Final03.png">
-            <img src="../Medias/Final03.png" class="w-full h-full object-contain" alt="黑配机身" />
-          </div>
-          <div class="thumb-card aspect-square flex items-center justify-center p-1.5" data-type="image" data-src="../Medias/aa281c08-59a8-449e-b710-6026e239950d.png">
-            <img src="../Medias/aa281c08-59a8-449e-b710-6026e239950d.png" class="w-full h-full object-contain" alt="三维工程图" />
-          </div>
-          <div class="thumb-card aspect-square flex items-center justify-center p-1.5" data-type="image" data-src="../Medias/手持麦克风键盘办公室场景图 (1).jpeg">
-            <img src="../Medias/手持麦克风键盘办公室场景图 (1).jpeg" class="w-full h-full object-cover rounded-md" alt="办公桌写真" />
-          </div>
-          <div class="thumb-card aspect-square flex items-center justify-center p-1.5" data-type="image" data-src="../Medias/手持麦克风键盘办公室场景图 (2).jpeg">
-            <img src="../Medias/手持麦克风键盘办公室场景图 (2).jpeg" class="w-full h-full object-cover rounded-md" alt="咖啡馆写真" />
-          </div>
-          <div class="thumb-card aspect-square flex items-center justify-center p-1.5 relative group" data-type="video" data-src="../Medias/手持麦克风键盘办公室场景图.mp4">
-            <img src="../Medias/手持麦克风键盘办公室场景图 (3).jpeg" class="w-full h-full object-cover rounded-md opacity-80" alt="演示视频" />
-            <div class="absolute inset-0 flex items-center justify-center bg-black/20 rounded-md">
-              <i data-lucide="play-circle" class="w-6 h-6 text-white group-hover:scale-110 transition-transform"></i>
+          <div class="apple-card p-10 reveal-on-scroll">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6">
+              <i data-lucide="monitor-x" class="w-6 h-6"></i>
             </div>
-          </div>
-        </div>
-
-        <!-- 官方质保与特性小标签条 -->
-        <div class="mt-6 p-4 rounded-2xl bg-gray-50 border border-gray-200/80 flex flex-wrap items-center justify-around gap-4 text-xs text-gray-600 font-medium">
-          <div class="flex items-center gap-1.5">
-            <i data-lucide="check-circle-2" class="w-4 h-4 text-blue-600"></i>
-            <span>台式机/笔记本免驱秒连</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <i data-lucide="keyboard" class="w-4 h-4 text-blue-600"></i>
-            <span>客制化机械轴体</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <i data-lucide="battery-charging" class="w-4 h-4 text-blue-600"></i>
-            <span>聚合物电芯 7 天待机</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <i data-lucide="ruler" class="w-4 h-4 text-blue-600"></i>
-            <span>18.5mm 极致纤薄</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 右侧：商品信息与版本选购区 -->
-      <div id="buy-options-area" class="lg:col-span-5 flex flex-col gap-6">
-        <div>
-          <div class="flex items-center gap-2 mb-2">
-            <span class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-red-50 text-red-600 border border-red-200">
-              AI 时代生产力神兵
-            </span>
-            <div class="flex items-center gap-1 text-xs text-amber-500 font-medium">
-              <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
-              <span class="text-gray-900 font-bold">4.9</span>
-              <span class="text-gray-500">(150+ 极客深度好评)</span>
-            </div>
-          </div>
-          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 mb-2">
-            VoxTriple 掌上语音机械终端
-          </h1>
-          <p class="text-base text-gray-600 leading-relaxed font-normal">
-            把 3 倍速的思考装进掌心。专为台式机无麦克风与 AI 对话海量 Prompt 需求打造，机械轴即按即说，彻底解放双手与坐姿。
-          </p>
-        </div>
-
-        <!-- 价格卡片 -->
-        <div class="p-5 rounded-2xl bg-blue-50/50 border border-blue-100 flex items-baseline justify-between">
-          <div>
-            <div class="text-xs text-gray-500 mb-1">官方首发礼遇特价</div>
-            <div class="flex items-baseline gap-3">
-              <span id="current-price" class="text-3xl font-extrabold text-blue-600">¥299</span>
-              <span id="original-price" class="text-sm text-gray-400 line-through">¥399</span>
-              <span class="text-xs text-red-600 font-bold px-2 py-0.5 rounded bg-red-100/80">直降 ¥100</span>
-            </div>
-          </div>
-          <div class="text-right text-xs text-gray-500">
-            <div class="font-medium text-gray-700">顺丰极速包邮</div>
-            <div class="text-emerald-600 font-medium mt-0.5">● 现货即发</div>
-          </div>
-        </div>
-
-        <!-- 版本选择 -->
-        <div>
-          <div class="text-sm font-bold text-gray-900 mb-3">选择适合您的版本规格</div>
-          <div class="grid grid-cols-1 gap-3">
-            
-            <!-- 成品版 (默认推荐) -->
-            <div class="edition-box selected flex items-start gap-3.5" data-edition="flagship">
-              <div class="mt-1">
-                <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-600"></i>
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-gray-900">官方旗舰成品版 (开箱即用)</span>
-                  <span class="text-sm font-extrabold text-blue-600">¥299</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                  声学工程师高精度装配校准，内置超薄聚合物锂电与客制化机械轴，固件已刷好。赠送 1.5m 编织弯头数据线与便携绒布袋。
-                </p>
-                <div class="mt-2.5 flex gap-2">
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">95% 用户选择</span>
-                  <span class="text-[10px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">免安装直接上手</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- DIY 套件版 -->
-            <div class="edition-box flex items-start gap-3.5" data-edition="maker">
-              <div class="mt-1">
-                <i data-lucide="wrench" class="w-5 h-5 text-gray-400"></i>
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-gray-900">极客 DIY 探险套装 (自备烙铁拼装)</span>
-                  <span class="text-sm font-extrabold text-blue-600">¥199</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                  包含 3D 打印外壳、ESP32 沉金主板、INMP441 麦克风、机械轴体与排线电芯。附赠详尽焊接图解教程。
-                </p>
-                <div class="mt-2.5 flex gap-2">
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">极客动手</span>
-                  <span class="text-[10px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">享受创造乐趣</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- 数量增减 -->
-        <div class="flex items-center justify-between py-3 border-y border-gray-200">
-          <span class="text-sm font-semibold text-gray-800">购买数量</span>
-          <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden bg-gray-50">
-            <button id="qty-minus" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition-colors">
-              <i data-lucide="minus" class="w-3.5 h-3.5"></i>
-            </button>
-            <input id="qty-input" type="text" value="1" readonly class="w-10 text-center bg-transparent text-sm font-bold text-gray-900 focus:outline-none" />
-            <button id="qty-plus" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition-colors">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 购买操作行动条 -->
-        <div class="flex flex-col sm:flex-row gap-3 pt-2">
-          <button id="btn-buy-now" class="btn-primary-blue flex-1 py-3.5 text-base font-bold shadow-md">
-            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-            <span>立即订购</span>
-          </button>
-          <a href="#dimensions" class="btn-secondary-white py-3.5 text-sm font-semibold">
-            <i data-lucide="eye" class="w-4 h-4"></i>
-            <span>查看尺寸工艺</span>
-          </a>
-        </div>
-
-        <!-- 售后承诺小徽章 -->
-        <div class="grid grid-cols-3 gap-2 text-center text-[11px] text-gray-500 pt-2 font-medium">
-          <div class="p-2 rounded-xl bg-gray-50 border border-gray-100">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 mx-auto mb-1 text-blue-600"></i>
-            <span>7 天无理由退换</span>
-          </div>
-          <div class="p-2 rounded-xl bg-gray-50 border border-gray-100">
-            <i data-lucide="award" class="w-3.5 h-3.5 mx-auto mb-1 text-blue-600"></i>
-            <span>1 年官方换新</span>
-          </div>
-          <div class="p-2 rounded-xl bg-gray-50 border border-gray-100">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 mx-auto mb-1 text-blue-600"></i>
-            <span>终生固件免费 OTA</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== 第 2 屏：灵魂拷问与四大场景痛点 ==================== -->
-  <section id="painpoints" class="py-20 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-3xl mx-auto mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-          The Real Pain Points
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-3">
-          为什么每个人的工位，都需要一支 VoxTriple？
-        </h2>
-        <p class="text-gray-600 text-base mt-3">
-          对标市面动辄上千元却缺失麦克风的桌面大宏板，VoxTriple 直击真实工作流中的四大断层体验。
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        <!-- 痛点 1：台式机无麦克风 -->
-        <div class="card-container p-8 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
-            <i data-lucide="mic-off" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">痛点 1：强大的台式机，出厂根本没有麦克风</h3>
-          <p class="text-sm text-gray-600 leading-relaxed mb-4">
-            许多程序员、设计师和办公白领的主力机是配置顶级的台式机。然而要临时开会、语音打字或与 AI 沟通时，才发现电脑根本没麦克风！翻箱倒柜找耳机、忍受线缆缠绕，流程极其割裂。
-          </p>
-          <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900 font-medium">
-            💡 <strong>VoxTriple 解法</strong>：经典蓝牙免驱秒连！无论是 Win 还是 Mac 台式机，开箱即刻拥有专业数字全向麦克风，台式机从此具备清澈发声能力。
-          </div>
-        </div>
-
-        <!-- 痛点 2：AI 时代打字赶不上思考 -->
-        <div class="card-container p-8 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
-            <i data-lucide="zap-off" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">痛点 2：跟 AI 提需求打字太累，敲到手指腱鞘酸痛</h3>
-          <p class="text-sm text-gray-600 leading-relaxed mb-4">
-            给大语言模型写 Prompt、梳理需求、修改代码、写万字方案，动辄几百上千字。普通人键盘打字仅 60~80 字/分钟，打字不仅累，更屡次打断稍纵即逝的思维灵感。
-          </p>
-          <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-xs text-emerald-900 font-medium">
-            💡 <strong>VoxTriple 解法</strong>：人类正常语速达 200~300 字/分钟！直接配合 Windows 自带 (Win+H) 或各类语音输入法，动动嘴皮子，文字如瀑布般极速上屏。
-          </div>
-        </div>
-
-        <!-- 痛点 3：桌面麦克风必须正襟危坐 -->
-        <div class="card-container p-8 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6">
-            <i data-lucide="anchor" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">痛点 3：桌面播音麦克风，把人死死“钉”在椅子上</h3>
-          <p class="text-sm text-gray-600 leading-relaxed mb-4">
-            传统的桌面大麦克风笨重占空间，收音距离短，人必须低头弯腰正襟危坐、凑近说话，半天下来腰酸背痛颈椎受罪。
-          </p>
-          <div class="p-3.5 rounded-xl bg-purple-50 border border-purple-100 text-xs text-purple-900 font-medium">
-            💡 <strong>VoxTriple 解法</strong>：握在掌心的绝对自由！你可以向后舒展靠在工位椅背上、甚至站起来在房间里漫步口述，彻底解放身体姿势。
-          </div>
-        </div>
-
-        <!-- 痛点 4：软件开麦误录与社死 -->
-        <div class="card-container p-8 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6">
-            <i data-lucide="shield-alert" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">痛点 4：软件开麦迟缓，容易误录或开麦社死</h3>
-          <p class="text-sm text-gray-600 leading-relaxed mb-4">
-            屏幕上的软件麦克风开关按钮经常卡顿，偶尔以为静音了其实还在录，极易发生开麦社死；或者误录进大量周围环境噪音。
-          </p>
-          <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900 font-medium">
-            💡 <strong>VoxTriple 解法</strong>：客制化机械轴物理 PTT！大拇指按住才开启拾音，松开物理断开，零误录、零误开麦风险。
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== 第 3 屏：ASR 语音输入法终极搭档 ==================== -->
-  <section id="voice-flow" class="py-20 border-t border-gray-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-widest text-blue-600">ASR Typing Paradigm</span>
-          <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-6">
-            为现代语音输入法而生，<br/>文字直接在光标处倾泻。
-          </h2>
-          <p class="text-gray-600 text-base leading-relaxed mb-6">
-            不同于必须用专用软件中转的鸡肋设备，VoxTriple 直接被 Windows 与 macOS 原生识别为硬件音频麦克风。
-          </p>
-
-          <div class="space-y-4">
-            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 flex items-start gap-4">
-              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-sm">
-                1
-              </div>
-              <div>
-                <h4 class="text-sm font-bold text-gray-900">全面切合原生输入法快捷键</h4>
-                <p class="text-xs text-gray-600 mt-1">
-                  按下按键 1 即可触发系统级听写通道（如 Win11 原生 Win+H 语音输入、Mac 连续两次 Fn 听写、微信键盘语音等）。
-                </p>
-              </div>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 flex items-start gap-4">
-              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-sm">
-                2
-              </div>
-              <div>
-                <h4 class="text-sm font-bold text-gray-900">300 字/分钟，思维不再卡壳</h4>
-                <p class="text-xs text-gray-600 mt-1">
-                  用口述代替敲键盘，打字速度瞬间提升 3 到 5 倍。无论是大模型长文生成、飞书文档、邮件还是聊天，一气呵成。
-                </p>
-              </div>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 flex items-start gap-4">
-              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-sm">
-                3
-              </div>
-              <div>
-                <h4 class="text-sm font-bold text-gray-900">近场高保真拾音，低语清晰入微</h4>
-                <p class="text-xs text-gray-600 mt-1">
-                  手握距离近在咫尺，无需高声大喊，在办公室工位轻声细语即可准确识别，不打扰旁人隐私。
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 速度对比展示卡片 -->
-        <div class="card-container p-8 bg-gradient-to-br from-white via-blue-50/30 to-white">
-          <div class="text-center mb-8">
-            <div class="text-xs font-bold uppercase tracking-wider text-gray-400">INPUT EFFICIENCY COMPARISON</div>
-            <div class="text-2xl font-black text-gray-900 mt-1">输入效率降维打击</div>
-          </div>
-
-          <div class="space-y-6">
-            <!-- 传统打字 -->
-            <div>
-              <div class="flex justify-between text-xs font-semibold text-gray-600 mb-1.5">
-                <span>传统键盘打字 (需端坐工位)</span>
-                <span class="font-bold text-gray-800">~60-80 字/分</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-3.5 overflow-hidden">
-                <div class="bg-gray-400 h-full w-[26%] rounded-full"></div>
-              </div>
-            </div>
-
-            <!-- VoxTriple 语音输入 -->
-            <div>
-              <div class="flex justify-between text-xs font-bold text-blue-600 mb-1.5">
-                <span>⚡ VoxTriple 掌上手持语音输入</span>
-                <span class="text-base font-extrabold text-blue-600">~260-300+ 字/分</span>
-              </div>
-              <div class="w-full bg-blue-100 rounded-full h-4 overflow-hidden p-0.5">
-                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 h-full w-[95%] rounded-full flex items-center justify-end pr-2 text-[10px] text-white font-bold">
-                  效率提升 300%
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-8 p-4 rounded-xl bg-white border border-gray-200 text-xs text-gray-600 leading-relaxed">
-            <span class="font-bold text-gray-900">“在 AI 时代，你的核心价值是组织思路，而不是做键盘敲击工。”</span><br>
-            让 VoxTriple 代替手指的高频敲击，把宝贵精力留给灵感构思。
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== 第 4 屏：客制化机械轴体 & 盲操控制闭环 ==================== -->
-  <section id="mechanical" class="py-20 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-3xl mx-auto mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Tactile Mechanical Switches</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">
-          客制化机械轴体 · 大拇指的盲操闭环
-        </h2>
-        <p class="text-gray-600 text-base mt-3">
-          摒弃易损易误触的廉价轻触开关，采用真正的机械键盘轴体。每一次按压，都是清脆扎实的回弹反馈。
-        </p>
-      </div>
-
-      <!-- 闭环操作流水线卡片 -->
-      <div class="card-container p-8 mb-10">
-        <div class="text-xs font-bold text-blue-600 mb-4 tracking-wider uppercase">THE PERFECT FLOW</div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-6">「按住口述 + 机械回车」的一气呵成</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div class="p-5 rounded-2xl bg-gray-50 border border-gray-200">
-            <div class="text-xs font-mono font-bold text-blue-600 mb-2">STEP 01</div>
-            <div class="font-bold text-gray-900 mb-1">按住机械轴 Key 1</div>
-            <p class="text-xs text-gray-600">大拇指自然落在按键上，按住即刻开启 INMP441 拾音通道，同时触发语音打字。</p>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-gray-50 border border-gray-200">
-            <div class="text-xs font-mono font-bold text-blue-600 mb-2">STEP 02</div>
-            <div class="font-bold text-gray-900 mb-1">自然口述思绪</div>
-            <p class="text-xs text-gray-600">依靠椅背悠闲表达，光标处文字极速输入，一秒也不耽误思路连贯性。</p>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-gray-50 border border-gray-200">
-            <div class="text-xs font-mono font-bold text-blue-600 mb-2">STEP 03</div>
-            <div class="font-bold text-gray-900 mb-1">松开立即静音</div>
-            <p class="text-xs text-gray-600">机械轴弹起，硬件直接关闭麦克风拾音，绝对零漏音，彻底摆脱开麦社死。</p>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-blue-50 border border-blue-200">
-            <div class="text-xs font-mono font-bold text-blue-600 mb-2">STEP 04</div>
-            <div class="font-bold text-blue-900 mb-1">顺手一按回车发送</div>
-            <p class="text-xs text-blue-800">顺势按下 Enter 机械轴，Prompt 瞬间发给 AI！全程右手完全不碰键盘鼠标。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4 个机械轴默认映射表 -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="p-5 rounded-2xl bg-white border border-gray-200 text-center">
-          <div class="text-xs font-mono text-gray-400">KEY 01</div>
-          <div class="text-lg font-black text-gray-900 my-1">Enter / PTT</div>
-          <div class="text-xs text-blue-600 font-medium">按住说话 / 单击发送</div>
-        </div>
-        <div class="p-5 rounded-2xl bg-white border border-gray-200 text-center">
-          <div class="text-xs font-mono text-gray-400">KEY 02</div>
-          <div class="text-lg font-black text-gray-900 my-1">Esc (取消)</div>
-          <div class="text-xs text-gray-500 font-medium">说错立即撤回重说</div>
-        </div>
-        <div class="p-5 rounded-2xl bg-white border border-gray-200 text-center">
-          <div class="text-xs font-mono text-gray-400">KEY 03</div>
-          <div class="text-lg font-black text-gray-900 my-1">Space (空格)</div>
-          <div class="text-xs text-gray-500 font-medium">空格确认 / 播放暂停</div>
-        </div>
-        <div class="p-5 rounded-2xl bg-white border border-gray-200 text-center">
-          <div class="text-xs font-mono text-gray-400">KEY 04</div>
-          <div class="text-lg font-black text-gray-900 my-1">Tab / Reset</div>
-          <div class="text-xs text-gray-500 font-medium">换行 / 长按3s重置蓝牙</div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== 第 5 屏：18.5 x 29.8 x 102 mm 极致小巧尺寸 ==================== -->
-  <section id="dimensions" class="py-20 border-t border-gray-200 bg-white">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-3xl mx-auto mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Ergonomic Precision</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">
-          18.5 × 29.8 × 102 mm<br/>比普通口红更纤巧的手掌契合度
-        </h2>
-        <p class="text-gray-600 text-base mt-3">
-          每一毫米都经过人体工学反复推敲。不仅随手放进口袋无负担，更能在手掌中实现单手盲操。
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        <!-- 官方工程图展示 -->
-        <div class="lg:col-span-7 card-container p-6 bg-gray-50 flex items-center justify-center">
-          <div class="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden bg-white border border-gray-200 p-4 shadow-sm flex items-center justify-center">
-            <img src="../Medias/aa281c08-59a8-449e-b710-6026e239950d.png" alt="VoxTriple 尺寸工程图" class="w-full h-full object-contain" />
-            <div class="absolute bottom-3 left-3 bg-white/95 px-3 py-1 rounded-md text-[11px] font-mono text-gray-600 border border-gray-200 shadow-xs">
-              CAD 官方精确实测尺寸标注
-            </div>
-          </div>
-        </div>
-
-        <!-- 尺寸解析数据卡 -->
-        <div class="lg:col-span-5 space-y-4">
-          <div class="p-6 rounded-2xl bg-blue-50/50 border border-blue-100">
-            <div class="text-xs font-bold text-blue-600 uppercase">THICKNESS</div>
-            <div class="text-3xl font-extrabold text-gray-900 my-1">18.5 mm</div>
-            <p class="text-xs text-gray-600">极致纤薄机身。得益于采用轻薄聚合物锂电代替 18650 笨重圆柱电芯，握持感厚薄适中，宛如握着一支高档签字笔。</p>
-          </div>
-
-          <div class="p-6 rounded-2xl bg-gray-50 border border-gray-200">
-            <div class="text-xs font-bold text-gray-500 uppercase">WIDTH</div>
-            <div class="text-3xl font-extrabold text-gray-900 my-1">29.8 mm</div>
-            <p class="text-xs text-gray-600">恰到好处的拇指跨度。四指在背面自然托扶，大拇指无需张开即可覆盖全部机械轴体。</p>
-          </div>
-
-          <div class="p-6 rounded-2xl bg-gray-50 border border-gray-200">
-            <div class="text-xs font-bold text-gray-500 uppercase">LENGTH</div>
-            <div class="text-3xl font-extrabold text-gray-900 my-1">102.0 mm</div>
-            <p class="text-xs text-gray-600">掌心级长度。既能保证拾音孔与嘴角保持最佳声学倾角，又能从容滑入风衣口袋或手包。</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== 第 6 屏：聚合物锂电池与整周节能待机 ==================== -->
-  <section id="battery" class="py-20 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-3xl mx-auto mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-          Power Revolution
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-3">
-          聚合物锂电池革命，待机长达整整一周
-        </h2>
-        <p class="text-gray-600 text-base mt-3">
-          告别 18650 电池臃肿占地方的硬伤。高密度轻薄聚合物电芯配合 ESP32 芯片级深度节能算法，时刻蓄势待发。
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div class="card-container p-8 text-center">
-          <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
-            <i data-lucide="calendar" class="w-6 h-6"></i>
-          </div>
-          <div class="text-3xl font-black text-gray-900 mb-1">7 天</div>
-          <div class="font-bold text-gray-800 text-sm mb-2">深度节能智能待机</div>
-          <p class="text-xs text-gray-600 leading-relaxed">
-            设备闲置自动切入极低微安级休眠，按压按键 1 毫秒级秒唤醒。出差一周无需充电器。
-          </p>
-        </div>
-
-        <div class="card-container p-8 text-center border-blue-200 bg-blue-50/20">
-          <div class="w-12 h-12 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-            <i data-lucide="clock" class="w-6 h-6"></i>
-          </div>
-          <div class="text-3xl font-black text-blue-600 mb-1">1 整天</div>
-          <div class="font-bold text-gray-800 text-sm mb-2">高强度持续语音口述</div>
-          <p class="text-xs text-gray-600 leading-relaxed">
-            连续与 AI 大模型高频语音交互、长篇听写或远程会议，足以从早到晚支撑全天高负荷工作。
-          </p>
-        </div>
-
-        <div class="card-container p-8 text-center">
-          <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
-            <i data-lucide="cable" class="w-6 h-6"></i>
-          </div>
-          <div class="text-3xl font-black text-gray-900 mb-1">Type-C</div>
-          <div class="font-bold text-gray-800 text-sm mb-2">通用盲插随用随充</div>
-          <p class="text-xs text-gray-600 leading-relaxed">
-            支持手机充电器、电脑 USB 接口或充电宝充电，更支持边充边用，彻底告别电量焦虑。
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== 第 7 屏：INMP441 数字声学与 DSP 滤波 ==================== -->
-  <section class="py-20 border-t border-gray-200 bg-white">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Acoustic Engineering</span>
-          <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-6">
-            数字 MEMS 硅麦，<br/>把人声杂质过滤在掌心。
-          </h2>
-          <p class="text-gray-600 text-sm leading-relaxed mb-6">
-            搭载高信噪比 INMP441 全向数字 MEMS 麦克风，配合 mSBC 16kHz 宽带语音编解码。告别廉价模拟麦克风由手持摩擦引起的杂音。
-          </p>
-
-          <div class="space-y-3">
-            <div class="p-3.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-emerald-600 shrink-0"></i>
-              <span class="text-xs font-semibold text-gray-800">硬件级高通滤波：消除手部微小摩擦低频振动</span>
-            </div>
-            <div class="p-3.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-emerald-600 shrink-0"></i>
-              <span class="text-xs font-semibold text-gray-800">滑动平均去噪算法：有效平滑环境高频白噪</span>
-            </div>
-            <div class="p-3.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-emerald-600 shrink-0"></i>
-              <span class="text-xs font-semibold text-gray-800">16kHz 宽带编码：远超传统窄带 8kHz 浑浊音质</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-container p-6 bg-gray-50">
-          <div class="aspect-[4/3] rounded-2xl overflow-hidden border border-gray-200">
-            <img src="../Medias/Final1.png" alt="纯白外观声学设计" class="w-full h-full object-contain p-4 bg-white" />
-          </div>
-          <div class="mt-4 text-center text-xs text-gray-500 font-medium">
-            防喷导音孔结构，确保近距离说话气流不直冲硅麦振膜
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== 第 8 屏：真实生活场景写真摄影墙 ==================== -->
-  <section class="py-20 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Everyday Moments</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">真实生活场景融入</h2>
-        <p class="text-gray-600 text-sm mt-3">无论身处极客工位、温馨书房还是咖啡馆角落，都优雅自得</p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div class="card-container overflow-hidden group">
-          <div class="h-72 overflow-hidden bg-gray-100 relative">
-            <img src="../Medias/手持麦克风键盘办公室场景图 (1).jpeg" alt="极客工位实景" class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" />
-          </div>
-          <div class="p-6">
-            <div class="font-bold text-gray-900 text-base">工位后仰 · 灵感倾泻</div>
-            <p class="text-xs text-gray-600 mt-1">
-              台式机前无需弓腰，背靠工位椅，手握 VoxTriple 轻松向 AI 口述复杂架构设计。
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">主力台式机，出厂根本没有麦克风</h3>
+            <p class="text-gray-600 leading-relaxed text-sm">
+              许多极客与开发者的生产力台式机，性能强悍，却唯独没有麦克风。临时要语音打字或与大模型说话，只能到处找耳机插线，繁琐且充满束缚。
             </p>
           </div>
-        </div>
 
-        <div class="card-container overflow-hidden group">
-          <div class="h-72 overflow-hidden bg-gray-100 relative">
-            <img src="../Medias/手持麦克风键盘办公室场景图 (2).jpeg" alt="咖啡馆移动办公实景" class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" />
-          </div>
-          <div class="p-6">
-            <div class="font-bold text-gray-900 text-base">咖啡馆 · 轻声低语</div>
-            <p class="text-xs text-gray-600 mt-1">
-              不干扰周围安静的顾客。轻声将灵感录入笔记本，随走随停，生活更显从容。
+          <div class="apple-card p-10 reveal-on-scroll">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
+              <i data-lucide="keyboard" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">AI 时代 Prompt 井喷，敲字敲到手腕酸痛</h3>
+            <p class="text-gray-600 leading-relaxed text-sm">
+              与大模型讨论复杂需求，动辄成百上千字。普通人打字不过 60~80 字/分钟，手指机械敲击，不仅容易手酸，更严重打断稍纵即逝的灵感心流。
             </p>
           </div>
+
+          <div class="apple-card p-10 reveal-on-scroll">
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6">
+              <i data-lucide="armchair" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">桌面大麦克风，把人死死“钉”在椅子上</h3>
+            <p class="text-gray-600 leading-relaxed text-sm">
+              传统桌面播音麦克风笨重占空间，必须低头弯腰正襟危坐才能收清声音。坐半天下来腰酸背痛颈椎受罪，毫无身体自由可言。
+            </p>
+          </div>
+
+          <div class="apple-card p-10 reveal-on-scroll">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
+              <i data-lucide="mic-off" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">软件开麦迟缓，随时担心开麦社死</h3>
+            <p class="text-gray-600 leading-relaxed text-sm">
+              屏幕上的软开关卡顿迟缓，误以为静音了其实还在录，极易发生开麦事故；或者录入周围杂音导致 ASR 识别全篇乱码。
+            </p>
+          </div>
+
         </div>
+
       </div>
+    </section>
 
-    </div>
-  </section>
-
-  <!-- ==================== 第 9 屏：开箱清单与白底参数全览 ==================== -->
-  <section id="specs" class="py-20 border-t border-gray-200 bg-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center mb-12">
-        <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Specifications</span>
-        <h2 class="text-3xl font-extrabold text-gray-900 mt-2">详细规格参数</h2>
-      </div>
-
-      <div class="rounded-2xl border border-gray-200 overflow-hidden bg-white shadow-xs mb-12">
-        <table class="w-full text-left text-sm">
-          <tbody class="divide-y divide-gray-200">
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium w-1/3 bg-gray-50">产品定位</td>
-              <td class="py-4 px-6 font-bold text-gray-900">掌上手持语音输入机械终端 (AI 对话与台式机专用)</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium bg-gray-50">整机尺寸</td>
-              <td class="py-4 px-6 font-bold text-blue-600 font-mono">18.5 × 29.8 × 102.0 mm (实测精密尺寸)</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium bg-gray-50">麦克风传感器</td>
-              <td class="py-4 px-6 font-semibold text-gray-900">INMP441 全向数字 MEMS 硅麦 (I2S 高速数字总线)</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium bg-gray-50">按键结构</td>
-              <td class="py-4 px-6 font-semibold text-gray-900">4 × 客制化机械键盘轴体 (PTT 语音 + Enter/Esc/Space/Tab)</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium bg-gray-50">电池与能耗</td>
-              <td class="py-4 px-6 font-semibold text-gray-900">内置轻薄高能聚合物锂电池 · 待机 7 天 / 持续使用 1 整天</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium bg-gray-50">蓝牙协议支持</td>
-              <td class="py-4 px-6 font-semibold text-gray-900">Classic BT 4.2 (HID 键盘 + HFP 麦克风多协议免驱复合)</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium bg-gray-50">系统兼容性</td>
-              <td class="py-4 px-6 font-semibold text-gray-900">Windows 10/11, macOS, Linux, iOS, Android 原生免驱识别</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 text-gray-500 font-medium bg-gray-50">充电与有线通信</td>
-              <td class="py-4 px-6 font-semibold text-gray-900">Type-C 盲插接口 (支持 20 秒极速有线 OTA 固件更新)</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 开箱清单白底格 -->
-      <div class="text-center mb-8">
-        <h3 class="text-xl font-bold text-gray-900">包装清单 (官方旗舰成品版)</h3>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-        <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
-          <i data-lucide="mic" class="w-6 h-6 mx-auto mb-2 text-blue-600"></i>
-          <div class="font-bold text-xs text-gray-900">VoxTriple 终端主机</div>
-          <div class="text-[11px] text-gray-500 mt-0.5">已装配机械轴与电池</div>
-        </div>
-        <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
-          <i data-lucide="cable" class="w-6 h-6 mx-auto mb-2 text-purple-600"></i>
-          <div class="font-bold text-xs text-gray-900">1.5m 编织弯头数据线</div>
-          <div class="text-[11px] text-gray-500 mt-0.5">柔韧耐磨阻抗小</div>
-        </div>
-        <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
-          <i data-lucide="pocket" class="w-6 h-6 mx-auto mb-2 text-emerald-600"></i>
-          <div class="font-bold text-xs text-gray-900">随身便携绒布收纳袋</div>
-          <div class="text-[11px] text-gray-500 mt-0.5">防刮贴心保护</div>
-        </div>
-        <div class="p-4 rounded-xl bg-gray-50 border border-gray-200">
-          <i data-lucide="file-text" class="w-6 h-6 mx-auto mb-2 text-amber-600"></i>
-          <div class="font-bold text-xs text-gray-900">极速上手指引卡</div>
-          <div class="text-[11px] text-gray-500 mt-0.5">含 ASR 输入法配置技巧</div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ==================== 常见问答 FAQ ==================== -->
-  <section class="py-20 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-extrabold text-gray-900">常见问题解答</h2>
-        <p class="text-gray-600 text-sm mt-2">了解关于连接、输入法搭配及续航的一切</p>
-      </div>
-
-      <div class="space-y-4">
+    <!-- -------------------- 第 3 屏：大拇指的微距心流 (大图特写) -------------------- -->
+    <section class="py-28 sm:py-36 bg-white">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="faq-row card-container p-5">
-          <button class="faq-trigger w-full text-left flex items-center justify-between font-bold text-gray-900 hover:text-blue-600 transition-colors">
-            <span>台式电脑没有自带蓝牙怎么办？</span>
-            <i data-lucide="chevron-down" class="faq-chevron w-4 h-4 text-gray-400 transition-transform"></i>
-          </button>
-          <div class="faq-content text-xs text-gray-600 pt-3 leading-relaxed border-t border-gray-100 mt-3">
-            若您的台式电脑没有内置蓝牙，只需购买一个普通的 USB 蓝牙适配器（市面价格约十几元），插上即可搜索连接 VoxTriple；或者直接使用附带的 Type-C 数据线有线直连，同样能直接进行配置与数据通信。
+        <div class="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
+          <span class="text-xs font-bold uppercase tracking-widest text-blue-600">The Interaction Flow</span>
+          <h2 class="section-headline mt-3">
+            按住，讲。松手，成。
+          </h2>
+          <p class="section-subhead mt-4">
+            客制化机械矮轴的清脆手感，配合物理级 PTT 即按即说。从源头杜绝误录，大拇指自然完成全套盲操闭环。
+          </p>
+        </div>
+
+        <!-- 极具张力的微距特写大图 -->
+        <div class="apple-card overflow-hidden shadow-2xl mb-12 reveal-on-scroll">
+          <img src="../Medias/vox_handheld_macro.jpg" alt="手持机械轴微距按压特写" class="w-full h-auto object-cover transform hover:scale-[1.01] transition-transform duration-700" />
+        </div>
+
+        <!-- 极简工作流三步 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center reveal-on-scroll">
+          <div class="p-6">
+            <div class="text-sm font-bold text-blue-600 mb-2 font-mono">01. 按住 PTT 机械轴</div>
+            <p class="text-xs text-gray-600 leading-relaxed">大拇指自然下沉，硬件直接开启数字硅麦，同时唤醒系统听写，开始从容口述。</p>
+          </div>
+          <div class="p-6">
+            <div class="text-sm font-bold text-blue-600 mb-2 font-mono">02. 300字/分 极速出字</div>
+            <p class="text-xs text-gray-600 leading-relaxed">语速高达 300 字/分，文字在光标处如泉涌般倾泻，彻底告别伏案键盘敲击。</p>
+          </div>
+          <div class="p-6">
+            <div class="text-sm font-bold text-blue-600 mb-2 font-mono">03. 松手顺按回车发送</div>
+            <p class="text-xs text-gray-600 leading-relaxed">机械轴弹起硬件立即静音，顺势一按 Enter 轴直达 AI，全程双手不碰键盘鼠标。</p>
           </div>
         </div>
 
-        <div class="faq-row card-container p-5">
-          <button class="faq-trigger w-full text-left flex items-center justify-between font-bold text-gray-900 hover:text-blue-600 transition-colors">
-            <span>怎样让语音直接在打字光标处出字？</span>
-            <i data-lucide="chevron-down" class="faq-chevron w-4 h-4 text-gray-400 transition-transform"></i>
-          </button>
-          <div class="faq-content text-xs text-gray-600 pt-3 leading-relaxed border-t border-gray-100 mt-3">
-            非常简单！在 Windows 10/11 下，按快捷键【Win + H】即可唤起系统自带的强力语音输入听写窗口；在 Mac 上可开启系统听写功能；或者使用微信键盘/讯飞输入法。按住 VoxTriple 的机械轴说话，光标处文字就会即刻飞速打出。
+      </div>
+    </section>
+
+    <!-- -------------------- 第 4 屏：18.5 x 29.8 x 102 mm 极致尺寸工程 -------------------- -->
+    <section class="py-28 sm:py-36 bg-[#fbfbfd] border-y border-gray-100">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
+          <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Ergonomic Architecture</span>
+          <h2 class="section-headline mt-3">
+            比口红更纤巧。<br/>
+            每一毫米，皆是克制。
+          </h2>
+          <p class="section-subhead mt-4">
+            18.5 × 29.8 × 102.0 mm。彻底告别 18650 电池的笨重身躯，精准贴合单手虎口与掌心轮廓。
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          <!-- 官方尺寸工程大图 -->
+          <div class="lg:col-span-7 apple-card p-6 bg-white flex items-center justify-center reveal-on-scroll shadow-lg">
+            <div class="relative w-full aspect-square rounded-2xl overflow-hidden p-4 flex items-center justify-center">
+              <img src="../Medias/aa281c08-59a8-449e-b710-6026e239950d.png" alt="VoxTriple CAD 官方实测尺寸工程图" class="w-full h-full object-contain" />
+              <div class="absolute bottom-2 left-2 bg-gray-900/90 text-white px-3 py-1 rounded text-[10px] font-mono">
+                CAD 官方精确实测标注
+              </div>
+            </div>
+          </div>
+
+          <!-- 三维解析卡 -->
+          <div class="lg:col-span-5 space-y-6 reveal-on-scroll">
+            <div class="p-8 apple-card bg-white">
+              <div class="text-xs font-bold text-blue-600 uppercase tracking-wider">THICKNESS</div>
+              <div class="text-4xl font-extrabold text-gray-900 my-2">18.5 mm</div>
+              <p class="text-xs text-gray-500 leading-relaxed">
+                极致纤薄。采用轻薄高密度聚合物电芯，厚度比普通圆柱电池大幅缩减，握持温润平稳。
+              </p>
+            </div>
+
+            <div class="p-8 apple-card bg-white">
+              <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">WIDTH & LENGTH</div>
+              <div class="text-3xl font-extrabold text-gray-900 my-2">29.8 × 102 mm</div>
+              <p class="text-xs text-gray-500 leading-relaxed">
+                掌心黄金跨度。大拇指无需张开即可轻松盲操全部按键，随手滑入口袋毫无下坠感。
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- -------------------- 第 5 屏：聚合物电芯与整周节能待机 -------------------- -->
+    <section class="py-28 sm:py-36 bg-white">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-3xl mx-auto mb-20 reveal-on-scroll">
+          <span class="text-xs font-bold uppercase tracking-widest text-emerald-600">Polymer Battery & Ultra-Low Power</span>
+          <h2 class="section-headline mt-3">
+            聚合物锂电革命。<br/>
+            待机整整一周。
+          </h2>
+          <p class="section-subhead mt-4">
+            轻量高密聚合物电芯，配合 ESP32 芯片级智能低功耗休眠，时刻待命。
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center reveal-on-scroll">
+          <div class="apple-card p-10">
+            <div class="text-5xl font-black text-gray-950 mb-2">7 天</div>
+            <div class="text-sm font-bold text-gray-800 mb-3">深度休眠智能待机</div>
+            <p class="text-xs text-gray-500 leading-relaxed">出差或周末归来，无需重复开机充电，随手拿起即刻秒级唤醒投入使用。</p>
+          </div>
+
+          <div class="apple-card p-10 bg-blue-50/30 border-blue-200">
+            <div class="text-5xl font-black text-blue-600 mb-2">1 整天</div>
+            <div class="text-sm font-bold text-gray-800 mb-3">持续高频口述输入</div>
+            <p class="text-xs text-gray-500 leading-relaxed">重度与 AI 对话、长篇文档口述与全天会议，电量充沛支撑一整天的高效运转。</p>
+          </div>
+
+          <div class="apple-card p-10">
+            <div class="text-5xl font-black text-gray-950 mb-2">Type-C</div>
+            <div class="text-sm font-bold text-gray-800 mb-3">闪电补能边充边用</div>
+            <p class="text-xs text-gray-500 leading-relaxed">通用接口盲插补能，电脑 USB 或手机充电头随插即充，彻底挥别电量焦虑。</p>
           </div>
         </div>
 
-        <div class="faq-row card-container p-5">
-          <button class="faq-trigger w-full text-left flex items-center justify-between font-bold text-gray-900 hover:text-blue-600 transition-colors">
-            <span>最新版本为什么换用聚合物电池？</span>
-            <i data-lucide="chevron-down" class="faq-chevron w-4 h-4 text-gray-400 transition-transform"></i>
-          </button>
-          <div class="faq-content text-xs text-gray-600 pt-3 leading-relaxed border-t border-gray-100 mt-3">
-            老版 18650 电池由于直径达到 18mm、长达 65mm，导致设备又厚又重。最新一代我们彻底重新设计，改用高能量密度聚合物锂电，机身厚度压制到仅 18.5mm，轻盈如铅笔，待机整整一周，体验获得质的飞跃。
+      </div>
+    </section>
+
+    <!-- -------------------- 第 6 屏：声学与近场低语防噪 -------------------- -->
+    <section class="py-28 sm:py-36 bg-[#fbfbfd] border-y border-gray-100">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="reveal-on-scroll">
+            <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Acoustic Clarity</span>
+            <h2 class="section-headline mt-3 mb-6">
+              轻声细语，<br/>字字精准。
+            </h2>
+            <p class="text-gray-600 text-sm leading-relaxed mb-6">
+              搭载专业级 INMP441 全向数字 MEMS 硅麦，以 I2S 数字总线直连芯片。手持近场拾音，无需大声喊叫，在工位或咖啡厅低声说话，ASR 依然字字准确。
+            </p>
+            <div class="space-y-3 text-xs text-gray-700 font-medium">
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-blue-600"></i>
+                <span>硬件级 DSP 高通滤波：切除手持微小摩擦低频振动</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-blue-600"></i>
+                <span>滑动平均去噪算法：平滑滤除空调与背景白噪</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-blue-600"></i>
+                <span>mSBC 16kHz 宽带语音通道：人声通透饱满</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="apple-card p-6 bg-white reveal-on-scroll shadow-lg">
+            <img src="../Medias/Final1.png" alt="纯白外观声学细节" class="w-full h-auto object-contain mx-auto" />
+            <div class="text-center text-xs text-gray-400 mt-4">
+              微孔声学防喷气流腔体，近距离说话无喷麦破音
+            </div>
           </div>
         </div>
 
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ==================== 吸顶购买条 (Sticky Bottom Bar) ==================== -->
-  <div id="sticky-buy-bar" class="fixed bottom-0 left-0 right-0 z-40 p-4 shadow-xl">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <img src="../Medias/Final03.png" class="w-10 h-10 object-contain rounded-lg border border-gray-200 bg-gray-50 hidden sm:block" alt="Mini" />
-        <div>
-          <div class="font-bold text-sm text-gray-900">VoxTriple 掌上语音机械终端</div>
-          <div class="text-xs text-gray-500 flex items-center gap-2">
-            <span>客制化机械轴 · 聚合物电芯 7 天待机</span>
-            <span class="text-emerald-600 font-medium">● 顺丰现货</span>
+    <!-- -------------------- 第 7 屏：真实生活氛围摄影墙 -------------------- -->
+    <section class="py-28 sm:py-36 bg-white">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-2xl mx-auto mb-16 reveal-on-scroll">
+          <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Everyday Freedom</span>
+          <h2 class="section-headline mt-3">后仰。踱步。自由。</h2>
+          <p class="section-subhead mt-4">无论是深夜极客书房，还是喧嚣都市中的咖啡馆角落，都优雅自如。</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 reveal-on-scroll">
+          <div class="apple-card overflow-hidden shadow-xl">
+            <img src="../Medias/手持麦克风键盘办公室场景图 (1).jpeg" alt="极客工位实拍" class="w-full h-80 object-cover" />
+            <div class="p-6 bg-white">
+              <div class="font-bold text-gray-900 text-base">工位后仰 · 思维倾泻</div>
+              <p class="text-xs text-gray-500 mt-1">背靠人体工学椅，手握终端从容向 AI 表达系统设计思路。</p>
+            </div>
+          </div>
+
+          <div class="apple-card overflow-hidden shadow-xl">
+            <img src="../Medias/手持麦克风键盘办公室场景图 (2).jpeg" alt="咖啡馆实拍" class="w-full h-80 object-cover" />
+            <div class="p-6 bg-white">
+              <div class="font-bold text-gray-900 text-base">咖啡厅随行 · 绝不扰人</div>
+              <p class="text-xs text-gray-500 mt-1">近场数字拾音，轻声细语即可完成邮件与长文口述。</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="flex items-center gap-4">
-        <div class="text-right">
-          <div class="text-xs text-gray-400">限时首发特惠</div>
-          <div id="sticky-price" class="text-xl font-black text-blue-600">¥299</div>
+      </div>
+    </section>
+
+    <!-- -------------------- 第 8 屏：纯白极简规格一览 -------------------- -->
+    <section class="py-28 sm:py-36 bg-[#fbfbfd] border-t border-gray-100">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
+        
+        <div class="text-center mb-16">
+          <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Technical Specifications</span>
+          <h2 class="section-headline mt-3">详细硬件规格</h2>
         </div>
-        <button id="sticky-buy-btn" class="btn-primary-blue py-2.5 px-6 text-sm font-bold shadow-md">
-          <span>立即订购</span>
-        </button>
-      </div>
-    </div>
-  </div>
 
-  <!-- ==================== 购买确认模态弹窗 (Modal) ==================== -->
-  <div id="buy-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md p-6 rounded-3xl relative border border-gray-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-      
-      <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1 rounded-full hover:bg-gray-100 transition-colors">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <div class="flex items-center gap-2 mb-4">
-        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+        <div class="apple-card bg-white p-8 sm:p-12 shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 text-sm">
+            <div>
+              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">产品定位</div>
+              <div class="text-gray-900 font-semibold">掌上语音输入机械终端 (AI 对话与台式机专用)</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">整机尺寸</div>
+              <div class="text-blue-600 font-bold font-mono">18.5 × 29.8 × 102.0 mm (实测精密尺寸)</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">按键结构</div>
+              <div class="text-gray-900 font-semibold">4 × 客制化机械键盘矮轴 (PTT 语音 + Enter/Esc/Space/Tab)</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">麦克风传感器</div>
+              <div class="text-gray-900 font-semibold">INMP441 全向数字 MEMS 硅麦 (I2S 高速数字总线)</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">电池与续航</div>
+              <div class="text-gray-900 font-semibold">内置轻薄聚合物锂电 · 待机 7 天 / 持续使用 1 整天</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">系统与协议</div>
+              <div class="text-gray-900 font-semibold">Classic BT 4.2 免驱复合 (Win/Mac/Linux 原生音频+键盘)</div>
+            </div>
+          </div>
         </div>
-        <h3 class="text-lg font-bold text-gray-900">确认您的订单意向</h3>
-      </div>
 
-      <div id="modal-summary" class="mb-6">
-        <!-- JS 动态注入 -->
-      </div>
+        <!-- 极简页脚标语 -->
+        <div class="text-center mt-20 text-xs text-gray-400">
+          <p>© 2026 VoxTriple Project. 致力于让每一次发声与指令都纯净优雅。</p>
+          <div class="mt-4 flex items-center justify-center gap-6">
+            <a href="../Official/index.html" class="text-blue-600 hover:underline">访问官方独立网站与固件中心</a>
+            <span>·</span>
+            <a href="#" class="text-gray-500 hover:underline">返回顶部</a>
+          </div>
+        </div>
 
-      <div class="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-200 mb-6">
-        <span class="text-sm font-bold text-gray-700">应付总计 (顺丰包邮)</span>
-        <span id="modal-price" class="text-2xl font-black text-blue-600">¥299</span>
       </div>
+    </section>
 
-      <button id="modal-confirm-btn" class="btn-primary-blue w-full py-3.5 text-sm font-bold shadow-md">
-        <span>提交预订并联系客服</span>
-      </button>
-
-    </div>
-  </div>
-
-  <!-- ==================== 白底页脚 ==================== -->
-  <footer class="py-12 border-t border-gray-200 bg-gray-50 text-xs text-gray-500 pb-28">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <div class="w-5 h-5 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">V</div>
-        <span class="text-gray-700 font-semibold">VoxTriple 官方电商直营</span>
-        <span>© 2026 VoxTriple Project. All Rights Reserved.</span>
-      </div>
-      <div class="flex items-center gap-6">
-        <a href="../Official/index.html" class="hover:text-gray-900 transition-colors font-medium">官方独立品牌网站</a>
-        <a href="#specs" class="hover:text-gray-900 transition-colors">规格参数</a>
-        <a href="#dimensions" class="hover:text-gray-900 transition-colors">尺寸工艺</a>
-      </div>
-    </div>
-  </footer>
+  </main>
 
   <script src="assets/js/main.js"></script>
-  <script>
-    lucide.createIcons();
-  </script>
 </body>
 </html>
