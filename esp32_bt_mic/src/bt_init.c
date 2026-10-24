@@ -275,6 +275,17 @@ esp_err_t bt_stack_init(void)
             snprintf(g_bt_device_name, sizeof(g_bt_device_name),
                      "ESP32_BT_KBD_KEY_%02X", addr[5]);
         }
+    } else {
+        uint8_t mac[6] = {0};
+        if (esp_read_mac(mac, ESP_MAC_BT) == ESP_OK) {
+            if (mic_enabled) {
+                snprintf(g_bt_device_name, sizeof(g_bt_device_name),
+                         "ESP32_BT_KBD_MIC_%02X", mac[5]);
+            } else {
+                snprintf(g_bt_device_name, sizeof(g_bt_device_name),
+                         "ESP32_BT_KBD_KEY_%02X", mac[5]);
+            }
+        }
     }
     ESP_LOGI(TAG, "Bluetooth controller mode: Classic BT Only (BR/EDR), Name: %s", g_bt_device_name);
 

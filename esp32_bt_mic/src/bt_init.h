@@ -11,6 +11,11 @@
 #include "esp_err.h"
 
 /**
+ * @brief Current Bluetooth device broadcast name
+ */
+extern char g_bt_device_name[32];
+
+/**
  * @brief Initialize NVS flash storage
  * @return ESP_OK on success
  */

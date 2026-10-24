@@ -15,6 +15,8 @@
 #include "button_handler.h"
 #include "esp_gap_bt_api.h"
 #include "multi_host.h"
+#include "bt_init.h"
+#include "esp_mac.h"
 
 #define TAG "CONFIG_CMD"
 
@@ -70,14 +72,23 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
             uint8_t board_model = profile ? (uint8_t)profile->model : 0;
             const char *board_name = profile ? profile->model_name : "WEMOS 18650";
 
+            if (strcmp(g_bt_device_name, "ESP32_BT_MIC") == 0) {
+                uint8_t mac[6] = {0};
+                if (esp_read_mac(mac, ESP_MAC_BT) == ESP_OK) {
+                    snprintf(g_bt_device_name, sizeof(g_bt_device_name),
+                             mic_enabled ? "ESP32_BT_KBD_MIC_%02X" : "ESP32_BT_KBD_KEY_%02X",
+                             mac[5]);
+                }
+            }
+
             const esp_app_desc_t *app_desc = esp_app_get_description();
             char resp[512];
             snprintf(resp, sizeof(resp), 
-                     "{\"status\":\"ok\",\"version\":\"%s\",\"btn1_vk\":%d,\"btn1_mod\":%d,\"btn2_vk\":%d,\"btn2_mod\":%d,"
+                     "{\"status\":\"ok\",\"version\":\"%s\",\"bt_name\":\"%s\",\"btn1_vk\":%d,\"btn1_mod\":%d,\"btn2_vk\":%d,\"btn2_mod\":%d,"
                      "\"btn3_vk\":%d,\"btn3_mod\":%d,\"btn4_vk\":%d,\"btn4_mod\":%d,\"tx_power\":%d,\"sleep_mode\":%d,\"mic_enabled\":%d,"
                      "\"board_model\":%d,\"board_name\":\"%s\",\"sleep_timeout_min\":%d,\"active_slot\":%d,"
                      "\"query_slot\":%d,\"slot0_paired\":%d,\"slot1_paired\":%d,\"slot0_os\":%d,\"slot1_os\":%d,\"query_os\":%d}\n",
-                     app_desc->version, vk1, mod1, vk2, mod2, vk3, mod3, vk4, mod4, tx_power, sleep_mode, mic_enabled,
+                     app_desc->version, g_bt_device_name, vk1, mod1, vk2, mod2, vk3, mod3, vk4, mod4, tx_power, sleep_mode, mic_enabled,
                      board_model, board_name, sleep_timeout_min, active_slot,
                      query_slot, slot0_paired, slot1_paired, slot0_os, slot1_os, query_os);
             respond_cb(resp, strlen(resp));
