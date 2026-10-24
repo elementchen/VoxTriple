@@ -16,7 +16,7 @@
 
 <br/>
 
-<img src="docs/images/vox_hero.jpg" alt="VoxTriple Pure White Hero Banner" width="880" style="border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.08);" />
+<img src="docs/images/final_banner.png" alt="VoxTriple Product Banner" width="880" style="border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.08);" />
 
 </div>
 
@@ -41,19 +41,19 @@
 
 ---
 
-## ✨ 核心特性矩阵 / Key Features
+## ✨ 真实产品设计矩阵 / Product Gallery
 
 <div align="center">
 
-| 🎧 声学微孔导音仓 | 🔀 物理双主机无缝切换 |
+| 📐 极简优雅造型与工业设计 | 🎙️ 声学微孔导音与紧凑结构 |
 | :---: | :---: |
-| <img src="docs/images/vox_handheld.jpg" width="420" alt="Handheld Macro" style="border-radius: 8px;" /> | <img src="docs/images/vox_dual_device.jpg" width="420" alt="Dual Device Desk Setup" style="border-radius: 8px;" /> |
-| **手感比口红更便携**<br/>18.5 × 29.8 × 102.0 mm 极致圆润握持，指向性微孔导音腔体，抗噪防喷麦 | **物理两档开关瞬间对齐**<br/>侧边硬件拨动开关（GPIO 33），Mac 与 PC 双工作台秒级热切换 |
+| <img src="docs/images/final_1.png" width="420" alt="VoxTriple Final Render 1" style="border-radius: 8px;" /> | <img src="docs/images/final_2.png" width="420" alt="VoxTriple Final Render 2" style="border-radius: 8px;" /> |
+| **手感比口红更便携**<br/>18.5 × 29.8 × 102.0 mm 极致圆润握持，符合人体工学握姿 | **指向性抗噪拾音腔体**<br/>声学微孔导音仓设计，有效抑制杂音喷麦与环境噪音 |
 
-| ⌨️ 客制化机械矮轴 | 🤖 离线与在线 AI 对话提速 |
+| ⌨️ 实体机械手感与盲操定位 | ⚡ 真实全景细节展示 |
 | :---: | :---: |
-| <img src="docs/images/vox_mechanical_switch.jpg" width="420" alt="Mechanical Switch" style="border-radius: 8px;" /> | <img src="docs/images/vox_ai_input.jpg" width="420" alt="AI Prompt Input" style="border-radius: 8px;" /> |
-| **清脆段落触感与 PBT 键帽**<br/>微动式机械段落轴体，毫秒级按压反馈，按住说话、一键回车、快捷换行 | **300字/分钟 思考即输入**<br/>无缝衔接本地离线大模型或云端 AI 工具，彻底告别双手键盘输入疲劳 |
+| <img src="docs/images/final_3.png" width="420" alt="VoxTriple Final Render 3" style="border-radius: 8px;" /> | <img src="docs/images/final_banner.png" width="420" alt="VoxTriple Panoramic Overview" style="border-radius: 8px;" /> |
+| **扎实机械确认感**<br/>4 颗微动式机械按键，支持按住说话、一键回车、快捷换行 | **极致纯粹极简美学**<br/>实体两档硬件拨动开关（GPIO 33），Mac 与 PC 双工作台秒级热切换 |
 
 </div>
 
@@ -181,7 +181,7 @@ VoxTriple/
 │       └── app.js
 │
 ├── docs/                          # [项目设计与规范文档]
-│   ├── images/                    # 高清产品渲染实拍图、架构图与接线指南
+│   ├── images/                    # 高清真实产品渲染图、架构图与接线指南
 │   ├── PROJECT_CONTEXT_MEMORY.md  # 项目全局记忆备忘录与设计哲学
 │   └── flash_guide_zh.md          # 详细图文小白烧录指引
 │
