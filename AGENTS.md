@@ -39,6 +39,7 @@
 
 - 当开启新会话或跨端切换（Antigravity IDE ↔ Antigravity 2.0 APP）时：
   - 可直接引用项目记忆备忘录：`@docs/PROJECT_CONTEXT_MEMORY.md`；
+  - 或引用硬件主线核心会话：`[Debugging NimBLE Connection Issues](conversation://54b88e82-9e66-4bab-8726-e7f57cfd6771)`；
   - 或引用历史独立站规划会话：`[Website Planning](conversation://c1b7a0f7-97db-46af-9516-be10a80e1ac6)`。
 
 ---

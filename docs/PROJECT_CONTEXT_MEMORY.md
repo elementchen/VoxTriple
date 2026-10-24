@@ -6,13 +6,19 @@
 
 ---
 
-## 一、关联历史会话索引
+## 一、关联历史核心会话索引
 
-- **历史核心会话（独立站与电商规划）**：
-  - **会话名称**：`Website Planning (电商与产品独立站规划)`
-  - **会话链接**：[Website Planning (电商与产品独立站规划)](conversation://c1b7a0f7-97db-46af-9516-be10a80e1ac6)
-  - **会话 ID**：`c1b7a0f7-97db-46af-9516-be10a80e1ac6`
-  - **核心产出**：`Website/Ecommerce/`（纯白电商详情长图页）、`Website/Official/`（品牌官方网站）、`Website/Medias/`（产品渲染与物料）。
+1. **固件与硬件核心主线会话（IDE 阶段核心记录）**：
+   - **会话名称**：`Debugging NimBLE Connection Issues (ESP32固件主线核心对话)`
+   - **会话链接**：[Debugging NimBLE Connection Issues](conversation://54b88e82-9e66-4bab-8726-e7f57cfd6771)
+   - **会话 ID**：`54b88e82-9e66-4bab-8726-e7f57cfd6771`
+   - **核心内容**：NimBLE 模式切换、NVS 读写存储、经典蓝牙 HID + HFP 双模调试、上位机联调及 v1.0.18 固件完整发布链路。
+
+2. **线上独立站与电商规划会话**：
+   - **会话名称**：`Website Planning (电商与产品独立站规划)`
+   - **会话链接**：[Website Planning (电商与产品独立站规划)](conversation://c1b7a0f7-97db-46af-9516-be10a80e1ac6)
+   - **会话 ID**：`c1b7a0f7-97db-46af-9516-be10a80e1ac6`
+   - **核心产出**：`Website/Ecommerce/`（纯白电商详情长图页）、`Website/Official/`（品牌官方网站）、`Website/Medias/`（产品渲染与物料）。
 
 ---
 
