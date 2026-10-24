@@ -1,10 +1,15 @@
 /**
  * VoxTriple Official Website Interactive Architecture
- * Live Simulator, Key Monitor, Audio Spectrum & Firmware Flash Visualizer
+ * Apple-grade White High-Tech Portal & Flash-Talk (闪电说) Ecosystem
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 模拟按键与上位机联动逻辑
+  // 1. 初始化 Lucide 图标
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+
+  // 2. 模拟按键与上位机控制台联动逻辑
   const simKeys = document.querySelectorAll('.sim-key');
   const ledIndicator = document.getElementById('board-led');
   const logContainer = document.getElementById('serial-log-stream');
@@ -14,30 +19,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const keyConfig = {
     'btn-1': {
       gpio: 4,
-      name: 'Button 1 (PTT / 唤醒)',
-      hidKey: 'Enter (0x28)',
-      action: 'PTT 录音启动 & 发送回车',
+      name: 'Key 1 (PTT 数字硅麦收音)',
+      hidKey: 'F13 (0x68) / PTT Stream',
+      action: '按住即说 · 数字硅麦收音中',
       isPTT: true
     },
     'btn-2': {
       gpio: 18,
-      name: 'Button 2 (Key 2)',
-      hidKey: 'Escape (0x29)',
-      action: '发送 Esc 取消指令',
+      name: 'Key 2 (Enter / 直发 AI)',
+      hidKey: 'Enter (0x28)',
+      action: '松手顺按发送 · Prompt 直达模型',
       isPTT: false
     },
     'btn-3': {
       gpio: 19,
-      name: 'Button 3 (Key 3)',
-      hidKey: 'Space (0x2C)',
-      action: '发送空格指令 (播放/暂停)',
+      name: 'Key 3 (Esc / 一键取消)',
+      hidKey: 'Escape (0x29)',
+      action: '发送 Esc 取消录音与指令',
       isPTT: false
     },
     'btn-4': {
       gpio: 23,
-      name: 'Button 4 (Key 4 / 配对)',
-      hidKey: 'Tab (0x2B)',
-      action: '发送 Tab (长按3秒重置蓝牙)',
+      name: 'Key 4 (双设备蓝牙切换)',
+      hidKey: 'Custom HID (0x7F)',
+      action: '蓝牙双通道秒切 (Host A <-> Host B)',
       isPTT: false
     }
   };
@@ -49,30 +54,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeStr = new Date().toTimeString().split(' ')[0] + '.' + Math.floor(Math.random() * 900 + 100);
 
     if (isPress) {
-      if (ledIndicator) ledIndicator.classList.add('active');
+      if (ledIndicator) {
+        ledIndicator.classList.remove('bg-emerald-400');
+        ledIndicator.classList.add('bg-blue-500', 'ring-4', 'ring-blue-400/40');
+      }
       if (appKeyDisplay) {
         appKeyDisplay.textContent = config.name;
-        appKeyDisplay.className = 'text-sm font-mono font-bold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-md border border-blue-500/20';
+        appKeyDisplay.className = 'text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200';
       }
       if (appStatusDisplay) {
-        appStatusDisplay.textContent = config.isPTT ? '🎙️ 麦克风音频传输中 (mSBC)' : '⚡ HID 信号触发中';
-        appStatusDisplay.className = 'text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+        appStatusDisplay.textContent = config.isPTT ? '🎙️ 数字硅麦收音中 (mSBC 16kHz)' : '⚡ HID 信号触发中';
+        appStatusDisplay.className = 'text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
       }
 
-      appendLog(`[${timeStr}] [INTR] GPIO ${config.gpio} FALLING -> Key: ${config.name} PRESSED`);
-      appendLog(`[${timeStr}] [HID-TX] HID Report Sent: ${config.hidKey}`);
+      appendLog(`[${timeStr}] [INTR] GPIO ${config.gpio} FALLING -> ${config.name} PRESSED`);
+      appendLog(`[${timeStr}] [HID-TX] HID Report Dispatched: ${config.hidKey}`);
       if (config.isPTT) {
-        appendLog(`[${timeStr}] [HFP-DSP] INMP441 DMA buffer full -> mSBC 16kHz Stream ON`);
+        appendLog(`[${timeStr}] [I2S-AUDIO] Digital MEMS Mic DMA Stream Active (Zero Latency)`);
       }
     } else {
-      if (ledIndicator) ledIndicator.classList.remove('active');
+      if (ledIndicator) {
+        ledIndicator.classList.remove('bg-blue-500', 'ring-4', 'ring-blue-400/40');
+        ledIndicator.classList.add('bg-emerald-400');
+      }
       if (appKeyDisplay) {
-        appKeyDisplay.textContent = 'None (IDLE / 等待输入)';
-        appKeyDisplay.className = 'text-sm font-mono font-bold text-neutral-500 bg-neutral-800/40 px-2.5 py-1 rounded-md';
+        appKeyDisplay.textContent = 'None (IDLE / 等待大拇指触发)';
+        appKeyDisplay.className = 'text-xs font-mono font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md';
       }
       if (appStatusDisplay) {
-        appStatusDisplay.textContent = '● 串口就绪 (COM5 @ 115200)';
-        appStatusDisplay.className = 'text-xs px-2 py-0.5 rounded-full font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20';
+        appStatusDisplay.textContent = '● 经典蓝牙直连已就绪 (免驱)';
+        appStatusDisplay.className = 'text-[11px] px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-600 border border-blue-100';
       }
       appendLog(`[${timeStr}] [INTR] GPIO ${config.gpio} RISING -> Released (Standby)`);
     }
@@ -81,30 +92,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function appendLog(text) {
     if (!logContainer) return;
     const line = document.createElement('div');
-    line.className = 'leading-relaxed hover:bg-white/5 px-2 py-0.5 rounded transition-colors text-[11px]';
+    line.className = 'leading-relaxed hover:bg-slate-800/80 px-2 py-0.5 rounded transition-colors text-[11px] font-mono';
     
     if (text.includes('PRESSED')) {
-      line.innerHTML = `<span class="text-blue-400 font-semibold">${text}</span>`;
-    } else if (text.includes('Stream ON')) {
+      line.innerHTML = `<span class="text-sky-400 font-semibold">${text}</span>`;
+    } else if (text.includes('Active')) {
       line.innerHTML = `<span class="text-emerald-400 font-medium">${text}</span>`;
     } else {
-      line.innerHTML = `<span class="text-neutral-400">${text}</span>`;
+      line.innerHTML = `<span class="text-slate-400">${text}</span>`;
     }
 
     logContainer.appendChild(line);
     logContainer.scrollTop = logContainer.scrollHeight;
 
-    // 保留最近 40 行，防止 DOM 过多
-    if (logContainer.children.length > 40) {
+    if (logContainer.children.length > 35) {
       logContainer.removeChild(logContainer.children[0]);
     }
   }
 
-  // 绑定实体模拟按键点击与长按
+  // 绑定实体模拟按键点击
   simKeys.forEach(keyEl => {
     const btnId = keyEl.id;
 
-    // 鼠标点击事件
     keyEl.addEventListener('mousedown', () => {
       keyEl.classList.add('pressed');
       triggerKeyAction(btnId, true);
@@ -122,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // 移动端触控
     keyEl.addEventListener('touchstart', (e) => {
       e.preventDefault();
       keyEl.classList.add('pressed');
@@ -136,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 2. 键盘物理快捷键同步 (数字键 1, 2, 3, 4)
+  // 键盘物理快捷键同步 (数字键 1, 2, 3, 4)
   window.addEventListener('keydown', (e) => {
     if (['1', '2', '3', '4'].includes(e.key)) {
       const target = document.getElementById(`btn-${e.key}`);
@@ -157,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 3. 20秒 OTA 模拟演示动画
+  // 3. 20 秒无线 OTA 模拟演示
   const otaBtn = document.getElementById('demo-ota-btn');
   const otaBar = document.getElementById('demo-ota-progress');
   const otaPercent = document.getElementById('demo-ota-percent');
@@ -172,27 +180,27 @@ document.addEventListener('DOMContentLoaded', () => {
       otaBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
       let progress = 0;
-      otaStatus.textContent = '正在从 GitHub 获取 esp32_bt_mic_v1.0.19.bin...';
+      otaStatus.textContent = '正在获取官方最新固件 voxtriple_fw_v1.0.19.bin...';
       otaBar.style.width = '0%';
       otaPercent.textContent = '0%';
 
       const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 6) + 3;
+        progress += Math.floor(Math.random() * 6) + 4;
         if (progress > 100) progress = 100;
 
         otaBar.style.width = `${progress}%`;
         otaPercent.textContent = `${progress}%`;
 
         if (progress < 30) {
-          otaStatus.textContent = '正在通过物理串口建立直接高速分包传输通道...';
+          otaStatus.textContent = '建立高速蓝牙分包通道 (Block Size: 512B)...';
         } else if (progress < 85) {
-          otaStatus.textContent = `写入 Flash (0x10000) 中... [${progress * 8} KB / 780 KB]`;
+          otaStatus.textContent = `写入 ESP32 OTA 分区中... [${Math.floor(progress * 7.8)} KB / 780 KB]`;
         } else if (progress < 100) {
-          otaStatus.textContent = '校验 SHA256 完整性并刷新 Bootloader 分区表...';
+          otaStatus.textContent = '校验 SHA-256 完整性并刷新 Bootloader 分区表...';
         } else {
           clearInterval(interval);
-          otaStatus.textContent = '✅ OTA 写入完成！芯片已自动执行软重启 (Total: 18.4s)';
-          otaStatus.className = 'text-xs text-emerald-400 font-semibold mt-1';
+          otaStatus.textContent = '✅ OTA 写入完成！芯片已完成平滑软重启 (耗时: 18.2s)';
+          otaStatus.className = 'text-xs text-emerald-600 font-semibold mt-1';
           otaBtn.disabled = false;
           otaBtn.classList.remove('opacity-50', 'cursor-not-allowed');
           otaRunning = false;
@@ -201,12 +209,57 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. 音频频谱动态随机抖动
+  // 4. 音频频谱动态波形模拟
   const waveBars = document.querySelectorAll('.dynamic-wave-bar');
-  setInterval(() => {
-    waveBars.forEach(bar => {
-      const scale = (Math.random() * 0.7 + 0.3).toFixed(2);
-      bar.style.transform = `scaleY(${scale})`;
+  if (waveBars.length > 0) {
+    setInterval(() => {
+      waveBars.forEach(bar => {
+        const scale = (Math.random() * 0.75 + 0.25).toFixed(2);
+        bar.style.transform = `scaleY(${scale})`;
+      });
+    }, 180);
+  }
+
+  // 5. 闪电技能库：一键复制 Prompt 脚本
+  const copyBtns = document.querySelectorAll('.copy-prompt-btn');
+  copyBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const promptText = btn.getAttribute('data-prompt') || '';
+      if (promptText) {
+        navigator.clipboard.writeText(promptText).then(() => {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-emerald-600">已复制配置</span>`;
+          if (window.lucide) window.lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            if (window.lucide) window.lucide.createIcons();
+          }, 2000);
+        });
+      }
     });
-  }, 180);
+  });
+
+  // 6. 技能分类 Filter 切换
+  const filterTabs = document.querySelectorAll('.skill-filter-tab');
+  const skillCards = document.querySelectorAll('.skill-card-item');
+
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach(t => {
+        t.classList.remove('bg-blue-600', 'text-white');
+        t.classList.add('bg-gray-100', 'text-gray-700');
+      });
+      tab.classList.remove('bg-gray-100', 'text-gray-700');
+      tab.classList.add('bg-blue-600', 'text-white');
+
+      const filterCategory = tab.getAttribute('data-category');
+      skillCards.forEach(card => {
+        if (filterCategory === 'all' || card.getAttribute('data-category') === filterCategory) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
 });
