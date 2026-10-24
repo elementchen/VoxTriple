@@ -585,11 +585,75 @@
     </div>
   </section>
 
-  <!-- ==================== 6. 固件中心与 20 秒极速 OTA (FIRMWARE & OTA) ==================== -->
+  <!-- ==================== 6. 固件中心与专属上位机软件 KeyMapper (FIRMWARE & KEYMAPPER APP) ==================== -->
   <section id="firmware" class="py-24 sm:py-32 bg-[#fbfbfd] border-y border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <!-- 上位机客户端 KeyMapper 巨幅软硬件协同大展 -->
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="eyebrow-badge">
+          <i data-lucide="sliders" class="w-4 h-4 text-blue-600"></i>
+          <span>KeyMapper 官方上位机客户端</span>
+        </span>
+        <h2 class="section-title">软硬件无缝协同，自由掌控每一处细节</h2>
+        <p class="section-desc mt-4">
+          开箱即用的图形化配置器。按键自由映射、修饰键任意绑定、ESP32 深度节能参数细致调优，以及一键无线固件 OTA 进化。
+        </p>
+      </div>
+
+      <!-- 上位机实机截图双图并展 (中文日常版与极客英文版) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16 items-start">
+        
+        <!-- 卡片 A：中文界面 (按键映射与节能设置) -->
+        <div class="apple-card p-6 sm:p-8 bg-white border border-gray-200/80 shadow-md flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-bold text-gray-900">按键映射与深度节能设置 (CN 界面)</span>
+            </div>
+            <span class="text-[11px] font-mono text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-md font-bold">PAIR 2 已连接</span>
+          </div>
+          <div class="rounded-2xl overflow-hidden border border-gray-100 shadow-sm mb-6 bg-[#f4f5f7]">
+            <img src="../Medias/app_keymapper_cn.png" alt="KeyMapper 中文界面：按键映射与节能设置" class="w-full h-auto object-contain" />
+          </div>
+          <div class="space-y-2 text-xs text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+            <div class="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+              <i data-lucide="power" class="w-4 h-4 text-emerald-600"></i>
+              <span>ESP32 智能休眠与节能配置</span>
+            </div>
+            <p>
+              在左侧面板自由开关“自动休眠”、调整“休眠等待时长”（1分钟至30分钟）以及射频信号发射强度，从底层为 7 天超长待机提供精细化电量管理。
+            </p>
+          </div>
+        </div>
+
+        <!-- 卡片 B：英文界面 (双设备配对与固件 OTA) -->
+        <div class="apple-card p-6 sm:p-8 bg-white border border-gray-200/80 shadow-md flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <span class="text-xs font-bold text-gray-900">双设备独立配置与云端 OTA (EN 界面)</span>
+            </div>
+            <span class="text-[11px] font-mono text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-md font-bold">PAIR 1 已连接</span>
+          </div>
+          <div class="rounded-2xl overflow-hidden border border-gray-100 shadow-sm mb-6 bg-[#f4f5f7]">
+            <img src="../Medias/app_keymapper_en.png" alt="KeyMapper 英文界面：双设备配对与固件OTA" class="w-full h-auto object-contain" />
+          </div>
+          <div class="space-y-2 text-xs text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+            <div class="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+              <i data-lucide="cpu" class="w-4 h-4 text-blue-600"></i>
+              <span>双设备独立记忆与板载固件 OTA</span>
+            </div>
+            <p>
+              支持为台式机（Pair 1）与笔记本（Pair 2）分别存储不同的专属按键映射方案；底部支持直接选择本地固件或云端一键在线升级。
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 下篇：客户端下载卡片与 20 秒 OTA 交互演示 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-12 border-t border-gray-200/80">
         
         <div class="lg:col-span-6 space-y-6">
           <span class="eyebrow-badge">
@@ -601,7 +665,7 @@
             固件持续添加新玩法。
           </h2>
           <p class="section-desc">
-            无缝集成本地 OTA 无线固件升级。从按键消抖优化到新型大模型接入支持，一键推送直写，保持设备最强战斗力。
+            无缝集成 OTA 无线固件升级。从按键消抖优化到新型大模型接入支持，一键推送直写，保持设备最强战斗力。
           </p>
 
           <!-- 固件发布日志卡片 -->
@@ -613,7 +677,8 @@
             <ul class="text-xs text-gray-600 space-y-2 list-disc list-inside">
               <li>优化经典蓝牙双设备记忆逻辑，切机延迟缩短至 120ms</li>
               <li>引入数字硅麦动态降噪滤波，优化低语近场收音信噪比</li>
-              <li>新增全键自定义宏防连击保护机制与深度节能策略</li>
+              <li>支持 KeyMapper 上位机动态调节自动休眠时长与信号强度</li>
+              <li>全按键宏映射持久化存储至 Flash，断电配置永不丢失</li>
             </ul>
           </div>
 
@@ -621,7 +686,7 @@
           <div class="pt-2 flex flex-wrap gap-4">
             <button class="btn-primary text-xs py-2 px-5">
               <i data-lucide="download" class="w-4 h-4"></i>
-              <span>下载上位机客户端 (Windows x64)</span>
+              <span>下载 KeyMapper 上位机 (Windows x64)</span>
             </button>
             <button class="btn-secondary text-xs py-2 px-5">
               <i data-lucide="download" class="w-4 h-4"></i>

@@ -368,13 +368,14 @@
       </div>
     </section>
 
-    <!-- -------------------- 第 7 屏：聚合物电芯 7 天待机 & 全键宏与 OTA (ENDURANCE - 内部结构大展) -------------------- -->
+    <!-- -------------------- 第 7 屏：聚合物电芯 7 天待机 & 专属上位机软件 KeyMapper (ENDURANCE & KEYMAPPER) -------------------- -->
     <section class="py-24 sm:py-32 bg-white w-full">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
+        <!-- 上篇：硬件结构与续航底座 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-24">
           <div class="lg:col-span-5 space-y-6">
-            <span class="eyebrow-tag text-emerald-600">Endurance & Evolution</span>
+            <span class="eyebrow-tag text-emerald-600">Endurance & Power</span>
             <h2 class="section-headline">
               待机整整一周。<br/>
               常用常新的极客生命力。
@@ -384,8 +385,8 @@
             </p>
             <div class="space-y-4 pt-4">
               <div class="border-l-2 border-emerald-500 pl-4">
-                <div class="font-bold text-gray-900 text-sm">全按键自由映射宏</div>
-                <div class="text-xs text-gray-500 mt-1">任意绑定传统键盘单键、组合快捷键（Ctrl+C/V、截图、唤起工作流）。</div>
+                <div class="font-bold text-gray-900 text-sm">聚合物锂电定制电芯</div>
+                <div class="text-xs text-gray-500 mt-1">高能量密度轻薄排布，彻底摆脱圆柱电池的臃肿厚重。</div>
               </div>
               <div class="border-l-2 border-blue-500 pl-4">
                 <div class="font-bold text-gray-900 text-sm">20 秒无线 OTA 固件进化</div>
@@ -396,8 +397,53 @@
 
           <!-- 超大画幅微透内部结构大图 -->
           <div class="lg:col-span-7 giant-visual-wrap">
-            <img src="../Medias/Final02.png" alt="工业微透机身与内部透视大片" class="w-full h-auto object-contain blend-seamless max-h-[560px]" />
+            <img src="../Medias/Final02.png" alt="工业微透机身与内部透视大片" class="w-full h-auto object-contain blend-seamless max-h-[520px]" />
           </div>
+        </div>
+
+        <!-- 下篇：官方专属上位机客户端 KeyMapper 软硬件闭环大展 -->
+        <div class="pt-16 border-t border-gray-100">
+          <div class="text-center max-w-3xl mx-auto mb-12">
+            <span class="eyebrow-tag text-blue-600">KeyMapper Desktop App</span>
+            <h2 class="section-headline">
+              专属上位机软件。<br/>
+              按键映射与节能，尽在指尖掌控。
+            </h2>
+            <p class="section-subhead mt-4">
+              开箱即用的极简桌面配置器。随心重映射 4 枚按键的传统键值与组合快捷键，更可根据你的使用节奏细致调节 ESP32 的智能休眠与节能策略。
+            </p>
+          </div>
+
+          <!-- 上位机真实高清截图大片 (铺满视口中心，无缝融入) -->
+          <div class="w-full my-8 giant-visual-wrap">
+            <div class="max-w-4xl w-full rounded-3xl overflow-hidden shadow-2xl border border-gray-200/80 bg-white">
+              <img src="../Medias/app_keymapper_cn.png" alt="VoxTriple KeyMapper 官方上位机软件界面截图" class="w-full h-auto object-contain" />
+            </div>
+          </div>
+
+          <!-- 两大核心软件能力说明 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-12 max-w-5xl mx-auto">
+            <div class="p-8 bg-[#fbfbfd] rounded-3xl border border-gray-100">
+              <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+                <i data-lucide="sliders" class="w-5 h-5"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">全按键自由映射 · 任意单键与组合宏</h3>
+              <p class="text-xs text-gray-600 leading-relaxed">
+                Key 1 ~ Key 4 任意重定义。支持绑定单个字符键、方向键，或组合 Ctrl、Alt、Shift、Win 修饰键（如一键复制黏贴、一键截图、一键唤出系统原生听写），点击即可保存至 ESP32 芯片内部持久化存储。
+              </p>
+            </div>
+
+            <div class="p-8 bg-[#fbfbfd] rounded-3xl border border-gray-100">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                <i data-lucide="battery-charging" class="w-5 h-5"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">ESP32 硬件级节能设置 · 续航精细化调控</h3>
+              <p class="text-xs text-gray-600 leading-relaxed">
+                在软件中一键开启“自动休眠”，自由设定静置低功耗触发时长（1 分钟至 30 分钟），并支持调节蓝牙射频发射功率与信号强度。正是有了这套深度节能策略，才实现了长达 7 天的从容待机。
+              </p>
+            </div>
+          </div>
+
         </div>
 
       </div>
