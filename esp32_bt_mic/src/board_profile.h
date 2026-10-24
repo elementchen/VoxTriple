@@ -33,7 +33,7 @@ typedef struct {
 } board_profile_t;
 
 /**
- * @brief Initialize board profile subsystem, loads model from NVS (default: WEMOS_18650)
+ * @brief Initialize board profile subsystem, loads model from NVS (default: ESP32_LITE_V1)
  */
 void board_profile_init(void);
 

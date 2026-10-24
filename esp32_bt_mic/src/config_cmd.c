@@ -69,8 +69,8 @@ void execute_config_cmd(const char *cmd_line, size_t len, cmd_respond_cb_t respo
             uint8_t query_os = (query_slot == 0) ? slot0_os : slot1_os;
 
             const board_profile_t *profile = board_profile_get_current();
-            uint8_t board_model = profile ? (uint8_t)profile->model : 0;
-            const char *board_name = profile ? profile->model_name : "WEMOS 18650";
+            uint8_t board_model = profile ? (uint8_t)profile->model : (uint8_t)BOARD_MODEL_ESP32_LITE_V1;
+            const char *board_name = profile ? profile->model_name : "ESP32 Lite V1.0.0";
 
             if (strcmp(g_bt_device_name, "ESP32_BT_MIC") == 0) {
                 uint8_t mac[6] = {0};

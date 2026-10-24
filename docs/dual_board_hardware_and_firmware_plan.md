@@ -1,9 +1,9 @@
-# VoxTriple 双开发板兼容与硬件适配方案规划书
-> **文档版本**：v1.0  
+# VoxTriple 开发板硬件规格与历史兼容规划书
+> **文档版本**：v1.1  
 > **适用硬件**：  
-> 1. WEMOS ESP32 Board with 18650 Battery Holder（经典版 / 18650款）  
-> 2. ESP32 Lite V1.0.0（LOLIN32 Lite 兼容款 / 轻量版）  
-> **状态**：方案规划与技术论证（暂未修改代码，待用户确认）
+> 1. ESP32 Lite V1.0.0（LOLIN32 Lite 兼容款 / **官方唯一标准硬件**）  
+> 2. WEMOS ESP32 Board with 18650 Battery Holder（**已停产弃用归档**）  
+> **状态**：历史方案备忘与技术档案（18650 款因体积厚重已被正式弃用，主线全面采用 ESP32 Lite V1.0.0 轻薄硬件标准）
 
 ---
 

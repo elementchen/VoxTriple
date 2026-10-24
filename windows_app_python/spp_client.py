@@ -410,7 +410,7 @@ class SppClient:
         """Get the hardware board model from cache (0: WEMOS 18650, 1: ESP32 Lite V1.0.0)."""
         if not self._config_cache:
             await self._fetch_config()
-        return self._config_cache.get("board_model", 0)
+        return self._config_cache.get("board_model", 1)
 
     async def write_board_model(self, model: int) -> bool:
         """Save hardware board model to the ESP32 and trigger reboot."""
@@ -484,8 +484,8 @@ class SppClient:
             "sleep": self._config_cache.get("sleep_mode", 1),
             "mic_enabled": self._config_cache.get("mic_enabled", 1),
             "version": self._config_cache.get("version", "1.0.19-beta"),
-            "board_model": self._config_cache.get("board_model", 0),
-            "board_name": self._config_cache.get("board_name", "WEMOS 18650"),
+            "board_model": self._config_cache.get("board_model", 1),
+            "board_name": self._config_cache.get("board_name", "ESP32 Lite V1.0.0"),
             "sleep_timeout_min": self._config_cache.get("sleep_timeout_min", 5),
             "active_slot": self._config_cache.get("active_slot", 0),
             "query_slot": self._config_cache.get("query_slot", slot if slot is not None else self._config_cache.get("active_slot", 0)),

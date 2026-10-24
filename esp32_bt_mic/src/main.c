@@ -47,7 +47,7 @@ void app_main(void)
     board_profile_init();
 
     const board_profile_t *profile = board_profile_get_current();
-    gpio_num_t led_pin = profile ? profile->led_gpio : GPIO_NUM_16;
+    gpio_num_t led_pin = profile ? profile->led_gpio : GPIO_NUM_22;
 
     /* Drive indicator LED high immediately (OFF for active-low LED) */
     gpio_config_t led_cfg = {
