@@ -54,3 +54,20 @@ AI 仅对以下核心目录及其必要根级配置文件拥有修改、编译�
   - 上位机客户端改动：`feat(client): ...` 或 `fix(client): ...`
   - 文档与规范：`docs: ...`
   - 工程与忽略规则：`chore: ...`
+
+---
+
+## 5. GitHub Release 标准化发布规范 (Standard Release Pipeline)
+
+每次主线进行新版本发布（合入 `main` 分支并打 Tag）时，**必须执行以下标准化闭环动作**：
+
+1. **固件编译与输出物料**：
+   - OTA 增量固件：`esp32_bt_mic/build/esp32_bt_mic_v<version>.bin`
+   - 全量烧录合包：`esp32_bt_mic/build/esp32_bt_mic_merged_v<version>.bin`
+2. **上位机编译与输出物料**：
+   - 免安装独立可执行程序：`windows_app_python/dist/VoxTriple_v<version>.exe`
+3. **GitHub Release 创建与产物挂载**：
+   - 必须通过 `gh release create` 将上述固件与上位机 EXE 文件全部作为 release asset 挂载上传到 GitHub Release；
+   - 必须同步覆盖项目的双远程仓库：
+     - `origin` (`elementchen/VoxTriple_Classic`)
+     - `github` (`elementchen/VoxTriple`)
