@@ -397,12 +397,29 @@ function applyDisconnectedUi() {
     if (fwSection) fwSection.classList.add("panel-hidden");
     const hostSection = document.getElementById("host-switch-section");
     if (hostSection) hostSection.style.display = "none";
+
+    // 隐藏产品图正上方的蓝牙广播名徽标
+    const btBadge = document.getElementById("device-bt-name-badge");
+    const btText = document.getElementById("device-bt-name-text");
+    if (btBadge) btBadge.classList.add("panel-hidden");
+    if (btText) btText.textContent = "--";
+
     resetConfigUi();
 }
 
 // ── Render Config Cache ──────────────────────────────────────────────────
 function renderConfig(config) {
     if (!config) return;
+
+    // 蓝牙广播名徽标
+    const btBadge = document.getElementById("device-bt-name-badge");
+    const btText = document.getElementById("device-bt-name-text");
+    if (btBadge && btText) {
+        const btName = config.bt_name || (config.mic_enabled === 1 ? "ESP32_BT_KBD_MIC" : "ESP32_BT_KBD_KEY");
+        btText.textContent = btName;
+        btBadge.title = `Bluetooth Broadcast Name: ${btName}`;
+        btBadge.classList.remove("panel-hidden");
+    }
 
     // 固件版本
     const fwEl = document.getElementById("firmware-ver");

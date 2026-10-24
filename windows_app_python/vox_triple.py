@@ -125,9 +125,14 @@ class Api:
         query_os = cfg.get("query_os", 0)
         target_slot = cfg.get("query_slot", 0)
 
+        # Determine Bluetooth broadcast name with fallback
+        default_bt_name = "ESP32_BT_KBD_MIC" if cfg.get("mic_enabled", 1) else "ESP32_BT_KBD_KEY"
+        bt_name = cfg.get("bt_name") or getattr(self.spp, "_bt_name", None) or default_bt_name
+
         # Format mapping list to JSON compatible
         config = {
             "version": cfg.get("version", "1.0.19-beta"),
+            "bt_name": bt_name,
             "tx_power": cfg.get("tx_power", 7),
             "sleep_mode": cfg.get("sleep", 1),
             "mic_enabled": cfg.get("mic_enabled", 1),

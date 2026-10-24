@@ -88,6 +88,7 @@ class SppClient:
         
         # Local configuration cache populated on connection
         self._config_cache = {}
+        self._bt_name = None
         
         # OTA mode flag and queue for flow control
         self._ota_mode = False
@@ -195,6 +196,7 @@ class SppClient:
             self._ser = None
         self._port = None
         self._config_cache.clear()
+        self._bt_name = None
         log.info("SPP Client disconnected")
 
     def _run_read_loop(self):
@@ -220,6 +222,14 @@ class SppClient:
                             detected_slot = int(m.group(1))
                             log.info(f"Detected hardware switch boot signature from log: Slot={detected_slot}")
                             self.on_slot_change(detected_slot)
+
+                    # 启动日志签名检测：蓝牙广播名嗅探 (如: Name: ESP32_BT_KBD_MIC_2C)
+                    if "Name:" in line or "g_bt_device_name" in line:
+                        import re
+                        nm = re.search(r"Name:\s*([A-Za-z0-9_\-]+)", line)
+                        if nm:
+                            self._bt_name = nm.group(1).strip()
+                            log.info(f"Sniffed Bluetooth broadcast name from boot log: {self._bt_name}")
                     continue
                 try:
                     data = json.loads(line)
@@ -310,6 +320,9 @@ class SppClient:
             resp = await self._send_cmd({"cmd": "get_config"}, timeout=1.5)
             if resp and resp.get("status") == "ok":
                 self._config_cache = resp
+                if "bt_name" in resp and resp["bt_name"]:
+                    self._bt_name = str(resp["bt_name"]).strip()
+                    log.info(f"Loaded Bluetooth device name from get_config: {self._bt_name}")
                 return True
             await asyncio.sleep(1.0)
         return False
