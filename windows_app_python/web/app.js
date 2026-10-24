@@ -62,7 +62,7 @@ let currentSlotPaired = [0, 0]; // 记录槽位是否已配对 (0: 未配对, 1:
 let currentSlotOs = [0, 0];   // 记录槽位配对系统 (1: Apple, 2: Windows, 0: 未知)
 let selectedOtaPath = "";
 
-const CURRENT_CLIENT_VERSION = "1.0.19-beta";
+const CURRENT_CLIENT_VERSION = "1.0.19";
 let clientUpdateInfo = null;
 let downloadedClientExePath = null;
 let isDownloadingClient = false;
@@ -423,7 +423,7 @@ function renderConfig(config) {
 
     // 固件版本
     const fwEl = document.getElementById("firmware-ver");
-    if (fwEl) fwEl.textContent = "v" + (config.version || "1.0.19-beta");
+    if (fwEl) fwEl.textContent = "v" + (config.version || "1.0.19");
 
     // 麦克风与休眠模式开关
     const micToggle = document.getElementById("mic-toggle");

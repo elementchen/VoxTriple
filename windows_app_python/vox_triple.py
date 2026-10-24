@@ -131,7 +131,7 @@ class Api:
 
         # Format mapping list to JSON compatible
         config = {
-            "version": cfg.get("version", "1.0.19-beta"),
+            "version": cfg.get("version", "1.0.19"),
             "bt_name": bt_name,
             "tx_power": cfg.get("tx_power", 7),
             "sleep_mode": cfg.get("sleep", 1),
@@ -264,7 +264,7 @@ class Api:
             log.warning(f"check_update network request failed/timeout: {e}")
             
         if self._github_version:
-            curr = self.spp._config_cache.get("version", "1.0.19-beta")
+            curr = self.spp._config_cache.get("version", "1.0.19")
             has_new = self._is_newer_version(self._github_version, curr)
             return {
                 "ok": True,
