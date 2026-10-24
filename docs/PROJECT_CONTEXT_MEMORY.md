@@ -12,19 +12,13 @@
    - **会话名称**：`Debugging NimBLE Connection Issues (ESP32固件主线核心对话)`
    - **会话链接**：[Debugging NimBLE Connection Issues](conversation://54b88e82-9e66-4bab-8726-e7f57cfd6771)
    - **会话 ID**：`54b88e82-9e66-4bab-8726-e7f57cfd6771`
-   - **核心内容**：NimBLE 模式切换、NVS 读写存储、经典蓝牙 HID + HFP 双模调试、上位机联调及 v1.0.18 固件完整发布链路。
+   - **核心内容**：NimBLE 模式切换、NVS 读写存储、经典蓝牙 HID + HFP 双模调试、上位机联调及 v1.0.18/v1.0.19 固件完整发布链路。
 
 2. **线上独立站与电商规划会话**：
    - **会话名称**：`Website Planning (电商与产品独立站规划)`
    - **会话链接**：[Website Planning (电商与产品独立站规划)](conversation://c1b7a0f7-97db-46af-9516-be10a80e1ac6)
    - **会话 ID**：`c1b7a0f7-97db-46af-9516-be10a80e1ac6`
    - **核心产出**：`Website/Ecommerce/`（纯白电商详情长图页）、`Website/Official/`（品牌官方网站）、`Website/Medias/`（产品渲染与物料）。
-
-3. **上位机蓝牙名徽标与软硬件协同会话**：
-   - **会话名称**：`Client BT Name Display & Sync (上位机蓝牙名与软硬件协同对话)`
-   - **会话链接**：[Client BT Name Display & Sync](conversation://03f8376c-31e7-4887-83f6-d9cd78d2d92e)
-   - **会话 ID**：`03f8376c-31e7-4887-83f6-d9cd78d2d92e`
-   - **核心产出**：在上位机中栏产品图正上方实现 Apple/Codex 质感的蓝牙广播名徽标（`.device-bt-name-badge`），具备串口协议解析、启动日志嗅探与默认兜底三级容错；确立了**固件与上位机紧密耦合、必须在同一会话中全栈协同**的架构共识。
 
 ---
 
@@ -57,7 +51,7 @@
 
 ---
 
-## 四、Website 站点体系架构（仅限 `Website/` 目录）
+## 四、Website 站点体系架构（本地保留）
 
 - **技术栈**：零构建体系（Modern HTML5 + Tailwind CSS CDN + Lucide Icons + 原生 ES6+），无需安装 npm 依赖，开箱即开浏览器浏览。
 - **双子站点结构**：
@@ -67,13 +61,13 @@
 
 ---
 
-## 五、跨端会话与后续开发协作守卫规则
+## 五、会话职责合并与 GitHub 提交边界规范 (2026-10-24 决策)
 
-1. **硬件/固件/上位机一体化主线会话（本会话与主干会话）**：
-   - **职责**：维护 `esp32_bt_mic/` 固件代码、`windows_app_python/` 上位机、`PCB/` 及 `3d_print/` 建模文件。
-   - **协同准则**：固件与上位机紧密绑定（同属同一 Release 产物），统一在同一个对话中维护并测试，杜绝人为跨会话割裂。
-   - **当前待闭环事项**：上位机已完成蓝牙广播名显示逻辑，固件端只需在 `esp32_bt_mic/src/config_cmd.c` 的 `get_config` 回包中补齐 `"bt_name": g_bt_device_name` 即可实现软硬件完美联调。
-   - **红线**：严禁修改 `Website/` 目录。
-2. **独立站/电商会话**：
-   - **职责**：维护 `Website/` 目录下的页面结构、样式与文案。
-   - **红线**：严格仅在 `Website/` 内读写，严禁触碰任何固件或硬件工程文件。
+1. **单会话全栈维护**：
+   - 固件与上位机桌面端工作统一由主线会话统筹，停止单独维护上位机客户端的独立对话，避免割裂。
+2. **软硬件联动状态**：
+   - 上位机客户端已增加广播名与 MAC 地址显示（`1f508ff`），且已通过 PyInstaller 重新编译为免安装可执行程序 `dist/VoxTriple_v1.0.19_beta.exe`。
+   - ESP32 固件端已在 `get_config` 回包中注入带 MAC 末位的动态广播名 `bt_name`（`4b39962`），软硬件联调闭环。
+3. **GitHub 提交边界隔离**：
+   - **AI 可提交目录**：`esp32_bt_mic/`、`windows_app_python/`、`docs/`、根级配置。
+   - **AI 严格排除目录（私有/非开源资产）**：`_Archive/`、`3d_print/`、`MAC_app_python/`、`PCB/`、`Serial_Log/`、`Website/`。这些目录在本地硬盘完全保留，由用户后续按需手动通过 `git add -f` 上传，AI 绝不越权提交。

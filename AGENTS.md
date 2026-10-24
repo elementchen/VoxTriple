@@ -1,37 +1,40 @@
 # 项目工程规范与 Agent 协作指南 (AGENTS.md)
 
-本项目为 **VoxTriple**（ESP32 蓝牙手持语音输入机械终端）全生命周期工程，集成了嵌入式固件、机械结构设计、硬件 PCB、跨平台上位机以及线上产品独立站。
+本项目为 **VoxTriple**（ESP32 蓝牙手持语音输入机械终端）全生命周期工程。
 
 ---
 
-## 1. 项目核心结构规范
+## 1. 核心开发与会话架构
 
-本项目遵从标准化三核心目录体系规范（兼顾已有嵌入式编译构建与工程资产）：
-
-```text
-├── Docs/ (docs/)            # [文档中心] 所有需求、架构设计、BLE协议、开发笔记与上下文备忘录
-├── Design/ (PCB/, 3d_print/) # [设计工程] 结构设计原始工程(3D外壳)、PCB原理图与硬件物料
-├── Main/ (esp32_bt_mic/,    # [核心开发] ESP32固件源码、Windows/macOS上位机
-│          windows_app_python/, 
-│          MAC_app_python/)
-├── Website/                 # [线上独立站] VoxTriple 电商长图页与官方品牌站(零构建前端)
-└── AGENTS.md                # [本规范文件] AI 协同与边界准则
-```
+根据用户最新决策，项目采用**主线单会话全栈协作模式**，由本核心会话统筹 ESP32 固件与上位机桌面端开发：
+- **ESP32 嵌入式固件**：位于 `esp32_bt_mic/`
+- **Windows 上位机客户端**：位于 `windows_app_python/`
+- **设计与架构文档**：位于 `docs/`
 
 ---
 
-## 2. 多会话防污染守卫机制 (Scope Guard)
+## 2. GitHub 提交范围边界与安全隔离机制 (Commit Scope Guard)
 
-为防止不同业务线（嵌入式固件 vs 独立站前端）互相干扰与上下文污染，所有 Agent 会话必须严格执行分工与目录守卫：
+为保护非开源资产、敏感工程数据并保持代码仓库的纯粹整洁，本项目严格划分 **AI 自动提交范畴** 与 **本地私有/排除范畴**：
 
-### 2.1 硬件与固件开发线（主线）
-- **操作范畴**：`esp32_bt_mic/`、`windows_app_python/`、`MAC_app_python/`、`PCB/`、`3d_print/`、`docs/`
-- **严禁越界**：**严禁修改 `Website/` 下的任何代码与文件**。
+### 2.1 AI 允许维护与自动提交范畴 (Committable Scope)
+AI 仅对以下核心目录及其必要根级配置文件拥有修改、编译与本地 Git commit 权限：
+- `esp32_bt_mic/`（ESP32 固件源码、Kconfig、分区表及编译规则）
+- `windows_app_python/`（Windows KeyMapper 上位机源码、Web 前端与打包配置）
+- `docs/`（需求说明、硬件架构、通信协议、项目备忘录）
+- 根级工程与规范文件（`AGENTS.md`、`.gitignore`、`VERSION_LOG.md` 等）
 
-### 2.2 独立站与电商线（站点线）
-- **操作范畴**：**严格仅限 `Website/` 目录**。
-- **严禁越界**：**严禁修改除 `Website/` 以外的任何固件、脚本、PCB 或 3D 工程文件**。
-- **物料引用**：只读方式引用 `3d_print/` 或已有物料至 `Website/Medias/`，不可反向写入。
+### 2.2 严禁提交范畴 (Strictly Excluded Scope)
+以下目录属于私有资产、非开源物料或独立管理内容，**已全部纳入 `.gitignore`，严禁 AI 进行 `git add` 或提交到 GitHub**：
+- `_Archive/`（历史归档代码与旧工程）
+- `3d_print/`（3D 建模原始文件、切片工程、模型物料）
+- `MAC_app_python/`（macOS 端上位机资产）
+- `PCB/`（硬件原理图与立创/EDA 原始工程文件）
+- `Serial_Log/`（本地调试日志与诊断抓包）
+- `Website/`（线上独立站与电商全量前端物料）
+
+> [!NOTE] 用户手动管理原则
+> 上述排除目录完全保留在用户本地硬盘上，由用户根据自身开源规划与需求，后续在本地通过 `git add -f` 手动选择性上传至 GitHub，AI 绝不越权干预或提交。
 
 ---
 
@@ -39,8 +42,7 @@
 
 - 当开启新会话或跨端切换（Antigravity IDE ↔ Antigravity 2.0 APP）时：
   - 可直接引用项目记忆备忘录：`@docs/PROJECT_CONTEXT_MEMORY.md`；
-  - 或引用硬件主线核心会话：`[Debugging NimBLE Connection Issues](conversation://54b88e82-9e66-4bab-8726-e7f57cfd6771)`；
-  - 或引用历史独立站规划会话：`[Website Planning](conversation://c1b7a0f7-97db-46af-9516-be10a80e1ac6)`。
+  - 或引用主线核心会话：`[Debugging NimBLE Connection Issues](conversation://54b88e82-9e66-4bab-8726-e7f57cfd6771)`。
 
 ---
 
@@ -48,6 +50,7 @@
 
 - **提交时机**：每次与用户的对话结束前，凡涉及文件新增、代码修改或配置调整，必须自动执行本地 Git commit 规范提交，确保版本历史完整。
 - **提交格式**：严格使用 Conventional Commits 规范，并在说明中以模块标识隔离：
-  - 固件/硬件改动：`feat(firmware): ...` 或 `fix(hardware): ...`
-  - 独立站改动：`feat(website): ...` 或 `style(website): ...`
+  - 固件改动：`feat(firmware): ...` 或 `fix(firmware): ...`
+  - 上位机客户端改动：`feat(client): ...` 或 `fix(client): ...`
   - 文档与规范：`docs: ...`
+  - 工程与忽略规则：`chore: ...`
