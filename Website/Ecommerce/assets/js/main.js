@@ -1,21 +1,10 @@
 /**
- * VoxTriple Flagship Story Stream Minimal Interactions
+ * VoxTriple Flagship Story Stream - Pure Native Flow (No scroll reveal lag)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 视差与元素平滑浮现 (Intersection Observer)
-  const revealElements = document.querySelectorAll('.reveal-on-scroll');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('opacity-100', 'translate-y-0');
-        entry.target.classList.remove('opacity-0', 'translate-y-8');
-      }
-    });
-  }, { threshold: 0.15 });
-
-  revealElements.forEach(el => {
-    el.classList.add('transition-all', 'duration-700', 'ease-out', 'opacity-0', 'translate-y-8');
-    observer.observe(el);
-  });
+  // 彻底移除所有元素入场延迟与滚动浮现动画，确保页面加载即完全呈现，丝滑纯净
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 });

@@ -1,7 +1,8 @@
 @charset "UTF-8";
 
 /* ==========================================================================
-   VoxTriple Flagship Detail Stream - Seamless Borderless Apple Aesthetic
+   VoxTriple Flagship Detail Stream - Apple & Work Louder Editorial Style
+   纯白无框、大图主导、无动画延迟、极简高级
    ========================================================================== */
 
 :root {
@@ -12,7 +13,7 @@
   --text-body: #6e6e73;
   --text-caption: #86868b;
   --accent-blue: #0071e3;
-  --border-light: rgba(0, 0, 0, 0.05);
+  --border-light: rgba(0, 0, 0, 0.06);
 }
 
 * {
@@ -21,6 +22,13 @@
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 彻底禁用全局非必要动画，保证即开即看、毫无卡顿 */
+*, *::before, *::after {
+  animation: none !important;
+  transition-property: color, background-color, border-color, opacity;
+  transition-duration: 0.15s;
 }
 
 body {
@@ -37,31 +45,61 @@ body {
   color: #1e3a8a;
 }
 
-/* 巨幅大字排版 */
+/* ==========================================================================
+   排版层级：苹果官网与 Work Louder 级别的醒目对比
+   ========================================================================== */
+
+/* 巨幅主标题 */
 .hero-headline {
-  font-size: clamp(2.8rem, 6.5vw, 5.2rem);
+  font-size: clamp(3rem, 7.5vw, 6.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--text-headline);
+}
+
+/* 章节大标题 */
+.section-headline {
+  font-size: clamp(2.5rem, 5.5vw, 4.5rem);
   font-weight: 800;
   letter-spacing: -0.035em;
-  line-height: 1.08;
+  line-height: 1.1;
   color: var(--text-headline);
 }
 
-.section-headline {
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.12;
-  color: var(--text-headline);
-}
-
+/* 杂志副标题 */
 .section-subhead {
-  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--text-body);
 }
 
-/* 无边框、无缝正片叠底融合类 */
+/* 巨大核心数据指标展示 (类似 Apple Keynote / Spec Callout) */
+.stat-giant {
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text-headline);
+}
+
+/* 小标题与分类眉批 */
+.eyebrow-tag {
+  font-size: 0.825rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-blue);
+  display: inline-block;
+  margin-bottom: 0.75rem;
+}
+
+/* ==========================================================================
+   图像呈现：全景大图、无边框、正片叠底无缝融入
+   ========================================================================== */
+
+/* 正片叠底与对比度优化，消除图片白底与网页白底的接缝 */
 .blend-seamless {
   mix-blend-mode: multiply;
   filter: contrast(1.02);
@@ -70,63 +108,51 @@ body {
   background: transparent !important;
 }
 
-/* 纯粹物体悬浮容器 (零相框感) */
-.floating-object-frame {
+/* 超大宽幅大图容器 (破栏/大视野) */
+.giant-visual-wrap {
   position: relative;
-  border: none;
-  background: transparent;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  background: transparent;
 }
 
-/* 纯白文字卡片 (仅用于文本，不包围图片) */
-.apple-card-text {
-  background: #ffffff;
-  border: 1px solid var(--border-light);
-  border-radius: 24px;
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/* 苹果风格的大卡片 (极浅灰色背景、无相框拘束、大内边距) */
+.apple-feature-panel {
+  background: #fbfbfd;
+  border-radius: 36px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
 }
 
-.apple-card-text:hover {
-  border-color: #e2e8f0;
-  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.06);
-}
-
-/* 渐变边缘羽化蒙版 (用于消除矩形照片边缘) */
-.feather-edge-mask {
-  mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
-}
-
-/* 极简参数胶囊 */
+/* 胶囊特性标签 */
 .spec-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 8px 18px;
   border-radius: 980px;
   background: #f5f5f7;
   color: #1d1d1f;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-/* 纯白滚动条 */
+/* 极简滚动条 */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: #ffffff;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #d2d2d7;
-  border-radius: 3px;
+  border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1a6;
 }
