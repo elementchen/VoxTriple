@@ -35,7 +35,7 @@
   <main class="w-full overflow-hidden">
 
     <!-- -------------------- 第 1 屏：巨幕首屏海报 (HERO BANNER) -------------------- -->
-    <section class="min-h-screen flex flex-col items-center justify-between pt-20 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-6xl mx-auto">
+    <section class="min-h-screen flex flex-col items-center justify-between pt-24 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-6xl mx-auto">
       
       <!-- 顶部小胶囊 -->
       <div class="reveal-on-scroll">
@@ -57,11 +57,9 @@
         </p>
       </div>
 
-      <!-- 悬浮纯白产品摄影大片 -->
-      <div class="w-full my-10 max-w-5xl mx-auto reveal-on-scroll">
-        <div class="media-hero-frame p-4 sm:p-10 shadow-2xl shadow-gray-200/50">
-          <img src="../Medias/vox_hero_pure_white.jpg" alt="VoxTriple 纯白官方产品大片" class="w-full h-auto object-contain mx-auto filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)] transform hover:scale-[1.01] transition-transform duration-700" />
-        </div>
+      <!-- 彻底去边框、去外壳阴影的纯粹产品大图悬浮 (与背景完全融为一体) -->
+      <div class="w-full my-8 max-w-5xl mx-auto reveal-on-scroll floating-object-frame">
+        <img src="../Medias/vox_hero_pure_white.jpg" alt="VoxTriple 纯白官方产品大片" class="w-full h-auto object-contain mx-auto blend-seamless transform hover:scale-[1.01] transition-transform duration-700" />
       </div>
 
       <!-- 底部核心参数一览 -->
@@ -90,20 +88,22 @@
           </p>
         </div>
 
-        <!-- 痛点场景大片 -->
-        <div class="apple-card overflow-hidden shadow-xl mb-12 reveal-on-scroll">
-          <img src="../Medias/手持麦克风键盘办公室场景图.jpeg" alt="台式电脑工位现实场景大片" class="w-full h-[400px] object-cover" />
-          <div class="p-6 bg-white border-t border-gray-100 text-center">
-            <span class="text-xs font-medium text-gray-500">
+        <!-- 柔和边缘羽化消融的大片 (彻底去除硬相框) -->
+        <div class="w-full max-w-4xl mx-auto mb-16 reveal-on-scroll flex flex-col items-center">
+          <div class="w-full overflow-hidden feather-edge-mask">
+            <img src="../Medias/手持麦克风键盘办公室场景图.jpeg" alt="台式电脑工位现实场景大片" class="w-full max-h-[460px] object-cover" />
+          </div>
+          <div class="mt-4 text-center">
+            <span class="text-xs text-gray-400 font-medium">
               强大却沉默的台式电脑，缺失了面对 AI 时代最关键的收音入口与身体自由
             </span>
           </div>
         </div>
 
-        <!-- 四大日常痛点大卡片 -->
+        <!-- 四大日常痛点卡片 (仅文本卡片，无内嵌相框) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          <div class="apple-card p-10 reveal-on-scroll bg-white">
+          <div class="apple-card-text p-10 reveal-on-scroll">
             <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6">
               <i data-lucide="monitor-x" class="w-6 h-6"></i>
             </div>
@@ -113,7 +113,7 @@
             </p>
           </div>
 
-          <div class="apple-card p-10 reveal-on-scroll bg-white">
+          <div class="apple-card-text p-10 reveal-on-scroll">
             <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
               <i data-lucide="keyboard" class="w-6 h-6"></i>
             </div>
@@ -123,7 +123,7 @@
             </p>
           </div>
 
-          <div class="apple-card p-10 reveal-on-scroll bg-white">
+          <div class="apple-card-text p-10 reveal-on-scroll">
             <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6">
               <i data-lucide="armchair" class="w-6 h-6"></i>
             </div>
@@ -133,7 +133,7 @@
             </p>
           </div>
 
-          <div class="apple-card p-10 reveal-on-scroll bg-white">
+          <div class="apple-card-text p-10 reveal-on-scroll">
             <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
               <i data-lucide="mic-off" class="w-6 h-6"></i>
             </div>
@@ -163,15 +163,15 @@
           </p>
         </div>
 
-        <!-- 专属定制的本地离线语音大模型界面大图 -->
-        <div class="apple-card overflow-hidden shadow-2xl mb-12 reveal-on-scroll">
-          <img src="../Medias/vox_offline_ai_ui.jpg" alt="本地端侧离线语音识别与大模型智能润色界面大片" class="w-full h-auto object-cover transform hover:scale-[1.01] transition-transform duration-700" />
+        <!-- 专属定制的本地离线语音大模型界面大图 (完全去边框去外框，白底无缝融入) -->
+        <div class="w-full max-w-4xl mx-auto mb-16 reveal-on-scroll floating-object-frame">
+          <img src="../Medias/vox_offline_ai_ui.jpg" alt="本地端侧离线语音识别与大模型智能润色界面大片" class="w-full h-auto object-contain blend-seamless transform hover:scale-[1.01] transition-transform duration-700" />
         </div>
 
         <!-- 离线大模型两大特性高光卡片 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           
-          <div class="apple-card p-10 bg-[#fbfbfd] reveal-on-scroll">
+          <div class="apple-card-text p-10 bg-[#fbfbfd] reveal-on-scroll">
             <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
               <i data-lucide="shield-check" class="w-6 h-6"></i>
             </div>
@@ -184,7 +184,7 @@
             </div>
           </div>
 
-          <div class="apple-card p-10 bg-[#fbfbfd] reveal-on-scroll">
+          <div class="apple-card-text p-10 bg-[#fbfbfd] reveal-on-scroll">
             <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6">
               <i data-lucide="sparkles" class="w-6 h-6"></i>
             </div>
@@ -197,6 +197,10 @@
             </div>
           </div>
 
+        </div>
+
+        <div class="text-center text-xs text-gray-400 reveal-on-scroll">
+          * 支持接入主流桌面 AI 语音工作流，深度兼容 macOS、Windows 与 Linux 系统原生听写通道。
         </div>
 
       </div>
@@ -218,21 +222,25 @@
           </p>
         </div>
 
-        <!-- 双大图：手持微距按压 + 凯华机械矮轴透视拆解 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <div class="apple-card overflow-hidden shadow-xl reveal-on-scroll">
-            <img src="../Medias/vox_handheld_macro.jpg" alt="手持机械轴微距按压特写" class="w-full h-full object-cover transform hover:scale-[1.01] transition-transform duration-700" />
+        <!-- 双大图：真人微距操作图 + 机械矮轴无边框无缝悬浮大片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+          
+          <!-- 真人操作保留高级感圆角微距 -->
+          <div class="overflow-hidden rounded-3xl shadow-xl reveal-on-scroll">
+            <img src="../Medias/vox_handheld_macro.jpg" alt="手持机械轴微距按压特写" class="w-full h-auto object-cover transform hover:scale-[1.01] transition-transform duration-700" />
             <div class="p-4 bg-white text-center text-xs text-gray-500 font-medium border-t border-gray-100">
               大拇指自然落位 · 即按即说 PTT 硬件静音
             </div>
           </div>
 
-          <div class="apple-card overflow-hidden shadow-xl reveal-on-scroll">
-            <img src="../Medias/vox_kailh_switch_macro.jpg" alt="凯华客制化机械矮轴透视拆解大片" class="w-full h-full object-cover transform hover:scale-[1.01] transition-transform duration-700" />
-            <div class="p-4 bg-white text-center text-xs text-gray-500 font-medium border-t border-gray-100">
+          <!-- 非真人图片：彻底去掉边框与盒子，轴体直接悬浮融入背景 -->
+          <div class="reveal-on-scroll floating-object-frame flex flex-col items-center">
+            <img src="../Medias/vox_kailh_switch_macro.jpg" alt="凯华客制化机械矮轴透视拆解大片" class="w-full h-auto object-contain blend-seamless transform hover:scale-[1.02] transition-transform duration-700" />
+            <div class="mt-2 text-center text-xs text-gray-500 font-medium">
               凯华透明轴盖 · 镀金弹簧与发声弹片精密微距
             </div>
           </div>
+
         </div>
 
         <!-- 大拇指按键闭环三步 -->
@@ -269,13 +277,16 @@
           </p>
         </div>
 
-        <!-- 双图大卡片：PBT 键帽细节 + 蓝牙双设备无线桌面大片 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <!-- 彻底去掉外框与边框盒子的双图 (完全融于白色底色) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
           
-          <div class="apple-card overflow-hidden shadow-xl reveal-on-scroll">
-            <img src="../Medias/Final1.png" alt="纯白外观声学细节与PBT键帽" class="w-full h-80 object-contain p-6 bg-gray-50" />
-            <div class="p-8 bg-white border-t border-gray-100">
-              <div class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded inline-block mb-2">客制化高纯度 PBT 键帽</div>
+          <!-- PBT 键帽细节直接悬浮 -->
+          <div class="reveal-on-scroll flex flex-col items-center">
+            <div class="w-full floating-object-frame">
+              <img src="../Medias/Final1.png" alt="纯白外观声学细节与PBT键帽" class="w-full h-auto max-h-[320px] object-contain blend-seamless transform hover:scale-[1.02] transition-transform duration-700" />
+            </div>
+            <div class="mt-6 text-center max-w-md">
+              <div class="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded inline-block mb-2">客制化高纯度 PBT 键帽</div>
               <h3 class="text-xl font-bold text-gray-900 mb-2">细腻微磨砂，久用不留油光</h3>
               <p class="text-xs text-gray-600 leading-relaxed">
                 普通廉价 ABS 键帽用几个月就发黏打滑、油光发亮。VoxTriple 标配 PBT 键帽，表层带有细腻干爽的微磨砂触感，长久使用绝不打油、不褪色，耐脏耐磨。
@@ -283,9 +294,12 @@
             </div>
           </div>
 
-          <div class="apple-card overflow-hidden shadow-xl reveal-on-scroll">
-            <img src="../Medias/vox_dual_device_desk.jpg" alt="双设备蓝牙免接收器无线切换大片" class="w-full h-80 object-cover" />
-            <div class="p-8 bg-white border-t border-gray-100">
+          <!-- 双设备蓝牙桌面直接融底 -->
+          <div class="reveal-on-scroll flex flex-col items-center">
+            <div class="w-full floating-object-frame">
+              <img src="../Medias/vox_dual_device_desk.jpg" alt="双设备蓝牙免接收器无线切换大片" class="w-full h-auto max-h-[320px] object-contain blend-seamless transform hover:scale-[1.02] transition-transform duration-700" />
+            </div>
+            <div class="mt-6 text-center max-w-md">
               <div class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded inline-block mb-2">双通道蓝牙无线直连</div>
               <h3 class="text-xl font-bold text-gray-900 mb-2">两台设备，一键穿梭切换</h3>
               <p class="text-xs text-gray-600 leading-relaxed">
@@ -316,21 +330,19 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-8">
           
-          <!-- 官方尺寸工程大图 -->
-          <div class="lg:col-span-7 apple-card p-6 bg-white flex items-center justify-center reveal-on-scroll shadow-lg">
-            <div class="relative w-full aspect-square rounded-2xl overflow-hidden p-4 flex items-center justify-center">
-              <img src="../Medias/aa281c08-59a8-449e-b710-6026e239950d.png" alt="VoxTriple CAD 官方实测尺寸工程图" class="w-full h-full object-contain" />
-              <div class="absolute bottom-2 left-2 bg-gray-900/90 text-white px-3 py-1 rounded text-[10px] font-mono">
-                CAD 官方精确实测标注
-              </div>
+          <!-- 官方尺寸工程大图 (彻底去掉多层相框盒子，图底正片叠底无缝融为一体) -->
+          <div class="lg:col-span-7 reveal-on-scroll floating-object-frame flex flex-col items-center">
+            <img src="../Medias/aa281c08-59a8-449e-b710-6026e239950d.png" alt="VoxTriple CAD 官方实测尺寸工程图" class="w-full max-w-md h-auto object-contain blend-seamless transform hover:scale-[1.02] transition-transform duration-700" />
+            <div class="mt-3 bg-gray-900 text-white px-3 py-1 rounded text-[10px] font-mono shadow-sm">
+              CAD 官方精确实测三维标注 (18.5 × 29.8 × 102.0 mm)
             </div>
           </div>
 
-          <!-- 三维解析卡 -->
+          <!-- 三维解析卡 (纯白文字卡片) -->
           <div class="lg:col-span-5 space-y-6 reveal-on-scroll">
-            <div class="p-8 apple-card bg-white">
+            <div class="p-8 apple-card-text">
               <div class="text-xs font-bold text-blue-600 uppercase tracking-wider">THICKNESS</div>
               <div class="text-4xl font-extrabold text-gray-900 my-2">18.5 mm</div>
               <p class="text-xs text-gray-500 leading-relaxed">
@@ -338,7 +350,7 @@
               </p>
             </div>
 
-            <div class="p-8 apple-card bg-white">
+            <div class="p-8 apple-card-text">
               <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">WIDTH & LENGTH</div>
               <div class="text-3xl font-extrabold text-gray-900 my-2">29.8 × 102 mm</div>
               <p class="text-xs text-gray-500 leading-relaxed">
@@ -367,28 +379,28 @@
           </p>
         </div>
 
-        <!-- 工业微透机身大片（透视科技感） -->
-        <div class="apple-card overflow-hidden shadow-xl mb-12 reveal-on-scroll">
-          <img src="../Medias/Final02.png" alt="工业微透机身与聚合物电芯内部透视大片" class="w-full h-80 object-cover" />
-          <div class="p-4 bg-white text-center text-xs text-gray-500 font-medium border-t border-gray-100">
+        <!-- 工业微透机身无框直接悬浮 (与纯白底色完全融为一体) -->
+        <div class="w-full max-w-4xl mx-auto mb-16 reveal-on-scroll floating-object-frame flex flex-col items-center">
+          <img src="../Medias/Final02.png" alt="工业微透机身与聚合物电芯内部透视大片" class="w-full h-auto max-h-[360px] object-contain blend-seamless transform hover:scale-[1.02] transition-transform duration-700" />
+          <div class="mt-4 text-center text-xs text-gray-400 font-medium">
             内部搭载超薄高能量密度聚合物锂电芯与 ESP32 深度节能架构
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center reveal-on-scroll mb-12">
-          <div class="apple-card p-10 bg-[#fbfbfd]">
+          <div class="apple-card-text p-10 bg-[#fbfbfd]">
             <div class="text-5xl font-black text-gray-950 mb-2">7 天</div>
             <div class="text-sm font-bold text-gray-800 mb-3">深度休眠智能待机</div>
             <p class="text-xs text-gray-500 leading-relaxed">随时拿起秒级唤醒，出差一周无需带充电器。</p>
           </div>
 
-          <div class="apple-card p-10 bg-blue-50/30 border-blue-200">
+          <div class="apple-card-text p-10 bg-blue-50/30 border-blue-200">
             <div class="text-5xl font-black text-blue-600 mb-2">全键宏</div>
             <div class="text-sm font-bold text-gray-800 mb-3">任意单键与组合键定制</div>
             <p class="text-xs text-gray-500 leading-relaxed">支持绑定 Ctrl+C/V、Win+H、一键截图或专属工作流。</p>
           </div>
 
-          <div class="apple-card p-10 bg-[#fbfbfd]">
+          <div class="apple-card-text p-10 bg-[#fbfbfd]">
             <div class="text-5xl font-black text-gray-950 mb-2">OTA 进化</div>
             <div class="text-sm font-bold text-gray-800 mb-3">20秒直写，常用常新</div>
             <p class="text-xs text-gray-500 leading-relaxed">云端新固件持续推送新玩法与 AI 工具链联动，越用越趁手。</p>
@@ -408,8 +420,9 @@
           <p class="section-subhead mt-4">无论是深夜极客书房，还是喧嚣都市中的咖啡馆角落，都优雅自如。</p>
         </div>
 
+        <!-- 真人场景实景大片 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 reveal-on-scroll mb-20">
-          <div class="apple-card overflow-hidden shadow-xl bg-white">
+          <div class="overflow-hidden rounded-3xl shadow-xl bg-white">
             <img src="../Medias/手持麦克风键盘办公室场景图 (1).jpeg" alt="极客工位实拍" class="w-full h-80 object-cover" />
             <div class="p-6 bg-white">
               <div class="font-bold text-gray-900 text-base">工位后仰 · 思维倾泻</div>
@@ -417,7 +430,7 @@
             </div>
           </div>
 
-          <div class="apple-card overflow-hidden shadow-xl bg-white">
+          <div class="overflow-hidden rounded-3xl shadow-xl bg-white">
             <img src="../Medias/手持麦克风键盘办公室场景图 (2).jpeg" alt="咖啡馆实拍" class="w-full h-80 object-cover" />
             <div class="p-6 bg-white">
               <div class="font-bold text-gray-900 text-base">咖啡厅随行 · 绝不扰人</div>
@@ -427,7 +440,7 @@
         </div>
 
         <!-- 纯白极简规格一览表 -->
-        <div class="apple-card bg-white p-8 sm:p-12 shadow-sm reveal-on-scroll">
+        <div class="apple-card-text bg-white p-8 sm:p-12 shadow-sm reveal-on-scroll">
           <div class="text-center mb-8">
             <h3 class="text-xl font-bold text-gray-900">详细硬件规格</h3>
           </div>

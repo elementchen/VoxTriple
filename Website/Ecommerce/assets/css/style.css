@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 /* ==========================================================================
-   VoxTriple Flagship Detail Stream - Apple & Codex Minimalist Pure Aesthetic
+   VoxTriple Flagship Detail Stream - Seamless Borderless Apple Aesthetic
    ========================================================================== */
 
 :root {
@@ -12,7 +12,7 @@
   --text-body: #6e6e73;
   --text-caption: #86868b;
   --accent-blue: #0071e3;
-  --border-light: rgba(0, 0, 0, 0.06);
+  --border-light: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -61,18 +61,43 @@ body {
   color: var(--text-body);
 }
 
-/* 柔和阴影卡片与光影容器 */
-.apple-card {
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-light);
-  border-radius: 32px;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+/* 无边框、无缝正片叠底融合类 */
+.blend-seamless {
+  mix-blend-mode: multiply;
+  filter: contrast(1.02);
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
-.apple-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06);
+/* 纯粹物体悬浮容器 (零相框感) */
+.floating-object-frame {
+  position: relative;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 纯白文字卡片 (仅用于文本，不包围图片) */
+.apple-card-text {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-card-text:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.06);
+}
+
+/* 渐变边缘羽化蒙版 (用于消除矩形照片边缘) */
+.feather-edge-mask {
+  mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
 }
 
 /* 极简参数胶囊 */
@@ -86,14 +111,6 @@ body {
   color: #1d1d1f;
   font-size: 13px;
   font-weight: 500;
-}
-
-/* 渐变微光大图展示 */
-.media-hero-frame {
-  position: relative;
-  background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f5f5f7 100%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 36px;
 }
 
 /* 纯白滚动条 */
